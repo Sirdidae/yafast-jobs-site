@@ -201,6 +201,7 @@ h3{font-size:1.2rem;font-weight:700;}
 .job-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:.95rem;}
 .job-company{font-size:.82rem;color:var(--text-muted);margin-top:2px;}
 .job-badge{font-family:'Montserrat',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px;}
+.badge-hiring{background:#0D2B4E;color:#fff;}
 .badge-new{background:#E3F9E5;color:#1A7A2A;}
 .badge-hot{background:#FFF0E4;color:#C05500;}
 .badge-featured{background:var(--sky-pale);color:var(--sky);}
@@ -645,6 +646,53 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       <button class="filter-btn" onclick="filterJobs('security',this)">Security</button>
     </div>
     <div class="jobs-grid" id="jobsGrid">
+
+      <!-- ★ ACTIVE VACANCY 1 -->
+      <div class="job-card" data-cat="uae domestic" data-title="Housemaid IMDAD Center" style="border-color:var(--sky);border-width:2px;">
+        <div class="job-card-top">
+          <div class="job-logo">🏠</div>
+          <div class="job-meta">
+            <div class="job-title">Housemaid</div>
+            <div class="job-company">IMDAD Center for Domestic Workers — UAE</div>
+          </div>
+          <span class="job-badge badge-hiring">HIRING NOW</span>
+        </div>
+        <div class="job-tags">
+          <span class="job-tag">🇦🇪 UAE</span>
+          <span class="job-tag">Full-time</span>
+          <span class="job-tag">Live-in</span>
+          <span class="job-tag">Domestic</span>
+          <span class="job-tag">Accommodation Incl.</span>
+        </div>
+        <div class="job-footer">
+          <div class="job-salary">AED 1,000 – 1,200 / mo</div>
+          <button class="apply-btn" onclick="openApply('Housemaid','IMDAD Center for Domestic Workers, UAE')">Apply Now</button>
+        </div>
+      </div>
+
+      <!-- ★ ACTIVE VACANCY 2 -->
+      <div class="job-card" data-cat="uae domestic" data-title="Cleaner SERVEU Union Properties" style="border-color:var(--sky);border-width:2px;">
+        <div class="job-card-top">
+          <div class="job-logo">🧹</div>
+          <div class="job-meta">
+            <div class="job-title">Cleaner</div>
+            <div class="job-company">SERVEU Union Properties PJSC — UAE</div>
+          </div>
+          <span class="job-badge badge-hiring">HIRING NOW</span>
+        </div>
+        <div class="job-tags">
+          <span class="job-tag">🇦🇪 UAE</span>
+          <span class="job-tag">Full-time</span>
+          <span class="job-tag">Shift Work</span>
+          <span class="job-tag">Cleaning Services</span>
+          <span class="job-tag">Transport Incl.</span>
+        </div>
+        <div class="job-footer">
+          <div class="job-salary">AED 1,100 – 1,400 / mo</div>
+          <button class="apply-btn" onclick="openApply('Cleaner','SERVEU Union Properties PJSC, UAE')">Apply Now</button>
+        </div>
+      </div>
+
       <div class="job-card" data-cat="uae hospitality" data-title="Hotel Room Attendant Female">
         <div class="job-card-top">
           <div class="job-logo">🏨</div>
