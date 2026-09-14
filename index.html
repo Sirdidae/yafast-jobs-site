@@ -296,15 +296,15 @@ h3{font-size:1.2rem;font-weight:700;}
 .btn-outline-white:hover{border-color:#fff;background:rgba(255,255,255,.1);}
 
 /* MEET THE TEAM */
-.team-section{position:relative;padding-block:clamp(64px,9vw,104px);overflow:hidden;background:#1C0A02;}
-.team-section::before{content:'';position:absolute;inset:0;background-image:url('malawi-flag.png');background-size:100% 100%;background-position:center;background-repeat:no-repeat;opacity:.18;z-index:0;}
-.team-section::after{content:'';position:absolute;inset:0;background:rgba(28,10,2,.62);z-index:1;}
+.team-section{position:relative;padding-block:clamp(64px,9vw,104px);overflow:hidden;background:#0a2600;}
+.team-section::before{content:'';position:absolute;inset:0;background-image:url('malawi-flag.png');background-size:cover;background-position:center center;background-repeat:no-repeat;opacity:.75;z-index:0;}
+.team-section::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.30) 50%,rgba(0,0,0,.50) 100%);z-index:1;}
 .team-section .container{position:relative;z-index:2;}
 .team-section .eyebrow{color:#C9A040;justify-content:center;display:flex;margin-bottom:18px;}
 .team-section h2{color:#fff;text-align:center;font-family:'Georgia',serif;font-size:clamp(2rem,4.5vw,3rem);font-weight:700;max-width:22ch;margin:0 auto 56px;line-height:1.2;}
 .team-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;}
-.team-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius-lg);padding:28px 20px 24px;text-align:center;transition:background .2s,border-color .2s,transform .2s;}
-.team-card:hover{background:rgba(255,255,255,.09);border-color:rgba(201,160,64,.35);transform:translateY(-4px);}
+.team-card{background:rgba(0,0,0,.52);border:1px solid rgba(255,255,255,.18);border-radius:var(--radius-lg);padding:28px 20px 24px;text-align:center;transition:background .2s,border-color .2s,transform .2s;backdrop-filter:blur(6px);}
+.team-card:hover{background:rgba(0,0,0,.65);border-color:rgba(201,160,64,.55);transform:translateY(-4px);}
 .team-avatar{width:88px;height:88px;border-radius:50%;margin:0 auto 18px;overflow:hidden;border:3px solid rgba(201,160,64,.4);background:#2D1A0A;display:flex;align-items:center;justify-content:center;}
 .team-avatar img{width:100%;height:100%;object-fit:cover;}
 .team-avatar-placeholder{font-size:2.2rem;line-height:1;}
