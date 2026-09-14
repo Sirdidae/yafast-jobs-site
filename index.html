@@ -47,17 +47,34 @@ h3{font-size:1.2rem;font-weight:700;}
 
 /* NAVBAR */
 .navbar{position:sticky;top:0;z-index:100;background:var(--navy);box-shadow:var(--shadow-md);}
-.navbar .container{display:flex;align-items:center;gap:24px;padding-block:0;height:68px;}
-.nav-logo{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.navbar .container{display:flex;align-items:center;gap:4px;padding-block:0;height:68px;}
+.nav-logo{display:flex;align-items:center;gap:12px;flex-shrink:0;margin-right:auto;}
 .nav-logo-img{width:52px;height:52px;border-radius:50%;background:var(--surface);overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .nav-logo-img img{width:52px;height:52px;object-fit:cover;border-radius:50%;}
 .nav-logo-text{font-family:'Montserrat',sans-serif;font-weight:900;font-size:.9rem;color:#fff;line-height:1.2;}
 .nav-logo-text span{color:var(--sky);}
-.nav-links{display:flex;align-items:center;gap:4px;list-style:none;margin-left:auto;}
-.nav-links a{display:block;padding:8px 14px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.82rem;letter-spacing:.02em;color:rgba(255,255,255,.85);border-radius:var(--radius-sm);transition:color .15s,background .15s;}
-.nav-links a:hover{color:#fff;background:rgba(255,255,255,.1);}
+.nav-links{display:flex;align-items:center;gap:0;list-style:none;}
+.nav-links>li{position:relative;}
+.nav-links>li>a{display:flex;align-items:center;gap:5px;padding:8px 13px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.02em;color:rgba(255,255,255,.85);border-radius:var(--radius-sm);transition:color .15s,background .15s;white-space:nowrap;}
+.nav-links>li>a:hover,.nav-links>li.open>a{color:#fff;background:rgba(255,255,255,.1);}
 .nav-links .active>a{color:var(--sky);}
-.nav-cta{background:var(--sky);color:#fff!important;border-radius:100px;padding:9px 20px!important;transition:background .15s,transform .12s!important;}
+/* chevron */
+.has-drop>a::after{content:'';display:inline-block;width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s;}
+.has-drop.open>a::after{transform:rotate(-135deg) translateY(-2px);}
+/* DROPDOWN PANEL */
+.nav-dropdown{
+  display:none;position:absolute;top:calc(100% + 2px);left:0;
+  min-width:220px;background:#fff;border-radius:0 0 var(--radius-md) var(--radius-md);
+  box-shadow:0 8px 32px rgba(13,43,78,.18);
+  padding:10px 0;z-index:200;
+  animation:dropIn .18s ease;
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+.has-drop.open>.nav-dropdown{display:block;}
+.nav-dropdown a{display:block;padding:10px 22px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);transition:background .12s,color .12s;}
+.nav-dropdown a:hover{background:var(--sky-pale);color:var(--sky);}
+.nav-dropdown hr{border:none;border-top:1px solid var(--border);margin:6px 16px;}
+.nav-cta{background:var(--sky);color:#fff!important;border-radius:100px;padding:9px 18px!important;margin-left:8px;transition:background .15s,transform .12s!important;}
 .nav-cta:hover{background:var(--sky-light)!important;transform:translateY(-1px);}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;margin-left:auto;z-index:110;}
 .hamburger span{width:24px;height:2px;background:#fff;border-radius:2px;transition:transform .3s,opacity .3s;}
@@ -398,12 +415,83 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       </div>
     </a>
     <ul class="nav-links">
-      <li class="active"><a href="#jobs">Find Jobs</a></li>
-      <li><a href="#employers">For Employers</a></li>
-      <li><a href="#travel">Travel</a></li>
-      <li><a href="#destinations">Destinations</a></li>
-      <li><a href="#about">About Us</a></li>
+
+      <!-- FIND JOBS -->
+      <li class="has-drop active" id="drop-jobs">
+        <a href="#jobs">Find Jobs</a>
+        <ul class="nav-dropdown">
+          <li><a onclick="filterJobs('uae',null);scrollTo('jobs')">UAE / Middle East</a></li>
+          <li><a onclick="filterJobs('southafrica',null);scrollTo('jobs')">South Africa</a></li>
+          <li><a onclick="filterJobs('malawi',null);scrollTo('jobs')">Local – Malawi</a></li>
+          <hr>
+          <li><a onclick="filterJobs('hospitality',null);scrollTo('jobs')">Hospitality Jobs</a></li>
+          <li><a onclick="filterJobs('construction',null);scrollTo('jobs')">Construction Jobs</a></li>
+          <li><a onclick="filterJobs('domestic',null);scrollTo('jobs')">Domestic &amp; Caregiving</a></li>
+          <li><a onclick="filterJobs('security',null);scrollTo('jobs')">Security Jobs</a></li>
+          <hr>
+          <li><a onclick="openModal('registerModal')">How to Apply</a></li>
+        </ul>
+      </li>
+
+      <!-- FOR EMPLOYERS -->
+      <li class="has-drop" id="drop-employers">
+        <a href="#employers">For Employers</a>
+        <ul class="nav-dropdown">
+          <li><a onclick="openModal('employerModal')">Hire Staff Now</a></li>
+          <li><a href="#employers">Industries We Serve</a></li>
+          <li><a href="#employers">Employer Solutions</a></li>
+          <li><a href="#how">Recruitment Process</a></li>
+          <hr>
+          <li><a onclick="openModal('employerModal')">Partner with Us</a></li>
+          <li><a onclick="openModal('employerModal')">Request a Quote</a></li>
+        </ul>
+      </li>
+
+      <!-- TRAVEL -->
+      <li class="has-drop" id="drop-travel">
+        <a href="#travel">Travel</a>
+        <ul class="nav-dropdown">
+          <li><a onclick="openTravelEnquiry('Flight Booking')">Flight Booking</a></li>
+          <li><a onclick="openTravelEnquiry('Visa Application')">Visa Applications</a></li>
+          <li><a onclick="openTravelEnquiry('Hotel &amp; Transfers')">Hotel &amp; Transfers</a></li>
+          <li><a onclick="openTravelEnquiry('Travel Insurance')">Travel Insurance</a></li>
+          <li><a onclick="openTravelEnquiry('Group Booking')">Group Bookings</a></li>
+          <hr>
+          <li><a onclick="openTravelEnquiry('Full Travel Package')">Full Travel Package</a></li>
+        </ul>
+      </li>
+
+      <!-- DESTINATIONS -->
+      <li class="has-drop" id="drop-dest">
+        <a href="#destinations">Destinations</a>
+        <ul class="nav-dropdown">
+          <li><a onclick="openTravelEnquiry('Dubai, UAE')">🇦🇪 UAE &amp; Dubai</a></li>
+          <li><a onclick="openTravelEnquiry('Johannesburg, South Africa')">🇿🇦 South Africa</a></li>
+          <li><a onclick="openTravelEnquiry('London, United Kingdom')">🇬🇧 United Kingdom</a></li>
+          <li><a onclick="openTravelEnquiry('Qatar')">🇶🇦 Qatar</a></li>
+          <li><a onclick="openTravelEnquiry('Zambia')">🇿🇲 Zambia</a></li>
+          <hr>
+          <li><a onclick="openTravelEnquiry('All Destinations')">All Destinations →</a></li>
+        </ul>
+      </li>
+
+      <!-- ABOUT US -->
+      <li class="has-drop" id="drop-about">
+        <a href="#about">About Us</a>
+        <ul class="nav-dropdown">
+          <li><a href="#about">Who We Are</a></li>
+          <li><a href="#about">Our Mission</a></li>
+          <li><a href="#how">Why Choose Yafast</a></li>
+          <li><a href="#contact">Our Offices</a></li>
+          <hr>
+          <li><a href="#team">Meet the Team</a></li>
+          <li><a onclick="openModal('registerModal')">Join Our Team</a></li>
+        </ul>
+      </li>
+
+      <!-- OUR TEAM (direct) -->
       <li><a href="#team">Our Team</a></li>
+
       <li><a href="#contact" class="nav-cta">Get Started</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMobile()">
@@ -1098,6 +1186,29 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 </div>
 
 <script>
+/* ── NAV DROPDOWNS ── */
+(function(){
+  const drops = document.querySelectorAll('.has-drop');
+  drops.forEach(li => {
+    li.addEventListener('mouseenter', () => li.classList.add('open'));
+    li.addEventListener('mouseleave', () => li.classList.remove('open'));
+    li.querySelector('a').addEventListener('click', e => {
+      if(window.innerWidth <= 960){
+        e.preventDefault();
+        const wasOpen = li.classList.contains('open');
+        drops.forEach(d => d.classList.remove('open'));
+        if(!wasOpen) li.classList.add('open');
+      }
+    });
+  });
+  document.addEventListener('click', e => {
+    if(!e.target.closest('.has-drop')) drops.forEach(d => d.classList.remove('open'));
+  });
+  function scrollTo(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
+  window.scrollTo = window.scrollTo || scrollTo;
+})();
+function scrollTo(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
+
 /* ── MOBILE MENU ── */
 function toggleMobile(){
   const h=document.getElementById('hamburger');
