@@ -990,20 +990,22 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 </section>
 
 <!-- EMPLOYERS -->
-<section class="section reveal" id="employers" style="background:var(--ground);">
-  <div class="container">
+<section class="section reveal" id="employers" style="position:relative;background:var(--navy-deep);overflow:hidden;">
+  <div style="position:absolute;inset:0;background-image:url('passports.jpg');background-size:cover;background-position:center 40%;opacity:.22;z-index:0;"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(8,26,49,.92) 40%,rgba(8,26,49,.6) 100%);z-index:1;"></div>
+  <div class="container" style="position:relative;z-index:2;">
     <div class="employer-grid">
       <div>
-        <p class="eyebrow">Employer Solutions</p>
-        <h2 style="margin-top:8px;">Looking to Hire Malawian Talent?</h2>
-        <p style="margin-top:16px;color:var(--text-muted);max-width:46ch;">We supply screened, trained, and document-ready workers for hotels, construction firms, farms, households, and more — across Africa and the Middle East.</p>
+        <p class="eyebrow" style="color:var(--sky-light);">Employer Solutions</p>
+        <h2 style="margin-top:8px;color:#fff;">Looking to Hire Malawian Talent?</h2>
+        <p style="margin-top:16px;color:rgba(255,255,255,.72);max-width:46ch;">We supply screened, trained, and document-ready workers for hotels, construction firms, farms, households, and more — across Africa and the Middle East.</p>
         <ul style="margin-top:28px;display:flex;flex-direction:column;gap:14px;list-style:none;">
-          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--sky);font-weight:700;font-size:1.1rem;">✓</span><span>Bulk recruitment for 10 to 500+ workers</span></li>
-          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--sky);font-weight:700;font-size:1.1rem;">✓</span><span>Pre-screened: medicals, police clearance, skills verification</span></li>
-          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--sky);font-weight:700;font-size:1.1rem;">✓</span><span>Contract management and Malawian legal compliance</span></li>
-          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--sky);font-weight:700;font-size:1.1rem;">✓</span><span>Ongoing support and replacement guarantee</span></li>
+          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--sky-light);font-weight:700;font-size:1.1rem;">✓</span><span style="color:rgba(255,255,255,.88);">Bulk recruitment for 10 to 500+ workers</span></li>
+          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--sky-light);font-weight:700;font-size:1.1rem;">✓</span><span style="color:rgba(255,255,255,.88);">Pre-screened: medicals, police clearance, skills verification</span></li>
+          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--sky-light);font-weight:700;font-size:1.1rem;">✓</span><span style="color:rgba(255,255,255,.88);">Contract management and Malawian legal compliance</span></li>
+          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--sky-light);font-weight:700;font-size:1.1rem;">✓</span><span style="color:rgba(255,255,255,.88);">Ongoing support and replacement guarantee</span></li>
         </ul>
-        <button onclick="openModal('employerModal')" style="display:inline-block;margin-top:32px;background:var(--navy);color:#fff;border:none;border-radius:100px;padding:14px 32px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:.88rem;letter-spacing:.04em;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--sky)'" onmouseout="this.style.background='var(--navy)'">
+        <button onclick="openModal('employerModal')" style="display:inline-block;margin-top:32px;background:var(--sky);color:#fff;border:none;border-radius:100px;padding:14px 32px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:.88rem;letter-spacing:.04em;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#0ea5e9'" onmouseout="this.style.background='var(--sky)'">
           Submit a Staffing Request →
         </button>
       </div>
