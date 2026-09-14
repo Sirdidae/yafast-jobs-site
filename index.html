@@ -438,7 +438,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
         <a href="#employers">For Employers</a>
         <ul class="nav-dropdown">
           <li><a onclick="openModal('employerModal')">Hire Staff Now</a></li>
-          <li><a href="#employers">Industries We Serve</a></li>
+          <li><a href="#industries" onclick="document.querySelectorAll('.has-drop').forEach(d=>d.classList.remove('open'))">Industries We Serve</a></li>
           <li><a href="#employers">Employer Solutions</a></li>
           <li><a href="#how">Recruitment Process</a></li>
           <hr>
@@ -878,7 +878,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
           Submit a Staffing Request →
         </button>
       </div>
-      <div class="sector-grid">
+      <div class="sector-grid" id="industries">
         <div class="sector-card" onclick="openEmployerFor('Hospitality')"><div style="font-size:2rem;margin-bottom:8px;">🏨</div><div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;">Hospitality</div><div style="font-size:.8rem;color:var(--text-muted);margin-top:4px;">Hotels &amp; Resorts</div></div>
         <div class="sector-card" onclick="openEmployerFor('Construction')"><div style="font-size:2rem;margin-bottom:8px;">🏗️</div><div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;">Construction</div><div style="font-size:.8rem;color:var(--text-muted);margin-top:4px;">Skilled &amp; Unskilled</div></div>
         <div class="sector-card" onclick="openEmployerFor('Agriculture')"><div style="font-size:2rem;margin-bottom:8px;">🌿</div><div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;">Agriculture</div><div style="font-size:.8rem;color:var(--text-muted);margin-top:4px;">Farm &amp; Plantation</div></div>
