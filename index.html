@@ -160,6 +160,18 @@ h3{font-size:1.2rem;font-weight:700;}
 .popular-tags a{color:var(--sky-light);font-size:.82rem;transition:color .15s;}
 .popular-tags a:hover{color:#fff;text-decoration:underline;}
 
+/* PARTNERS STRIP */
+.partners-strip{background:var(--surface);border-bottom:1px solid var(--border);padding-block:36px;}
+.partners-strip .container{display:flex;flex-direction:column;align-items:center;gap:24px;}
+.partners-label{font-family:'Montserrat',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);}
+.partners-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px;}
+.partner-badge{display:flex;align-items:center;gap:12px;background:var(--ground);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:14px 24px;transition:border-color .2s,box-shadow .2s;}
+.partner-badge:hover{border-color:var(--sky);box-shadow:var(--shadow-sm);}
+.partner-icon{width:42px;height:42px;border-radius:var(--radius-sm);background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:#fff;font-family:'Montserrat',sans-serif;letter-spacing:.02em;flex-shrink:0;line-height:1.1;text-align:center;}
+.partner-info{display:flex;flex-direction:column;gap:2px;}
+.partner-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:.8rem;color:var(--text);letter-spacing:.01em;}
+.partner-type{font-size:.72rem;color:var(--text-muted);}
+
 /* STATS */
 .stats-strip{background:var(--sky);padding-block:28px;}
 .stats-strip .container{display:flex;justify-content:space-around;flex-wrap:wrap;gap:24px;}
@@ -627,6 +639,32 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     </div>
   </div>
 </section>
+
+<!-- PARTNERS -->
+<div class="partners-strip" id="partners">
+  <div class="container">
+    <p class="partners-label">Our Trusted Employer Partners</p>
+    <div class="partners-row">
+
+      <div class="partner-badge">
+        <div class="partner-icon">IMDAD</div>
+        <div class="partner-info">
+          <span class="partner-name">IMDAD Center for Domestic Workers LLC</span>
+          <span class="partner-type">Domestic Workers Placement — UAE</span>
+        </div>
+      </div>
+
+      <div class="partner-badge">
+        <div class="partner-icon" style="font-size:.65rem;">SERVEU</div>
+        <div class="partner-info">
+          <span class="partner-name">SERVEU Union Properties PJSC</span>
+          <span class="partner-type">Facility & Cleaning Services — UAE</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <!-- FEATURED JOBS -->
 <section class="section jobs-section reveal" id="jobs">
