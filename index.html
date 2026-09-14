@@ -296,7 +296,10 @@ h3{font-size:1.2rem;font-weight:700;}
 .btn-outline-white:hover{border-color:#fff;background:rgba(255,255,255,.1);}
 
 /* MEET THE TEAM */
-.team-section{background:#1C0A02;padding-block:clamp(64px,9vw,104px);}
+.team-section{position:relative;padding-block:clamp(64px,9vw,104px);overflow:hidden;background:#1C0A02;}
+.team-section::before{content:'';position:absolute;inset:0;background-image:url('malawi-flag.png');background-size:100% 100%;background-position:center;background-repeat:no-repeat;opacity:.18;z-index:0;}
+.team-section::after{content:'';position:absolute;inset:0;background:rgba(28,10,2,.62);z-index:1;}
+.team-section .container{position:relative;z-index:2;}
 .team-section .eyebrow{color:#C9A040;justify-content:center;display:flex;margin-bottom:18px;}
 .team-section h2{color:#fff;text-align:center;font-family:'Georgia',serif;font-size:clamp(2rem,4.5vw,3rem);font-weight:700;max-width:22ch;margin:0 auto 56px;line-height:1.2;}
 .team-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;}
