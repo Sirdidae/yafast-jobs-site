@@ -386,6 +386,44 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   .footer-grid{grid-template-columns:1fr;}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important;}}
+
+/* ── WHATSAPP FLOATING BAR ── */
+.wa-float{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+}
+.wa-bubble{
+  background:#25D366;color:#fff;border-radius:100px;
+  display:flex;align-items:center;gap:10px;
+  padding:12px 20px 12px 14px;
+  box-shadow:0 4px 20px rgba(37,211,102,.45);
+  font-family:'Montserrat',sans-serif;font-weight:700;font-size:.82rem;
+  text-decoration:none;transition:background .15s,transform .15s,box-shadow .15s;
+  white-space:nowrap;
+}
+.wa-bubble:hover{background:#1ebe5a;transform:translateY(-2px);box-shadow:0 6px 28px rgba(37,211,102,.55);}
+.wa-bubble svg{width:22px;height:22px;flex-shrink:0;}
+.wa-label{display:flex;flex-direction:column;line-height:1.2;}
+.wa-label span:first-child{font-size:.75rem;font-weight:600;opacity:.85;}
+.wa-label span:last-child{font-size:.88rem;font-weight:800;}
+.wa-toggle{
+  width:56px;height:56px;border-radius:50%;background:#25D366;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(37,211,102,.45);
+  transition:background .15s,transform .15s;
+}
+.wa-toggle:hover{background:#1ebe5a;transform:scale(1.08);}
+.wa-toggle svg{width:28px;height:28px;}
+.wa-menu{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.wa-menu.hidden{display:none;}
+@keyframes waIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.wa-bubble{animation:waIn .18s ease both;}
+.wa-bubble:nth-child(2){animation-delay:.05s;}
+@media(max-width:600px){
+  .wa-float{bottom:16px;right:14px;}
+  .wa-bubble{padding:10px 14px 10px 12px;}
+  .wa-label span:last-child{font-size:.82rem;}
+}
 </style>
 </head>
 <body>
@@ -408,9 +446,10 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   <div class="container">
     <span>📍 Blantyre &amp; Lilongwe, Malawi &nbsp;|&nbsp; Mon–Fri 08:00–17:00 CAT</span>
     <div style="display:flex;gap:20px;flex-wrap:wrap;">
-      <a href="tel:+265999000000">📞 +265 999 000 000</a>
-      <a href="mailto:info@yafast.mw">✉️ info@yafast.mw</a>
-      <a href="https://wa.me/265999000000" target="_blank">💬 WhatsApp</a>
+      <a href="tel:+97156634583">📞 UAE: +971 56 634 583</a>
+      <a href="tel:+265986483410">📞 MW: +265 986 483 410</a>
+      <a href="mailto:yafastservices@gmail.com">✉️ yafastservices@gmail.com</a>
+      <a href="https://wa.me/97156634583" target="_blank">💬 WhatsApp</a>
     </div>
   </div>
 </div>
@@ -1070,7 +1109,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
         <p>Malawi's trusted recruitment and travel agency. We connect skilled Malawians with life-changing opportunities at home and around the world.</p>
         <div class="footer-social">
           <a href="https://facebook.com" target="_blank" class="social-btn" aria-label="Facebook" title="Facebook">f</a>
-          <a href="https://wa.me/265999000000" target="_blank" class="social-btn" aria-label="WhatsApp" title="WhatsApp">w</a>
+          <a href="https://wa.me/97156634583" target="_blank" class="social-btn" aria-label="WhatsApp" title="WhatsApp">w</a>
           <a href="https://instagram.com" target="_blank" class="social-btn" aria-label="Instagram" title="Instagram">ig</a>
           <a href="https://linkedin.com" target="_blank" class="social-btn" aria-label="LinkedIn" title="LinkedIn">in</a>
         </div>
@@ -1102,7 +1141,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
           <li><a onclick="openModal('employerModal')">For Employers</a></li>
           <li><a href="#contact">Our Offices</a></li>
           <li><a onclick="openModal('registerModal')">Careers at Yafast</a></li>
-          <li><a href="mailto:info@yafast.mw">Contact Us</a></li>
+          <li><a href="mailto:yafastservices@gmail.com">Contact Us</a></li>
         </ul>
       </div>
     </div>
@@ -1116,6 +1155,23 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     </div>
   </div>
 </footer>
+
+<!-- ══ WHATSAPP FLOATING BAR ══════════════════════════════════ -->
+<div class="wa-float" id="waFloat">
+  <div class="wa-menu hidden" id="waMenu">
+    <a class="wa-bubble" href="https://wa.me/97156634583" target="_blank" rel="noopener" title="WhatsApp UAE">
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.116 1.532 5.845L.054 23.447a.5.5 0 0 0 .612.612l5.683-1.492A11.942 11.942 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 0 1-5.034-1.386l-.361-.214-3.734.98.997-3.648-.235-.374A9.808 9.808 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+      <div class="wa-label"><span>UAE Office</span><span>+971 56 634 583</span></div>
+    </a>
+    <a class="wa-bubble" href="https://wa.me/265986483410" target="_blank" rel="noopener" title="WhatsApp Malawi">
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.116 1.532 5.845L.054 23.447a.5.5 0 0 0 .612.612l5.683-1.492A11.942 11.942 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 0 1-5.034-1.386l-.361-.214-3.734.98.997-3.648-.235-.374A9.808 9.808 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+      <div class="wa-label"><span>Malawi Office</span><span>+265 986 483 410</span></div>
+    </a>
+  </div>
+  <button class="wa-toggle" id="waToggle" onclick="toggleWa()" aria-label="WhatsApp us" title="Chat on WhatsApp">
+    <svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.116 1.532 5.845L.054 23.447a.5.5 0 0 0 .612.612l5.683-1.492A11.942 11.942 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 0 1-5.034-1.386l-.361-.214-3.734.98.997-3.648-.235-.374A9.808 9.808 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+  </button>
+</div>
 
 <!-- ══ MODALS ══════════════════════════════════════════════════ -->
 
@@ -1298,6 +1354,18 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   window.scrollTo = window.scrollTo || scrollTo;
 })();
 function scrollTo(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
+
+/* ── WHATSAPP TOGGLE ── */
+function toggleWa(){
+  const menu = document.getElementById('waMenu');
+  menu.classList.toggle('hidden');
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('#waFloat')) {
+    const menu = document.getElementById('waMenu');
+    if(menu) menu.classList.add('hidden');
+  }
+});
 
 /* ── MOBILE MENU ── */
 function toggleMobile(){
