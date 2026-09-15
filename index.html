@@ -1576,16 +1576,10 @@ function navigate(pageId, filter){
   const target = document.querySelector('.page[data-page="'+pageId+'"]');
   if(target){
     target.classList.add('active');
-    // run reveal on newly visible elements
-    target.querySelectorAll('.reveal:not(.visited)').forEach(el => {
-      el.classList.add('visited');
-      observer.observe(el);
-    });
-    // re-trigger immediately visible ones
+    // animate reveals: stagger them in so the page feels alive
     setTimeout(() => {
-      target.querySelectorAll('.reveal').forEach(el => {
-        const rect = el.getBoundingClientRect();
-        if(rect.top < window.innerHeight) el.classList.add('visible');
+      target.querySelectorAll('.reveal').forEach((el, i) => {
+        setTimeout(() => el.classList.add('visible'), i * 40);
       });
     }, 30);
   }
@@ -1816,7 +1810,7 @@ function animateCounter(el){
   },step);
 }
 
-/* ── SCROLL REVEAL ── */
+/* ── SCROLL REVEAL (within active page — handles below-fold items) ── */
 const observer=new IntersectionObserver((entries)=>{
   entries.forEach(e=>{
     if(e.isIntersecting){
@@ -1825,8 +1819,6 @@ const observer=new IntersectionObserver((entries)=>{
     }
   });
 },{threshold:.10});
-// only observe elements in the active page on first load
-document.querySelectorAll('.page.active .reveal').forEach(el=>observer.observe(el));
 
 const statsObserver=new IntersectionObserver((entries)=>{
   entries.forEach(e=>{
@@ -1836,7 +1828,8 @@ const statsObserver=new IntersectionObserver((entries)=>{
     }
   });
 },{threshold:.3});
-statsObserver.observe(document.querySelector('.stats-strip'));
+const statsEl=document.querySelector('.stats-strip');
+if(statsEl) statsObserver.observe(statsEl);
 
 /* ── ACTIVE NAV ON SCROLL (disabled in page-mode) ── */
 const sections=[];
