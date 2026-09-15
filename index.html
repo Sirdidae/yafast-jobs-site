@@ -413,13 +413,20 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 
 /* RESPONSIVE */
 @media(max-width:960px){
+  /* Nav — show hamburger on tablet and below */
+  .nav-links{display:none;}
+  .hamburger{display:flex;}
+  /* Nav-top — collapse to essentials on tablet */
+  .nav-top .container{flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:.75rem;}
+  /* Hero */
   .hero-bg-content{grid-template-columns:1fr;}
   .hero-bg{min-height:auto;}
-  .hero-jobs-panel{min-height:440px;}
-  .hero-travel-panel{border-left:none;border-top:1px solid rgba(255,255,255,.12);backdrop-filter:none;}
+  .hero-jobs-panel{min-height:auto;padding:48px 24px 32px;}
+  .hero-travel-panel{border-left:none;border-top:1px solid rgba(255,255,255,.12);backdrop-filter:none;padding:32px 24px 40px;}
   .hero-bg-overlay{background:rgba(0,0,0,.28);}
   .hero-grid{grid-template-columns:1fr;}
   .hero-panel-travel{border-left:none;border-top:2px solid rgba(27,163,232,.3);}
+  /* Grids */
   .travel-grid{grid-template-columns:repeat(2,1fr);}
   .paths-grid{grid-template-columns:repeat(2,1fr);}
   .jobs-grid{grid-template-columns:1fr;}
@@ -429,12 +436,50 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   .footer-grid{grid-template-columns:1fr 1fr;}
   .employer-grid{grid-template-columns:1fr;}
   .form-row{grid-template-columns:1fr;}
+  /* Placement gallery — stack on tablet */
+  .placement-grid{grid-template-columns:1fr!important;}
 }
 @media(max-width:600px){
-  .nav-links{display:none;}
-  .hamburger{display:flex;}
+  /* Nav-top — hide entirely on phone */
+  .nav-top{display:none;}
+  /* Grids — all single column */
   .paths-grid,.travel-grid,.how-grid,.dest-grid{grid-template-columns:1fr;}
   .footer-grid{grid-template-columns:1fr;}
+  .sector-grid{grid-template-columns:1fr 1fr;}
+  /* Search bar — stack vertically */
+  .search-bar{flex-direction:column;}
+  .search-bar input{border-radius:var(--radius-md) var(--radius-md) 0 0;}
+  .search-bar button{border-radius:0 0 var(--radius-md) var(--radius-md);padding:13px;}
+  /* Stats — wrap into 2-per-row */
+  .stats-strip .container{justify-content:center;gap:12px 24px;}
+  .stat-item{min-width:140px;}
+  /* Partners */
+  .partners-row{gap:10px;}
+  .partner-badge{padding:10px 16px;}
+  /* Why visual */
+  .why-visual{padding:24px 20px;}
+  /* Modal — slide up from bottom on mobile */
+  .modal-backdrop{align-items:flex-end;padding:0;}
+  .modal{border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:90vh;}
+  /* Hero caption */
+  .hero-caption{font-size:.72rem;padding:10px 16px;}
+  /* Section padding */
+  .section{padding-block:clamp(40px,7vw,72px);}
+}
+@media(max-width:480px){
+  /* Very small phones */
+  .sector-grid{grid-template-columns:1fr 1fr;}
+  .travel-picks{gap:6px;}
+  .travel-pick{font-size:.76rem;padding:7px 12px;}
+  .cta-btns{flex-direction:column;align-items:center;}
+  .btn-white,.btn-outline-white{width:100%;max-width:280px;}
+  .voice-card{padding:20px 16px;}
+  .partner-badge{flex-direction:column;text-align:center;gap:8px;}
+  .footer-social{justify-content:center;}
+  .footer-about p{font-size:.85rem;}
+  .job-card{padding:18px 16px;}
+  .job-footer{flex-direction:column;align-items:flex-start;gap:10px;}
+  .apply-btn{width:100%;text-align:center;padding:10px;}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important;}}
 
@@ -1386,7 +1431,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       <h2 style="margin-top:8px;max-width:22ch;margin-inline:auto;">Workers in the Field</h2>
       <p style="color:var(--text-muted);max-width:52ch;margin-inline:auto;margin-top:12px;font-size:.97rem;">Real workers we've placed with trusted employers across the UAE and the region.</p>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+    <div class="placement-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
 
       <!-- Card 1: Domestic Workers — IMDAD -->
       <div style="border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-md);">
