@@ -442,6 +442,41 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 @media(max-width:600px){
   /* Nav-top — hide entirely on phone */
   .nav-top{display:none;}
+
+  /* ── HERO: show full group photo on mobile ── */
+  /* Pull image out of absolute positioning so it displays at natural size */
+  .hero-bg{display:block;min-height:auto;}
+  .hero-bg-img{
+    position:relative;
+    top:auto;left:auto;right:auto;bottom:auto;
+    width:100%;
+    height:auto;          /* natural aspect ratio — full group visible */
+    object-fit:contain;
+    background:var(--navy-deep);
+    display:block;
+  }
+  .hero-bg-overlay{display:none;}    /* no overlay needed — content is below photo */
+  .hero-caption{display:none;}
+  .hero-bg-content{
+    min-height:auto;
+    background:var(--navy-deep);
+    display:flex;
+    flex-direction:column;
+  }
+  .hero-jobs-panel{
+    min-height:auto;
+    padding:28px 20px 24px;
+  }
+  .hero-travel-panel{
+    padding:24px 20px 32px;
+    border-top:1px solid rgba(255,255,255,.15);
+  }
+  .hero-tag{
+    background:rgba(27,163,232,.22);
+    border-color:rgba(27,163,232,.4);
+  }
+  /* ────────────────────────────────────────── */
+
   /* Grids — all single column */
   .paths-grid,.travel-grid,.how-grid,.dest-grid{grid-template-columns:1fr;}
   .footer-grid{grid-template-columns:1fr;}
