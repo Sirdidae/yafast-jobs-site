@@ -72,21 +72,27 @@ h3{font-size:1.2rem;font-weight:700;}
 .nav-links>li>a:hover,.nav-links>li.open>a{color:#fff;background:rgba(255,255,255,.1);}
 .nav-links .active>a{color:var(--sky);}
 /* chevron */
-.has-drop>a::after{content:'';display:inline-block;width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s;}
+.has-drop>a::after{content:'';display:inline-block;width:5px;height:5px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s;margin-left:2px;}
 .has-drop.open>a::after{transform:rotate(-135deg) translateY(-2px);}
-/* DROPDOWN PANEL */
+/* DROPDOWN PANEL — Adecco style */
 .nav-dropdown{
-  display:none;position:absolute;top:calc(100% + 2px);left:0;
-  min-width:220px;background:#fff;border-radius:0 0 var(--radius-md) var(--radius-md);
-  box-shadow:0 8px 32px rgba(13,43,78,.18);
-  padding:10px 0;z-index:200;
-  animation:dropIn .18s ease;
+  display:none;position:absolute;top:100%;left:0;
+  background:#fff;border-radius:0 0 10px 10px;
+  box-shadow:0 12px 40px rgba(13,43,78,.18);
+  border-top:3px solid var(--sky);
+  padding:20px 24px;z-index:500;
+  min-width:280px;
+  animation:dropIn .16s ease;
 }
 @keyframes dropIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
 .has-drop.open>.nav-dropdown{display:block;}
-.nav-dropdown a{display:block;padding:10px 22px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);transition:background .12s,color .12s;}
-.nav-dropdown a:hover{background:var(--sky-pale);color:var(--sky);}
-.nav-dropdown hr{border:none;border-top:1px solid var(--border);margin:6px 16px;}
+/* dropdown internals */
+.drop-label{font-family:'Montserrat',sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:block;}
+.nav-dropdown a{display:flex;align-items:center;gap:6px;padding:8px 0;font-family:'Source Sans 3',sans-serif;font-size:.93rem;font-weight:600;color:var(--navy);text-transform:none;letter-spacing:0;transition:color .12s,gap .12s;white-space:nowrap;}
+.nav-dropdown a:hover{color:var(--sky);gap:10px;}
+.drop-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;}
+.drop-divider{border:none;border-top:1px solid var(--border);margin:10px 0;}
+.drop-viewall{display:inline-flex!important;align-items:center;gap:6px;color:var(--sky)!important;font-family:'Montserrat',sans-serif!important;font-weight:800!important;font-size:.82rem!important;letter-spacing:.03em;padding:10px 0 0!important;border-top:1px solid var(--border);width:100%;margin-top:4px;}
 .nav-cta{background:var(--sky);color:#fff!important;border-radius:100px;padding:9px 18px!important;margin-left:8px;transition:background .15s,transform .12s!important;}
 .nav-cta:hover{background:var(--sky-light)!important;transform:translateY(-1px);}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;margin-left:auto;z-index:110;}
@@ -490,82 +496,91 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     <ul class="nav-links">
 
       <!-- FIND JOBS -->
-      <li class="has-drop" id="drop-jobs" data-nav="jobs">
-        <a onclick="navigate('jobs')">Find Jobs</a>
-        <ul class="nav-dropdown">
-          <li><a onclick="navigate('jobs','uae')">UAE / Middle East</a></li>
-          <li><a onclick="navigate('jobs','southafrica')">South Africa</a></li>
-          <li><a onclick="navigate('jobs','malawi')">Local – Malawi</a></li>
-          <hr>
-          <li><a onclick="navigate('jobs','hospitality')">Hospitality Jobs</a></li>
-          <li><a onclick="navigate('jobs','construction')">Construction Jobs</a></li>
-          <li><a onclick="navigate('jobs','domestic')">Domestic &amp; Caregiving</a></li>
-          <li><a onclick="navigate('jobs','security')">Security Jobs</a></li>
-          <hr>
-          <li><a onclick="openModal('registerModal')">How to Apply</a></li>
-        </ul>
+      <li class="has-drop" data-nav="jobs">
+        <a href="#">Find Jobs</a>
+        <div class="nav-dropdown" style="min-width:360px;">
+          <span class="drop-label">Current Opportunities</span>
+          <div class="drop-cols">
+            <div>
+              <span class="drop-label" style="border:none;padding-bottom:4px;margin-bottom:0;">By Location</span>
+              <a onclick="navigate('jobs','uae')">🇦🇪 UAE &amp; Middle East</a>
+              <a onclick="navigate('jobs','southafrica')">🇿🇦 South Africa</a>
+              <a onclick="navigate('jobs','malawi')">🇲🇼 Local – Malawi</a>
+            </div>
+            <div>
+              <span class="drop-label" style="border:none;padding-bottom:4px;margin-bottom:0;">By Industry</span>
+              <a onclick="navigate('jobs','hospitality')">🏨 Hospitality</a>
+              <a onclick="navigate('jobs','construction')">🏗️ Construction</a>
+              <a onclick="navigate('jobs','domestic')">🏠 Domestic &amp; Care</a>
+              <a onclick="navigate('jobs','security')">🛡️ Security</a>
+            </div>
+          </div>
+          <a onclick="navigate('jobs')" class="drop-viewall">View All 650+ Vacancies →</a>
+        </div>
       </li>
 
       <!-- FOR EMPLOYERS -->
-      <li class="has-drop" id="drop-employers" data-nav="employers">
-        <a onclick="navigate('employers')">For Employers</a>
-        <ul class="nav-dropdown">
-          <li><a onclick="openModal('employerModal')">Hire Staff Now</a></li>
-          <li><a onclick="navigate('employers')">Industries We Serve</a></li>
-          <li><a onclick="navigate('employers')">Employer Solutions</a></li>
-          <li><a onclick="navigate('employers')">Recruitment Process</a></li>
-          <hr>
-          <li><a onclick="openModal('employerModal')">Partner with Us</a></li>
-          <li><a onclick="openModal('employerModal')">Request a Quote</a></li>
-        </ul>
+      <li class="has-drop" data-nav="employers">
+        <a href="#">For Employers</a>
+        <div class="nav-dropdown">
+          <span class="drop-label">Hire Malawian Talent</span>
+          <a onclick="navigate('employers')">📋 Employer Solutions</a>
+          <a onclick="navigate('employers')">🏭 Industries We Serve</a>
+          <a onclick="navigate('employers')">🔄 Recruitment Process</a>
+          <div class="drop-divider"></div>
+          <a onclick="openModal('employerModal')">🤝 Partner with Us</a>
+          <a onclick="openModal('employerModal')">📩 Request a Quote</a>
+          <a onclick="navigate('employers')" class="drop-viewall">Explore Employer Services →</a>
+        </div>
       </li>
 
       <!-- TRAVEL -->
-      <li class="has-drop" id="drop-travel" data-nav="travel">
-        <a onclick="navigate('travel')">Travel</a>
-        <ul class="nav-dropdown">
-          <li><a onclick="navigate('travel');openTravelEnquiry('Flight Booking')">Flight Booking</a></li>
-          <li><a onclick="navigate('travel');openTravelEnquiry('Visa Application')">Visa Applications</a></li>
-          <li><a onclick="navigate('travel');openTravelEnquiry('Hotel &amp; Transfers')">Hotel &amp; Transfers</a></li>
-          <li><a onclick="navigate('travel');openTravelEnquiry('Travel Insurance')">Travel Insurance</a></li>
-          <li><a onclick="navigate('travel');openTravelEnquiry('Group Booking')">Group Bookings</a></li>
-          <hr>
-          <li><a onclick="navigate('travel');openTravelEnquiry('Full Travel Package')">Full Travel Package</a></li>
-        </ul>
+      <li class="has-drop" data-nav="travel">
+        <a href="#">Travel</a>
+        <div class="nav-dropdown">
+          <span class="drop-label">Travel Services</span>
+          <a onclick="navigate('travel');openTravelEnquiry('Flight Booking')">✈️ Flight Booking</a>
+          <a onclick="navigate('travel');openTravelEnquiry('Visa Application')">🛂 Visa Applications</a>
+          <a onclick="navigate('travel');openTravelEnquiry('Hotel &amp; Transfers')">🏨 Hotel &amp; Transfers</a>
+          <a onclick="navigate('travel');openTravelEnquiry('Travel Insurance')">🛡️ Travel Insurance</a>
+          <a onclick="navigate('travel');openTravelEnquiry('Group Booking')">👥 Group Bookings</a>
+          <a onclick="navigate('travel')" class="drop-viewall">All Travel Services →</a>
+        </div>
       </li>
 
       <!-- DESTINATIONS -->
-      <li class="has-drop" id="drop-dest" data-nav="destinations">
-        <a onclick="navigate('destinations')">Destinations</a>
-        <ul class="nav-dropdown">
-          <li><a onclick="navigate('destinations');openTravelEnquiry('Dubai, UAE')">🇦🇪 UAE &amp; Dubai</a></li>
-          <li><a onclick="navigate('destinations');openTravelEnquiry('Johannesburg, South Africa')">🇿🇦 South Africa</a></li>
-          <li><a onclick="navigate('destinations');openTravelEnquiry('London, United Kingdom')">🇬🇧 United Kingdom</a></li>
-          <li><a onclick="navigate('destinations');openTravelEnquiry('Qatar')">🇶🇦 Qatar</a></li>
-          <li><a onclick="navigate('destinations');openTravelEnquiry('Zambia')">🇿🇲 Zambia</a></li>
-          <hr>
-          <li><a onclick="navigate('destinations')">All Destinations →</a></li>
-        </ul>
+      <li class="has-drop" data-nav="destinations">
+        <a href="#">Destinations</a>
+        <div class="nav-dropdown">
+          <span class="drop-label">Popular Routes from Malawi</span>
+          <a onclick="navigate('destinations');openTravelEnquiry('Dubai, UAE')">🇦🇪 UAE &amp; Dubai</a>
+          <a onclick="navigate('destinations');openTravelEnquiry('Johannesburg, South Africa')">🇿🇦 South Africa</a>
+          <a onclick="navigate('destinations');openTravelEnquiry('London, United Kingdom')">🇬🇧 United Kingdom</a>
+          <a onclick="navigate('destinations');openTravelEnquiry('Qatar')">🇶🇦 Qatar</a>
+          <a onclick="navigate('destinations');openTravelEnquiry('Zambia')">🇿🇲 Zambia</a>
+          <a onclick="navigate('destinations')" class="drop-viewall">All Destinations →</a>
+        </div>
       </li>
 
       <!-- ABOUT US -->
-      <li class="has-drop" id="drop-about" data-nav="who-we-are">
-        <a onclick="navigate('who-we-are')">About Us</a>
-        <ul class="nav-dropdown">
-          <li><a onclick="navigate('who-we-are')">Who We Are</a></li>
-          <li><a onclick="navigate('vision')">Vision, Mission &amp; Values</a></li>
-          <li><a onclick="navigate('why-choose')">Why Choose Yafast</a></li>
-          <li><a onclick="navigate('contact')">Our Offices</a></li>
-          <hr>
-          <li><a onclick="navigate('team')">Meet the Team</a></li>
-          <li><a onclick="openModal('registerModal')">Join Our Team</a></li>
-        </ul>
+      <li class="has-drop" data-nav="who-we-are">
+        <a href="#">About Us</a>
+        <div class="nav-dropdown">
+          <span class="drop-label">About Yafast</span>
+          <a onclick="navigate('who-we-are')">🏢 Who We Are</a>
+          <a onclick="navigate('vision')">🎯 Vision, Mission &amp; Values</a>
+          <a onclick="navigate('why-choose')">⭐ Why Choose Yafast</a>
+          <a onclick="navigate('contact')">📍 Our Offices</a>
+          <div class="drop-divider"></div>
+          <a onclick="navigate('team')">👥 Meet the Team</a>
+          <a onclick="openModal('registerModal')">🚀 Join Our Team</a>
+        </div>
       </li>
 
       <!-- OUR TEAM (direct) -->
-      <li data-nav="team"><a onclick="navigate('team')">Our Team</a></li>
+      <li data-nav="team"><a onclick="navigate('team');return false;" href="#">Our Team</a></li>
 
-      <li><a onclick="navigate('contact')" class="nav-cta">Get Started</a></li>
+      <li><a onclick="navigate('contact');return false;" class="nav-cta" href="#">Get Started</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMobile()">
       <span></span><span></span><span></span>
@@ -1552,10 +1567,9 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 const PAGES = ['home','jobs','travel','destinations','who-we-are','vision','why-choose','employers','contact','team'];
 
 function navigate(pageId, filter){
-  // close dropdowns
+  // close dropdowns and mobile menu
   document.querySelectorAll('.has-drop').forEach(d => d.classList.remove('open'));
-  // close mobile menu
-  closeMobile && closeMobile();
+  if(typeof closeMobile === 'function') closeMobile();
   // hide all pages
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   // show target page
@@ -1575,9 +1589,11 @@ function navigate(pageId, filter){
       });
     }, 30);
   }
-  // update active nav
+  // update active nav (About sub-pages all light up the About Us item)
   document.querySelectorAll('.nav-links > li').forEach(li => li.classList.remove('page-active'));
-  const navLi = document.querySelector('.nav-links > li[data-nav="'+pageId+'"]');
+  const aboutPages = ['who-we-are','vision','why-choose','contact'];
+  const navKey = aboutPages.includes(pageId) ? 'who-we-are' : pageId;
+  const navLi = document.querySelector('.nav-links > li[data-nav="'+navKey+'"]');
   if(navLi) navLi.classList.add('page-active');
   // update hash
   history.pushState(null,'', pageId==='home' ? location.pathname : '#'+pageId);
@@ -1608,19 +1624,36 @@ window.addEventListener('popstate', () => {
 (function(){
   const drops = document.querySelectorAll('.has-drop');
   drops.forEach(li => {
-    li.addEventListener('mouseenter', () => li.classList.add('open'));
-    li.addEventListener('mouseleave', () => li.classList.remove('open'));
-    li.querySelector('a').addEventListener('click', e => {
-      if(window.innerWidth <= 960){
-        e.preventDefault();
-        const wasOpen = li.classList.contains('open');
-        drops.forEach(d => d.classList.remove('open'));
-        if(!wasOpen) li.classList.add('open');
-      }
+    // Desktop: hover open/close
+    li.addEventListener('mouseenter', () => {
+      if(window.innerWidth > 780) li.classList.add('open');
     });
+    li.addEventListener('mouseleave', () => {
+      if(window.innerWidth > 780) li.classList.remove('open');
+    });
+    // Mobile/tablet: click parent label to toggle dropdown
+    const parentLink = li.querySelector(':scope > a');
+    if(parentLink){
+      parentLink.addEventListener('click', e => {
+        if(window.innerWidth <= 780){
+          e.preventDefault();
+          const wasOpen = li.classList.contains('open');
+          drops.forEach(d => d.classList.remove('open'));
+          if(!wasOpen) li.classList.add('open');
+        } else {
+          // Desktop: prevent default (href="#" scroll-to-top)
+          e.preventDefault();
+        }
+      });
+    }
   });
+  // Click outside closes all
   document.addEventListener('click', e => {
     if(!e.target.closest('.has-drop')) drops.forEach(d => d.classList.remove('open'));
+  });
+  // Dropdown item clicks also close dropdown
+  document.querySelectorAll('.nav-dropdown a').forEach(a => {
+    a.addEventListener('click', () => drops.forEach(d => d.classList.remove('open')));
   });
 })();
 
