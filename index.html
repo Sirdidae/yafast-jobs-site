@@ -190,12 +190,12 @@ h3{font-size:1.2rem;font-weight:700;}
 .partner-info{display:flex;flex-direction:column;gap:2px;}
 .partner-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:.8rem;color:var(--text);letter-spacing:.01em;}
 .partner-type{font-size:.72rem;color:var(--text-muted);}
-/* ── EMPLOYEE VOICES ── */
+/* ── REAL STORIES ── */
 .voices-section{background:var(--ground);padding-block:80px;}
 .voices-header{text-align:center;margin-bottom:52px;}
 .voices-header .eyebrow{display:inline-block;margin-bottom:10px;}
 .voices-header h2{margin-top:0;max-width:22ch;margin-inline:auto;}
-.voices-header p{color:var(--text-muted);max-width:44ch;margin-inline:auto;margin-top:12px;font-size:.97rem;}
+.voices-header p{color:var(--text-muted);max-width:48ch;margin-inline:auto;margin-top:12px;font-size:.97rem;}
 .voices-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
 @media(max-width:900px){.voices-grid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:580px){.voices-grid{grid-template-columns:1fr;}}
@@ -204,11 +204,15 @@ h3{font-size:1.2rem;font-weight:700;}
 .voice-quote{font-family:'Source Sans 3',sans-serif;font-size:1rem;color:var(--text);line-height:1.65;flex:1;position:relative;padding-top:4px;}
 .voice-quote::before{content:'\201C';font-family:'Montserrat',sans-serif;font-size:3.2rem;line-height:1;color:var(--sky);opacity:.35;position:absolute;top:-10px;left:-6px;}
 .voice-author{display:flex;align-items:center;gap:13px;border-top:1px solid var(--border);padding-top:16px;}
-.voice-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--navy));display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:900;font-size:.85rem;color:#fff;flex-shrink:0;letter-spacing:.02em;}
+.voice-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--navy));display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:900;font-size:.85rem;color:#fff;flex-shrink:0;letter-spacing:.02em;overflow:hidden;}
+.voice-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
 .voice-info{display:flex;flex-direction:column;gap:2px;}
 .voice-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:.84rem;color:var(--text);}
 .voice-role{font-size:.76rem;color:var(--sky);font-weight:600;}
 .voice-dest{font-size:.74rem;color:var(--text-muted);}
+.voice-badge{display:inline-block;font-size:.66rem;font-family:'Montserrat',sans-serif;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:100px;margin-bottom:6px;}
+.voice-badge-candidate{background:rgba(27,163,232,.12);color:var(--sky);}
+.voice-badge-team{background:rgba(13,43,78,.08);color:var(--navy);}
 
 /* STATS */
 .stats-strip{background:var(--sky);padding-block:28px;}
@@ -773,13 +777,27 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 <section class="section voices-section reveal">
   <div class="container">
     <div class="voices-header">
-      <p class="eyebrow">From Our Team</p>
-      <h2>Employee Voices</h2>
-      <p>Real people, real journeys — hear from the Yafast staff behind every successful placement and travel.</p>
+      <p class="eyebrow">Team &amp; Candidate Stories</p>
+      <h2>Real Stories</h2>
+      <p>Hear from the Yafast team and the people whose lives we've helped change — staff, placed candidates, and travellers.</p>
     </div>
     <div class="voices-grid">
 
       <div class="voice-card reveal">
+        <span class="voice-badge voice-badge-candidate">Placed Candidate</span>
+        <p class="voice-quote">Thank you to YAFAST Job Links and Travel Services for assisting me with my journey from Madagascar to Dubai, UAE. They supported me with my air ticket, hotel booking, travel coordination, and employment assistance. I was successfully connected with a job opportunity in sales/ticketing. I truly appreciate the guidance received throughout my journey.</p>
+        <div class="voice-author">
+          <div class="voice-avatar"><img src="leo.jpeg" alt="Leo Fenozo" /></div>
+          <div class="voice-info">
+            <span class="voice-name">Leo Fenozo</span>
+            <span class="voice-role">Sales &amp; Ticketing — Dubai, UAE</span>
+            <span class="voice-dest">🇲🇬 Madagascar → 🇦🇪 Dubai, UAE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="voice-card reveal">
+        <span class="voice-badge voice-badge-team">Team</span>
         <p class="voice-quote">Working at Yafast means changing lives every single day. When a candidate lands their first overseas job, that phone call from the airport — nothing compares to that feeling.</p>
         <div class="voice-author">
           <div class="voice-avatar">DG</div>
@@ -792,18 +810,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       </div>
 
       <div class="voice-card reveal">
-        <p class="voice-quote">I love helping candidates understand the visa process. What looks complicated from the outside becomes straightforward once you know the steps — and that's exactly what we show them.</p>
-        <div class="voice-author">
-          <div class="voice-avatar">??</div>
-          <div class="voice-info">
-            <span class="voice-name">— Add Name Here —</span>
-            <span class="voice-role">Visa &amp; Documentation Officer</span>
-            <span class="voice-dest">Lilongwe, Malawi</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="voice-card reveal">
+        <span class="voice-badge voice-badge-team">Team</span>
         <p class="voice-quote">Every employer we partner with goes through our vetting process. Our candidates deserve workplaces that respect them, and we don't compromise on that.</p>
         <div class="voice-author">
           <div class="voice-avatar">??</div>
@@ -816,6 +823,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       </div>
 
       <div class="voice-card reveal">
+        <span class="voice-badge voice-badge-team">Team</span>
         <p class="voice-quote">The travel division is more than booking flights. We counsel people on what to expect, sort out their insurance, and make sure they land confident — not overwhelmed.</p>
         <div class="voice-author">
           <div class="voice-avatar">??</div>
@@ -828,6 +836,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       </div>
 
       <div class="voice-card reveal">
+        <span class="voice-badge voice-badge-team">Team</span>
         <p class="voice-quote">Pre-departure training is where confidence is built. I watch candidates walk in nervous and walk out ready. That transformation in just a few days is what drives me.</p>
         <div class="voice-author">
           <div class="voice-avatar">??</div>
@@ -840,6 +849,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       </div>
 
       <div class="voice-card reveal">
+        <span class="voice-badge voice-badge-team">Team</span>
         <p class="voice-quote">Following up with placed workers in the UAE — hearing that they're settled, earning, and sending money home — that's the real result we're working towards every day.</p>
         <div class="voice-author">
           <div class="voice-avatar">??</div>
