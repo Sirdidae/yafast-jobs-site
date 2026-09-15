@@ -254,10 +254,14 @@ h3{font-size:1.2rem;font-weight:700;}
 .dest-enquire:hover{background:var(--sky);}
 
 /* HOW IT WORKS */
-.how-section{background:var(--ground);}
+.how-section{position:relative;overflow:hidden;background:var(--navy-deep);}
+.how-yt-wrap{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.how-yt-wrap iframe{position:absolute;top:50%;left:50%;width:177.78vh;min-width:100%;height:56.25vw;min-height:100%;transform:translate(-50%,-50%);border:0;}
+.how-overlay{position:absolute;inset:0;background:rgba(8,26,49,.68);z-index:1;}
+.how-section .container{position:relative;z-index:2;}
 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:48px;}
 .how-step{text-align:center;}
-.step-num{width:56px;height:56px;border-radius:50%;background:var(--navy);color:#fff;font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.2rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 0 8px var(--sky-pale);}
+.step-num{width:56px;height:56px;border-radius:50%;background:var(--sky);color:#fff;font-family:'Montserrat',sans-serif;font-weight:800;font-size:1.2rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 0 8px rgba(27,163,232,.2);}
 .how-step h3{margin-bottom:8px;}
 .how-step p{color:var(--text-muted);font-size:.9rem;}
 
@@ -932,20 +936,25 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 
 <!-- HOW IT WORKS -->
 <section class="section how-section reveal">
+  <!-- YouTube background video -->
+  <div class="how-yt-wrap">
+    <iframe src="https://www.youtube.com/embed/mG3MDvU59DU?autoplay=1&mute=1&loop=1&playlist=mG3MDvU59DU&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" allow="autoplay; encrypted-media" allowfullscreen title="Airport background"></iframe>
+  </div>
+  <div class="how-overlay"></div>
   <div class="container">
     <div style="text-align:center;max-width:52ch;margin:0 auto;">
-      <p class="eyebrow">The Process</p>
-      <h2 style="margin-top:8px;">How Yafast Works</h2>
-      <p style="margin-top:12px;color:var(--text-muted);">Four steps from your first enquiry to your first day at work — or your first boarding pass.</p>
+      <p class="eyebrow" style="color:var(--sky-light);justify-content:center;display:flex;">The Process</p>
+      <h2 style="margin-top:8px;color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.8);">How Yafast Works</h2>
+      <p style="margin-top:12px;color:rgba(255,255,255,.78);text-shadow:0 1px 8px rgba(0,0,0,.6);">Four steps from your first enquiry to your first day at work — or your first boarding pass.</p>
     </div>
     <div class="how-grid">
-      <div class="how-step"><div class="step-num">1</div><h3>Register &amp; Apply</h3><p>Fill in your profile and upload documents at our Blantyre or Lilongwe office, or online.</p></div>
-      <div class="how-step"><div class="step-num">2</div><h3>Screening &amp; Match</h3><p>Our team reviews your background and matches you with the best-fit employer or travel need.</p></div>
-      <div class="how-step"><div class="step-num">3</div><h3>Visa &amp; Docs</h3><p>We manage work permits, medical tests, attestations, and all official requirements.</p></div>
-      <div class="how-step"><div class="step-num">4</div><h3>Depart with Support</h3><p>Pre-departure briefing, airport assist, and a local contact wherever you're going.</p></div>
+      <div class="how-step"><div class="step-num">1</div><h3 style="color:#fff;">Register &amp; Apply</h3><p style="color:rgba(255,255,255,.72);">Fill in your profile and upload documents at our Mzuzu or Lilongwe office, or online.</p></div>
+      <div class="how-step"><div class="step-num">2</div><h3 style="color:#fff;">Screening &amp; Match</h3><p style="color:rgba(255,255,255,.72);">Our team reviews your background and matches you with the best-fit employer or travel need.</p></div>
+      <div class="how-step"><div class="step-num">3</div><h3 style="color:#fff;">Visa &amp; Docs</h3><p style="color:rgba(255,255,255,.72);">We manage work permits, medical tests, attestations, and all official requirements.</p></div>
+      <div class="how-step"><div class="step-num">4</div><h3 style="color:#fff;">Depart with Support</h3><p style="color:rgba(255,255,255,.72);">Pre-departure briefing, airport assist, and a local contact wherever you're going.</p></div>
     </div>
     <div style="text-align:center;margin-top:40px;">
-      <button onclick="openModal('registerModal')" style="background:var(--navy);color:#fff;border:none;border-radius:100px;padding:14px 36px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:.88rem;letter-spacing:.04em;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--sky)'" onmouseout="this.style.background='var(--navy)'">
+      <button onclick="openModal('registerModal')" style="background:var(--sky);color:#fff;border:none;border-radius:100px;padding:14px 36px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:.88rem;letter-spacing:.04em;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#0ea5e9'" onmouseout="this.style.background='var(--sky)'">
         Start Your Journey →
       </button>
     </div>
