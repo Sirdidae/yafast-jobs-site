@@ -39,6 +39,19 @@ h3{font-size:1.2rem;font-weight:700;}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease;}
 .reveal.visible{opacity:1;transform:none;}
 
+/* PAGE ROUTING */
+.page{display:none;}
+.page.active{display:block;}
+/* page header bar for inner pages */
+.page-hdr{background:var(--navy-deep);padding:22px 0 18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.page-hdr .container{display:flex;align-items:center;gap:8px;}
+.page-crumb{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42);cursor:pointer;transition:color .15s;}
+.page-crumb:hover{color:var(--sky-light);}
+.page-crumb-sep{color:rgba(255,255,255,.2);font-size:.7rem;}
+.page-crumb-cur{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);}
+/* nav active state for page routing */
+.nav-links > li.page-active > a{color:var(--sky)!important;}
+
 /* NAV TOP */
 .nav-top{background:var(--navy-deep);padding-block:6px;font-size:.8rem;color:rgba(255,255,255,.7);}
 .nav-top .container{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
@@ -440,12 +453,13 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#jobs" onclick="closeMobile()">Find Jobs</a>
-  <a href="#employers" onclick="closeMobile()">For Employers</a>
-  <a href="#travel" onclick="closeMobile()">Travel</a>
-  <a href="#destinations" onclick="closeMobile()">Destinations</a>
-  <a href="#about" onclick="closeMobile()">About Us</a>
-  <a href="#contact" onclick="closeMobile()" style="color:var(--sky);">Get Started</a>
+  <a onclick="navigate('jobs');closeMobile()">Find Jobs</a>
+  <a onclick="navigate('employers');closeMobile()">For Employers</a>
+  <a onclick="navigate('travel');closeMobile()">Travel</a>
+  <a onclick="navigate('destinations');closeMobile()">Destinations</a>
+  <a onclick="navigate('who-we-are');closeMobile()">About Us</a>
+  <a onclick="navigate('team');closeMobile()">Our Team</a>
+  <a onclick="navigate('contact');closeMobile()" style="color:var(--sky);">Get Started</a>
 </div>
 
 <!-- TOP BAR -->
@@ -464,7 +478,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 <!-- NAV -->
 <nav class="navbar">
   <div class="container">
-    <a href="#" class="nav-logo">
+    <a onclick="navigate('home')" class="nav-logo" style="cursor:pointer;">
       <div class="nav-logo-img">
         <img src="logo.png" alt="Yafast logo" />
       </div>
@@ -476,30 +490,30 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     <ul class="nav-links">
 
       <!-- FIND JOBS -->
-      <li class="has-drop active" id="drop-jobs">
-        <a href="#jobs">Find Jobs</a>
+      <li class="has-drop" id="drop-jobs" data-nav="jobs">
+        <a onclick="navigate('jobs')">Find Jobs</a>
         <ul class="nav-dropdown">
-          <li><a onclick="filterJobs('uae',null);scrollTo('jobs')">UAE / Middle East</a></li>
-          <li><a onclick="filterJobs('southafrica',null);scrollTo('jobs')">South Africa</a></li>
-          <li><a onclick="filterJobs('malawi',null);scrollTo('jobs')">Local – Malawi</a></li>
+          <li><a onclick="navigate('jobs','uae')">UAE / Middle East</a></li>
+          <li><a onclick="navigate('jobs','southafrica')">South Africa</a></li>
+          <li><a onclick="navigate('jobs','malawi')">Local – Malawi</a></li>
           <hr>
-          <li><a onclick="filterJobs('hospitality',null);scrollTo('jobs')">Hospitality Jobs</a></li>
-          <li><a onclick="filterJobs('construction',null);scrollTo('jobs')">Construction Jobs</a></li>
-          <li><a onclick="filterJobs('domestic',null);scrollTo('jobs')">Domestic &amp; Caregiving</a></li>
-          <li><a onclick="filterJobs('security',null);scrollTo('jobs')">Security Jobs</a></li>
+          <li><a onclick="navigate('jobs','hospitality')">Hospitality Jobs</a></li>
+          <li><a onclick="navigate('jobs','construction')">Construction Jobs</a></li>
+          <li><a onclick="navigate('jobs','domestic')">Domestic &amp; Caregiving</a></li>
+          <li><a onclick="navigate('jobs','security')">Security Jobs</a></li>
           <hr>
           <li><a onclick="openModal('registerModal')">How to Apply</a></li>
         </ul>
       </li>
 
       <!-- FOR EMPLOYERS -->
-      <li class="has-drop" id="drop-employers">
-        <a href="#employers">For Employers</a>
+      <li class="has-drop" id="drop-employers" data-nav="employers">
+        <a onclick="navigate('employers')">For Employers</a>
         <ul class="nav-dropdown">
           <li><a onclick="openModal('employerModal')">Hire Staff Now</a></li>
-          <li><a href="#industries" onclick="document.querySelectorAll('.has-drop').forEach(d=>d.classList.remove('open'))">Industries We Serve</a></li>
-          <li><a href="#employers">Employer Solutions</a></li>
-          <li><a href="#how">Recruitment Process</a></li>
+          <li><a onclick="navigate('employers')">Industries We Serve</a></li>
+          <li><a onclick="navigate('employers')">Employer Solutions</a></li>
+          <li><a onclick="navigate('employers')">Recruitment Process</a></li>
           <hr>
           <li><a onclick="openModal('employerModal')">Partner with Us</a></li>
           <li><a onclick="openModal('employerModal')">Request a Quote</a></li>
@@ -507,57 +521,60 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       </li>
 
       <!-- TRAVEL -->
-      <li class="has-drop" id="drop-travel">
-        <a href="#travel">Travel</a>
+      <li class="has-drop" id="drop-travel" data-nav="travel">
+        <a onclick="navigate('travel')">Travel</a>
         <ul class="nav-dropdown">
-          <li><a onclick="openTravelEnquiry('Flight Booking')">Flight Booking</a></li>
-          <li><a onclick="openTravelEnquiry('Visa Application')">Visa Applications</a></li>
-          <li><a onclick="openTravelEnquiry('Hotel &amp; Transfers')">Hotel &amp; Transfers</a></li>
-          <li><a onclick="openTravelEnquiry('Travel Insurance')">Travel Insurance</a></li>
-          <li><a onclick="openTravelEnquiry('Group Booking')">Group Bookings</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Flight Booking')">Flight Booking</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Visa Application')">Visa Applications</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Hotel &amp; Transfers')">Hotel &amp; Transfers</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Travel Insurance')">Travel Insurance</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Group Booking')">Group Bookings</a></li>
           <hr>
-          <li><a onclick="openTravelEnquiry('Full Travel Package')">Full Travel Package</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Full Travel Package')">Full Travel Package</a></li>
         </ul>
       </li>
 
       <!-- DESTINATIONS -->
-      <li class="has-drop" id="drop-dest">
-        <a href="#destinations">Destinations</a>
+      <li class="has-drop" id="drop-dest" data-nav="destinations">
+        <a onclick="navigate('destinations')">Destinations</a>
         <ul class="nav-dropdown">
-          <li><a onclick="openTravelEnquiry('Dubai, UAE')">🇦🇪 UAE &amp; Dubai</a></li>
-          <li><a onclick="openTravelEnquiry('Johannesburg, South Africa')">🇿🇦 South Africa</a></li>
-          <li><a onclick="openTravelEnquiry('London, United Kingdom')">🇬🇧 United Kingdom</a></li>
-          <li><a onclick="openTravelEnquiry('Qatar')">🇶🇦 Qatar</a></li>
-          <li><a onclick="openTravelEnquiry('Zambia')">🇿🇲 Zambia</a></li>
+          <li><a onclick="navigate('destinations');openTravelEnquiry('Dubai, UAE')">🇦🇪 UAE &amp; Dubai</a></li>
+          <li><a onclick="navigate('destinations');openTravelEnquiry('Johannesburg, South Africa')">🇿🇦 South Africa</a></li>
+          <li><a onclick="navigate('destinations');openTravelEnquiry('London, United Kingdom')">🇬🇧 United Kingdom</a></li>
+          <li><a onclick="navigate('destinations');openTravelEnquiry('Qatar')">🇶🇦 Qatar</a></li>
+          <li><a onclick="navigate('destinations');openTravelEnquiry('Zambia')">🇿🇲 Zambia</a></li>
           <hr>
-          <li><a onclick="openTravelEnquiry('All Destinations')">All Destinations →</a></li>
+          <li><a onclick="navigate('destinations')">All Destinations →</a></li>
         </ul>
       </li>
 
       <!-- ABOUT US -->
-      <li class="has-drop" id="drop-about">
-        <a href="#who-we-are">About Us</a>
+      <li class="has-drop" id="drop-about" data-nav="who-we-are">
+        <a onclick="navigate('who-we-are')">About Us</a>
         <ul class="nav-dropdown">
-          <li><a href="#who-we-are">Who We Are</a></li>
-          <li><a href="#vision">Vision, Mission &amp; Values</a></li>
-          <li><a href="#about">Why Choose Yafast</a></li>
-          <li><a href="#contact">Our Offices</a></li>
+          <li><a onclick="navigate('who-we-are')">Who We Are</a></li>
+          <li><a onclick="navigate('vision')">Vision, Mission &amp; Values</a></li>
+          <li><a onclick="navigate('why-choose')">Why Choose Yafast</a></li>
+          <li><a onclick="navigate('contact')">Our Offices</a></li>
           <hr>
-          <li><a href="#team">Meet the Team</a></li>
+          <li><a onclick="navigate('team')">Meet the Team</a></li>
           <li><a onclick="openModal('registerModal')">Join Our Team</a></li>
         </ul>
       </li>
 
       <!-- OUR TEAM (direct) -->
-      <li><a href="#team">Our Team</a></li>
+      <li data-nav="team"><a onclick="navigate('team')">Our Team</a></li>
 
-      <li><a href="#contact" class="nav-cta">Get Started</a></li>
+      <li><a onclick="navigate('contact')" class="nav-cta">Get Started</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMobile()">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
+
+<!-- ═══ HOME PAGE ═══ -->
+<div class="page active" data-page="home">
 
 <!-- HERO -->
 <section class="hero">
@@ -579,10 +596,10 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
         </div>
         <div class="popular-tags" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
           <span style="color:rgba(255,255,255,.5);font-size:.82rem;font-family:'Montserrat',sans-serif;font-weight:600;">POPULAR:</span>
-          <a href="#jobs" onclick="setFilter('security')">Security Guard</a>
-          <a href="#jobs" onclick="setFilter('domestic')">Domestic Worker</a>
-          <a href="#jobs" onclick="setFilter('construction')">Construction</a>
-          <a href="#jobs" onclick="setFilter('hospitality')">Hospitality</a>
+          <a onclick="navigate('jobs','security')" style="cursor:pointer;">Security Guard</a>
+          <a onclick="navigate('jobs','domestic')" style="cursor:pointer;">Domestic Worker</a>
+          <a onclick="navigate('jobs','construction')" style="cursor:pointer;">Construction</a>
+          <a onclick="navigate('jobs','hospitality')" style="cursor:pointer;">Hospitality</a>
         </div>
       </div>
       <!-- RIGHT: Travel -->
@@ -600,7 +617,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
             <button class="travel-pick" onclick="openTravelEnquiry('Zambia')">🇿🇲 Zambia</button>
           </div>
         </div>
-        <a href="#travel" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent-alt);color:#fff;border-radius:100px;padding:13px 28px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:.88rem;letter-spacing:.04em;width:fit-content;transition:background .15s;" onmouseover="this.style.background='#d4690e'" onmouseout="this.style.background='var(--accent-alt)'">
+        <a onclick="navigate('travel')" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;background:var(--accent-alt);color:#fff;border-radius:100px;padding:13px 28px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:.88rem;letter-spacing:.04em;width:fit-content;transition:background .15s;" onmouseover="this.style.background='#d4690e'" onmouseout="this.style.background='var(--accent-alt)'">
           EXPLORE TRAVEL →
         </a>
       </div>
@@ -628,43 +645,43 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       <div><p class="eyebrow">Our Services</p><h2 style="margin-top:8px;">What We Do Best</h2></div>
     </div>
     <div class="paths-grid">
-      <div class="path-card" onclick="openModal('registerModal')">
+      <div class="path-card" onclick="navigate('jobs')">
         <div class="path-card-head" style="background:var(--sky);"></div>
         <div class="path-card-body">
           <div class="path-icon path-icon-blue">💼</div>
           <h3>Job Placement</h3>
           <p>We match candidates with verified employers locally and internationally, handling paperwork, contracts, and pre-departure briefings.</p>
-          <span class="path-link path-link-blue">Register Now →</span>
+          <span class="path-link path-link-blue">Browse Jobs →</span>
         </div>
       </div>
-      <div class="path-card" onclick="openModal('travelModal')">
+      <div class="path-card" onclick="navigate('travel')">
         <div class="path-card-head" style="background:var(--navy);"></div>
         <div class="path-card-body">
           <div class="path-icon path-icon-blue">🛂</div>
           <h3>Visa &amp; Work Permit</h3>
           <p>Expert visa assistance for UAE, South Africa, the UK, and more. We guide you through every requirement with a 98% success rate.</p>
-          <span class="path-link path-link-blue">Enquire Now →</span>
+          <span class="path-link path-link-blue">Travel Services →</span>
         </div>
       </div>
-      <div class="path-card" onclick="openModal('travelModal')">
+      <div class="path-card" onclick="navigate('travel')">
         <div class="path-card-head" style="background:var(--accent-alt);"></div>
         <div class="path-card-body">
           <div class="path-icon path-icon-orange">✈️</div>
           <h3>Flight &amp; Travel</h3>
           <p>Competitive airfare, hotel packages, and group bookings. Travel for work or leisure — we find the best routes from Malawi.</p>
-          <span class="path-link path-link-orange">Book Now →</span>
+          <span class="path-link path-link-orange">Book Travel →</span>
         </div>
       </div>
-      <div class="path-card" onclick="openModal('employerModal')">
+      <div class="path-card" onclick="navigate('employers')">
         <div class="path-card-head" style="background:var(--sky);"></div>
         <div class="path-card-body">
           <div class="path-icon path-icon-blue">🏢</div>
           <h3>Employer Solutions</h3>
           <p>We source, screen, and deploy skilled workers for businesses across industries. Bulk recruitment and staffing contracts welcome.</p>
-          <span class="path-link path-link-blue">Partner With Us →</span>
+          <span class="path-link path-link-blue">Hire Staff →</span>
         </div>
       </div>
-      <div class="path-card" onclick="openModal('travelModal')">
+      <div class="path-card" onclick="navigate('travel')">
         <div class="path-card-head" style="background:var(--navy);"></div>
         <div class="path-card-body">
           <div class="path-icon path-icon-blue">📋</div>
@@ -673,7 +690,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
           <span class="path-link path-link-blue">Get Help →</span>
         </div>
       </div>
-      <div class="path-card" onclick="openModal('registerModal')">
+      <div class="path-card" onclick="navigate('jobs')">
         <div class="path-card-head" style="background:var(--accent-alt);"></div>
         <div class="path-card-body">
           <div class="path-icon path-icon-orange">🎓</div>
@@ -715,6 +732,18 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     </div>
   </div>
 </div>
+
+</div><!-- /page:home -->
+
+<!-- ═══ JOBS PAGE ═══ -->
+<div class="page" data-page="jobs">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Find Jobs</span>
+    </div>
+  </div>
 
 <!-- FEATURED JOBS -->
 <section class="section jobs-section reveal" id="jobs">
@@ -863,6 +892,18 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   </div>
 </section>
 
+</div><!-- /page:jobs -->
+
+<!-- ═══ TRAVEL PAGE ═══ -->
+<div class="page" data-page="travel">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Travel Services</span>
+    </div>
+  </div>
+
 <!-- TRAVEL SERVICES -->
 <section class="section travel-section reveal" id="travel">
   <div class="travel-bg-pattern"></div>
@@ -894,6 +935,18 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     </div>
   </div>
 </section>
+
+</div><!-- /page:travel -->
+
+<!-- ═══ DESTINATIONS PAGE ═══ -->
+<div class="page" data-page="destinations">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Destinations</span>
+    </div>
+  </div>
 
 <!-- DESTINATIONS -->
 <section class="section reveal" id="destinations">
@@ -934,7 +987,21 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
+</div><!-- /page:destinations -->
+
+<!-- ═══ WHO WE ARE PAGE ═══ -->
+<div class="page" data-page="who-we-are">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb" onclick="navigate('who-we-are')" style="color:rgba(255,255,255,.45);">About Us</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Who We Are</span>
+    </div>
+  </div>
+
+<!-- HOW IT WORKS (shown on About pages) -->
 <section class="section how-section reveal">
   <!-- Background video -->
   <div class="how-yt-wrap">
@@ -964,7 +1031,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 </section>
 
 <!-- WHO WE ARE -->
-<section class="section reveal" id="who-we-are" style="background:var(--surface);">
+<section class="section reveal" id="sec-who-we-are" style="background:var(--surface);">
   <div class="container">
     <div class="why-grid">
       <div>
@@ -992,6 +1059,20 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     </div>
   </div>
 </section>
+
+</div><!-- /page:who-we-are -->
+
+<!-- ═══ VISION PAGE ═══ -->
+<div class="page" data-page="vision">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb" onclick="navigate('who-we-are')">About Us</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Vision, Mission &amp; Values</span>
+    </div>
+  </div>
 
 <!-- VISION, MISSION & VALUES -->
 <section class="section reveal" id="vision" style="background:var(--navy-deep);">
@@ -1024,6 +1105,20 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     </div>
   </div>
 </section>
+
+</div><!-- /page:vision -->
+
+<!-- ═══ WHY CHOOSE PAGE ═══ -->
+<div class="page" data-page="why-choose">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb" onclick="navigate('who-we-are')">About Us</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Why Choose Yafast</span>
+    </div>
+  </div>
 
 <!-- WHY YAFAST -->
 <section class="section why-section reveal" id="about">
@@ -1065,6 +1160,18 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   </div>
 </section>
 
+</div><!-- /page:why-choose -->
+
+<!-- ═══ EMPLOYERS PAGE ═══ -->
+<div class="page" data-page="employers">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">For Employers</span>
+    </div>
+  </div>
+
 <!-- EMPLOYERS -->
 <section class="section reveal" id="employers" style="position:relative;background:var(--navy-deep);overflow:hidden;">
   <div style="position:absolute;inset:0;background-image:url('passports.jpg');background-size:cover;background-position:center 40%;opacity:1;z-index:0;"></div>
@@ -1095,12 +1202,24 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   </div>
 </section>
 
+</div><!-- /page:employers -->
+
+<!-- ═══ CONTACT PAGE ═══ -->
+<div class="page" data-page="contact">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Our Offices</span>
+    </div>
+  </div>
+
 <!-- CTA -->
 <section class="cta-section reveal" id="contact">
   <div class="container">
     <p class="eyebrow" style="color:rgba(255,255,255,.7);justify-content:center;display:flex;">Get Started Today</p>
     <h2 style="margin-top:12px;">Your Opportunity Is<br>One Step Away</h2>
-    <p>Visit our offices in Blantyre or Lilongwe, or reach us by phone and WhatsApp. Consultations are always free.</p>
+    <p>Visit our offices in Mzuzu or Lilongwe, or reach us by phone and WhatsApp. Consultations are always free.</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:20px;margin-bottom:8px;">
       <a href="tel:+97156634583" style="color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;text-decoration:none;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:10px 20px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.22)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">📞 UAE: +971 56 634 583</a>
       <a href="tel:+265986483410" style="color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.88rem;text-decoration:none;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:10px 20px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.22)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">📞 Malawi: +265 986 483 410</a>
@@ -1116,6 +1235,18 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     </p>
   </div>
 </section>
+
+</div><!-- /page:contact -->
+
+<!-- ═══ TEAM PAGE ═══ -->
+<div class="page" data-page="team">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Meet the Team</span>
+    </div>
+  </div>
 
 <!-- MEET THE TEAM -->
 <section class="team-section reveal" id="team">
@@ -1183,6 +1314,8 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   </div>
 </section>
 
+</div><!-- /page:team -->
+
 <!-- FOOTER -->
 <footer>
   <div class="container">
@@ -1200,36 +1333,36 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       <div class="footer-col">
         <h4>Find Jobs</h4>
         <ul class="footer-links">
-          <li><a onclick="filterJobs('uae',null);document.getElementById('jobs').scrollIntoView({behavior:'smooth'})">UAE &amp; Middle East</a></li>
-          <li><a onclick="filterJobs('southafrica',null);document.getElementById('jobs').scrollIntoView({behavior:'smooth'})">South Africa</a></li>
-          <li><a onclick="filterJobs('uae',null);document.getElementById('jobs').scrollIntoView({behavior:'smooth'})">United Kingdom</a></li>
-          <li><a onclick="filterJobs('malawi',null);document.getElementById('jobs').scrollIntoView({behavior:'smooth'})">Local — Malawi</a></li>
-          <li><a onclick="showAllJobs();document.getElementById('jobs').scrollIntoView({behavior:'smooth'})">All Vacancies</a></li>
+          <li><a onclick="navigate('jobs','uae')">UAE &amp; Middle East</a></li>
+          <li><a onclick="navigate('jobs','southafrica')">South Africa</a></li>
+          <li><a onclick="navigate('jobs','malawi')">Local — Malawi</a></li>
+          <li><a onclick="navigate('jobs','hospitality')">Hospitality Jobs</a></li>
+          <li><a onclick="navigate('jobs')">All Vacancies</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <h4>Travel Services</h4>
         <ul class="footer-links">
-          <li><a onclick="openTravelEnquiry('Flight Booking')">Flight Booking</a></li>
-          <li><a onclick="openTravelEnquiry('Visa Application')">Visa Applications</a></li>
-          <li><a onclick="openTravelEnquiry('Travel Package')">Travel Packages</a></li>
-          <li><a onclick="openTravelEnquiry('Hotel & Transfers')">Hotel &amp; Transfers</a></li>
-          <li><a onclick="openTravelEnquiry('Travel Insurance')">Travel Insurance</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Flight Booking')">Flight Booking</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Visa Application')">Visa Applications</a></li>
+          <li><a onclick="navigate('destinations')">Destinations</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Hotel & Transfers')">Hotel &amp; Transfers</a></li>
+          <li><a onclick="navigate('travel');openTravelEnquiry('Travel Insurance')">Travel Insurance</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <h4>Company</h4>
         <ul class="footer-links">
-          <li><a href="#about">About Yafast</a></li>
-          <li><a onclick="openModal('employerModal')">For Employers</a></li>
-          <li><a href="#contact">Our Offices</a></li>
+          <li><a onclick="navigate('who-we-are')">About Yafast</a></li>
+          <li><a onclick="navigate('employers')">For Employers</a></li>
+          <li><a onclick="navigate('contact')">Our Offices</a></li>
           <li><a onclick="openModal('registerModal')">Careers at Yafast</a></li>
           <li><a href="mailto:yafastservices@gmail.com">Contact Us</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 Yafast Job Links &amp; Travel Services. Blantyre, Malawi.</span>
+      <span>© 2025 Yafast Job Links &amp; Travel Services. Mzuzu &amp; Lilongwe, Malawi.</span>
       <div style="display:flex;gap:20px;">
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
@@ -1415,6 +1548,62 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 </div>
 
 <script>
+/* ── PAGE ROUTER ── */
+const PAGES = ['home','jobs','travel','destinations','who-we-are','vision','why-choose','employers','contact','team'];
+
+function navigate(pageId, filter){
+  // close dropdowns
+  document.querySelectorAll('.has-drop').forEach(d => d.classList.remove('open'));
+  // close mobile menu
+  closeMobile && closeMobile();
+  // hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // show target page
+  const target = document.querySelector('.page[data-page="'+pageId+'"]');
+  if(target){
+    target.classList.add('active');
+    // run reveal on newly visible elements
+    target.querySelectorAll('.reveal:not(.visited)').forEach(el => {
+      el.classList.add('visited');
+      observer.observe(el);
+    });
+    // re-trigger immediately visible ones
+    setTimeout(() => {
+      target.querySelectorAll('.reveal').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if(rect.top < window.innerHeight) el.classList.add('visible');
+      });
+    }, 30);
+  }
+  // update active nav
+  document.querySelectorAll('.nav-links > li').forEach(li => li.classList.remove('page-active'));
+  const navLi = document.querySelector('.nav-links > li[data-nav="'+pageId+'"]');
+  if(navLi) navLi.classList.add('page-active');
+  // update hash
+  history.pushState(null,'', pageId==='home' ? location.pathname : '#'+pageId);
+  // scroll to top
+  window.scrollTo(0,0);
+  // apply job filter if provided
+  if(filter && pageId === 'jobs'){
+    setTimeout(() => {
+      const btn = [...document.querySelectorAll('.filter-btn')].find(b => b.textContent.toLowerCase().includes(filter.toLowerCase().split('south')[0]));
+      filterJobs(filter, btn || null);
+    }, 60);
+  }
+}
+
+// init from hash on load
+(function(){
+  const hash = location.hash.replace('#','');
+  navigate(PAGES.includes(hash) ? hash : 'home');
+})();
+
+// browser back/forward
+window.addEventListener('popstate', () => {
+  const hash = location.hash.replace('#','');
+  navigate(PAGES.includes(hash) ? hash : 'home');
+});
+
 /* ── NAV DROPDOWNS ── */
 (function(){
   const drops = document.querySelectorAll('.has-drop');
@@ -1433,10 +1622,7 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   document.addEventListener('click', e => {
     if(!e.target.closest('.has-drop')) drops.forEach(d => d.classList.remove('open'));
   });
-  function scrollTo(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
-  window.scrollTo = window.scrollTo || scrollTo;
 })();
-function scrollTo(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); }
 
 /* ── WHATSAPP TOGGLE ── */
 function toggleWa(){
@@ -1551,7 +1737,7 @@ function showAllJobs(){
 
 function doHeroSearch(){
   const q=document.getElementById('heroSearch').value.toLowerCase();
-  document.getElementById('jobs').scrollIntoView({behavior:'smooth'});
+  navigate('jobs');
   setTimeout(()=>{
     filterJobs('all',document.querySelector('.filter-btn'));
     const cards=[...document.querySelectorAll('.job-card')];
@@ -1562,16 +1748,9 @@ function doHeroSearch(){
     });
     const visible=cards.filter(c=>!c.hidden).length;
     document.getElementById('noJobs').classList.toggle('show',visible===0);
-  },400);
+  },80);
 }
 document.getElementById('heroSearch').addEventListener('keydown',e=>{if(e.key==='Enter')doHeroSearch();});
-
-function setFilter(cat){
-  setTimeout(()=>{
-    const btn=[...document.querySelectorAll('.filter-btn')].find(b=>b.textContent.toLowerCase().includes(cat));
-    filterJobs(cat,btn||null);
-  },400);
-}
 
 /* ── TESTIMONIAL CAROUSEL ── */
 const testimonials=[
@@ -1604,7 +1783,7 @@ function animateCounter(el){
   },step);
 }
 
-/* ── SCROLL REVEAL + COUNTERS ── */
+/* ── SCROLL REVEAL ── */
 const observer=new IntersectionObserver((entries)=>{
   entries.forEach(e=>{
     if(e.isIntersecting){
@@ -1612,8 +1791,9 @@ const observer=new IntersectionObserver((entries)=>{
       observer.unobserve(e.target);
     }
   });
-},{threshold:.12});
-document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+},{threshold:.10});
+// only observe elements in the active page on first load
+document.querySelectorAll('.page.active .reveal').forEach(el=>observer.observe(el));
 
 const statsObserver=new IntersectionObserver((entries)=>{
   entries.forEach(e=>{
@@ -1625,8 +1805,8 @@ const statsObserver=new IntersectionObserver((entries)=>{
 },{threshold:.3});
 statsObserver.observe(document.querySelector('.stats-strip'));
 
-/* ── ACTIVE NAV ON SCROLL ── */
-const sections=['jobs','employers','travel','destinations','about','contact'];
+/* ── ACTIVE NAV ON SCROLL (disabled in page-mode) ── */
+const sections=[];
 const navLinks=[...document.querySelectorAll('.nav-links a')];
 window.addEventListener('scroll',()=>{
   let current='';
