@@ -256,7 +256,7 @@ h3{font-size:1.2rem;font-weight:700;}
 /* HOW IT WORKS */
 .how-section{position:relative;overflow:hidden;background:var(--navy-deep);}
 .how-yt-wrap{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-.how-yt-wrap iframe{position:absolute;top:50%;left:50%;width:177.78vh;min-width:100%;height:56.25vw;min-height:100%;transform:translate(-50%,-50%);border:0;}
+.how-yt-wrap video{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;width:auto;height:auto;transform:translate(-50%,-50%);object-fit:cover;}
 .how-overlay{position:absolute;inset:0;background:rgba(8,26,49,.30);z-index:1;}
 .how-section .container{position:relative;z-index:2;}
 .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:48px;}
@@ -936,9 +936,11 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 
 <!-- HOW IT WORKS -->
 <section class="section how-section reveal">
-  <!-- YouTube background video -->
+  <!-- Background video -->
   <div class="how-yt-wrap">
-    <iframe src="https://www.youtube.com/embed/mG3MDvU59DU?autoplay=1&mute=1&loop=1&playlist=mG3MDvU59DU&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" allow="autoplay; encrypted-media" allowfullscreen title="Airport background"></iframe>
+    <video autoplay muted loop playsinline preload="auto">
+      <source src="bg-airport.mp4" type="video/mp4" />
+    </video>
   </div>
   <div class="how-overlay"></div>
   <div class="container">
