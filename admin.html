@@ -398,7 +398,7 @@ tr:hover td{background:var(--ground);}
           <div class="table-wrap">
             <table>
               <thead>
-                <tr><th>Name</th><th>Job Applied For</th><th>Nationality</th><th>Phone / WhatsApp</th><th>Date</th></tr>
+                <tr><th>Name</th><th>Job Applied For</th><th>Nationality</th><th>Phone / WhatsApp</th><th>Date</th><th></th></tr>
               </thead>
               <tbody id="applications-tbody">
                 <tr><td colspan="5"><div class="empty"><div class="icon">📋</div><p>No applications received yet.</p></div></td></tr>
@@ -695,7 +695,7 @@ function renderVacancies(){
 // ── APPLICATIONS ──
 function renderApplications(){
   const tbody=document.getElementById('applications-tbody');
-  if(!_apps.length){ tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="icon">📋</div><p>No applications received yet.</p></div></td></tr>'; return; }
+  if(!_apps.length){ tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="icon">📋</div><p>No applications received yet.</p></div></td></tr>'; return; }
   tbody.innerHTML=_apps.map(a=>`
     <tr>
       <td><strong>${esc(a.name||'—')}</strong></td>
@@ -703,7 +703,16 @@ function renderApplications(){
       <td>${esc(a.nationality||'—')}</td>
       <td>${esc(a.phone||'—')}</td>
       <td>${fmt(a.created_at)}</td>
+      <td><button class="btn-danger" onclick="deleteApplication('${a.id}')">Delete</button></td>
     </tr>`).join('');
+}
+
+async function deleteApplication(id){
+  if(!confirm('Delete this application? This cannot be undone.')) return;
+  const {error}=await db.from('applications').delete().eq('id',id);
+  if(error){ alert('Error: '+error.message); return; }
+  _apps=_apps.filter(a=>a.id!==id);
+  renderApplications(); renderDashboard();
 }
 
 // ── ENQUIRIES ──
@@ -714,11 +723,22 @@ function renderEnquiries(){
     <div class="enq-card">
       <div class="enq-top">
         <span class="enq-name">${esc(e.name||'Unknown')}</span>
-        <span class="${e.read?'tag-read':'tag-new'}">${e.read?'Read':'New'}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="${e.read?'tag-read':'tag-new'}">${e.read?'Read':'New'}</span>
+          <button class="btn-danger" style="padding:4px 10px;font-size:.72rem;" onclick="deleteEnquiry('${e.id}')">Delete</button>
+        </div>
       </div>
       <div class="enq-meta">${e.company?esc(e.company)+' · ':''}${esc(e.email||'')}${e.phone?' · '+esc(e.phone):''} · ${fmt(e.created_at)}</div>
       <div class="enq-body">${esc(e.message||'No message.')}</div>
     </div>`).join('');
+}
+
+async function deleteEnquiry(id){
+  if(!confirm('Delete this enquiry? This cannot be undone.')) return;
+  const {error}=await db.from('enquiries').delete().eq('id',id);
+  if(error){ alert('Error: '+error.message); return; }
+  _enqs=_enqs.filter(e=>e.id!==id);
+  renderEnquiries(); renderDashboard();
 }
 
 // ── QUESTIONNAIRES ──
