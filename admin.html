@@ -14,6 +14,7 @@
 <title>Yafast Admin</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --navy:#0D2B4E;--navy-deep:#081A31;--sky:#1BA3E8;--sky-light:#5EC5F5;
@@ -381,26 +382,32 @@ tr:hover td{background:var(--ground);}
 </div>
 
 <script>
-// ── CREDENTIALS (stored in localStorage, changeable in Settings) ──
-const DEFAULT_USER = 'YAFAST26';
-const DEFAULT_PASS = '*Faster*';
+// ── SUPABASE ──
+const db = supabase.createClient(
+  'https://kefsvaettxwuzrusufmi.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZnN2YWV0dHh3dXpydXN1Zm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTE3MzQsImV4cCI6MjEwNTI2NzczNH0.u7yPSyKzets54SQmrJ72d7MqRK2XuZnfanp3ZIALxK8'
+);
 
-function getCreds(){
-  return {
-    user: localStorage.getItem('yf_admin_user') || DEFAULT_USER,
-    pass: localStorage.getItem('yf_admin_pass') || DEFAULT_PASS
-  };
-}
+// ── HELPERS ──
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(ts){ if(!ts) return '—'; return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+
+// ── CACHED DATA ──
+let _vacs=[], _apps=[], _enqs=[], vacMap={};
+
+// ── CREDENTIALS (localStorage) ──
+const DEFAULT_USER='YAFAST26', DEFAULT_PASS='*Faster*';
+function getCreds(){ return {user:localStorage.getItem('yf_admin_user')||DEFAULT_USER, pass:localStorage.getItem('yf_admin_pass')||DEFAULT_PASS}; }
 
 // ── LOGIN ──
-document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-document.getElementById('unInput').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('unInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 
 function doLogin(){
-  const u = document.getElementById('unInput').value.trim();
-  const p = document.getElementById('pwInput').value;
-  const creds = getCreds();
-  if(u === creds.user && p === creds.pass){
+  const u=document.getElementById('unInput').value.trim();
+  const p=document.getElementById('pwInput').value;
+  const c=getCreds();
+  if(u===c.user&&p===c.pass){
     localStorage.setItem('yf_admin_session','1');
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('app').style.display='flex';
@@ -409,13 +416,8 @@ function doLogin(){
     document.getElementById('loginErr').style.display='block';
   }
 }
+function doLogout(){ localStorage.removeItem('yf_admin_session'); location.reload(); }
 
-function doLogout(){
-  localStorage.removeItem('yf_admin_session');
-  location.reload();
-}
-
-// Auto-login if session exists
 if(localStorage.getItem('yf_admin_session')==='1'){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -432,57 +434,49 @@ function showPanel(name){
   document.getElementById('panelTitle').textContent=titles[name]||name;
 }
 
-// ── DATA HELPERS ──
-function getVacancies(){ return JSON.parse(localStorage.getItem('yf_vacancies')||'[]'); }
-function saveVacancies(arr){ localStorage.setItem('yf_vacancies',JSON.stringify(arr)); }
-function getApplications(){ return JSON.parse(localStorage.getItem('yf_applications')||'[]'); }
-function getEnquiries(){ return JSON.parse(localStorage.getItem('yf_enquiries')||'[]'); }
-
-// ── LOAD ALL ──
-function loadAll(){
-  renderVacancies();
-  renderApplications();
-  renderEnquiries();
-  renderDashboard();
+// ── LOAD ALL (single round-trip) ──
+async function loadAll(){
+  const [vR,aR,eR]=await Promise.all([
+    db.from('vacancies').select('*').order('created_at',{ascending:false}),
+    db.from('applications').select('*').order('created_at',{ascending:false}),
+    db.from('enquiries').select('*').order('created_at',{ascending:false})
+  ]);
+  _vacs=vR.data||[]; _apps=aR.data||[]; _enqs=eR.data||[];
+  _vacs.forEach(v=>{ vacMap[v.id]=v; });
+  renderDashboard(); renderVacancies(); renderApplications(); renderEnquiries();
 }
 
 // ── DASHBOARD ──
 function renderDashboard(){
-  const vacs = getVacancies();
-  const apps = getApplications();
-  const enqs = getEnquiries();
-  document.getElementById('stat-vacancies').textContent = vacs.filter(v=>v.status==='Active').length;
-  document.getElementById('stat-applications').textContent = apps.length;
-  document.getElementById('stat-enquiries').textContent = enqs.length;
-  const tbody = document.getElementById('dash-vacancies-tbody');
-  if(!vacs.length){
-    tbody.innerHTML='<tr><td colspan="4"><div class="empty"><div class="icon">💼</div><p>No vacancies posted yet.</p></div></td></tr>';
-    return;
-  }
-  tbody.innerHTML = vacs.slice(0,5).map(v=>`
+  document.getElementById('stat-vacancies').textContent=_vacs.filter(v=>v.status==='Active').length;
+  document.getElementById('stat-applications').textContent=_apps.length;
+  document.getElementById('stat-enquiries').textContent=_enqs.length;
+  const tbody=document.getElementById('dash-vacancies-tbody');
+  if(!_vacs.length){ tbody.innerHTML='<tr><td colspan="4"><div class="empty"><div class="icon">💼</div><p>No vacancies posted yet.</p></div></td></tr>'; return; }
+  tbody.innerHTML=_vacs.slice(0,5).map(v=>`
     <tr>
-      <td><strong>${v.title}</strong></td>
-      <td>${v.sector}</td>
-      <td>${v.location}</td>
-      <td><span class="tag tag-${v.status.toLowerCase()}">${v.status}</span></td>
+      <td><strong>${esc(v.title)}</strong></td>
+      <td>${esc(v.sector||'')}</td>
+      <td>${esc(v.location||'')}</td>
+      <td><span class="tag tag-${(v.status||'active').toLowerCase()}">${esc(v.status||'')}</span></td>
     </tr>`).join('');
 }
 
 // ── VACANCIES ──
-let editIndex = -1;
+let editId=null;
 
-function openVacancyModal(idx){
-  editIndex = (idx===undefined) ? -1 : idx;
-  document.getElementById('modalTitle').textContent = editIndex===-1 ? 'Post New Vacancy' : 'Edit Vacancy';
-  if(editIndex!==-1){
-    const v = getVacancies()[idx];
-    document.getElementById('v-title').value=v.title;
-    document.getElementById('v-sector').value=v.sector;
-    document.getElementById('v-location').value=v.location;
+function openVacancyModal(id){
+  editId=id||null;
+  document.getElementById('modalTitle').textContent=editId?'Edit Vacancy':'Post New Vacancy';
+  if(editId&&vacMap[editId]){
+    const v=vacMap[editId];
+    document.getElementById('v-title').value=v.title||'';
+    document.getElementById('v-sector').value=v.sector||'Domestic';
+    document.getElementById('v-location').value=v.location||'';
     document.getElementById('v-salary').value=v.salary||'';
     document.getElementById('v-slots').value=v.slots||'';
-    document.getElementById('v-status').value=v.status;
-    document.getElementById('v-desc').value=v.desc||'';
+    document.getElementById('v-status').value=v.status||'Active';
+    document.getElementById('v-desc').value=v.description||'';
   } else {
     ['v-title','v-location','v-salary','v-slots','v-desc'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('v-sector').value='Domestic';
@@ -493,99 +487,91 @@ function openVacancyModal(idx){
 
 function closeModal(){ document.getElementById('vacancyModal').classList.remove('open'); }
 
-function saveVacancy(){
-  const title = document.getElementById('v-title').value.trim();
+async function saveVacancy(){
+  const title=document.getElementById('v-title').value.trim();
   if(!title){ alert('Please enter a job title.'); return; }
-  const vac = {
-    title, sector:document.getElementById('v-sector').value,
+  const vac={
+    title,
+    sector:document.getElementById('v-sector').value,
     location:document.getElementById('v-location').value.trim(),
     salary:document.getElementById('v-salary').value.trim(),
-    slots:document.getElementById('v-slots').value,
+    slots:parseInt(document.getElementById('v-slots').value)||null,
     status:document.getElementById('v-status').value,
-    desc:document.getElementById('v-desc').value.trim(),
-    date: new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+    description:document.getElementById('v-desc').value.trim()
   };
-  const arr = getVacancies();
-  if(editIndex===-1) arr.push(vac); else arr[editIndex]=vac;
-  saveVacancies(arr);
+  const btn=document.querySelector('#vacancyModal .btn-primary');
+  btn.textContent='Saving…'; btn.disabled=true;
+  let error;
+  if(editId){ ({error}=await db.from('vacancies').update(vac).eq('id',editId)); }
+  else { ({error}=await db.from('vacancies').insert([vac])); }
+  btn.textContent='Save Vacancy'; btn.disabled=false;
+  if(error){ alert('Save failed: '+error.message); return; }
   closeModal();
-  renderVacancies();
-  renderDashboard();
+  const {data}=await db.from('vacancies').select('*').order('created_at',{ascending:false});
+  _vacs=data||[]; _vacs.forEach(v=>{vacMap[v.id]=v;});
+  renderVacancies(); renderDashboard();
 }
 
-function deleteVacancy(idx){
+async function deleteVacancy(id){
   if(!confirm('Delete this vacancy?')) return;
-  const arr = getVacancies();
-  arr.splice(idx,1);
-  saveVacancies(arr);
-  renderVacancies();
-  renderDashboard();
+  const {error}=await db.from('vacancies').delete().eq('id',id);
+  if(error){ alert('Error: '+error.message); return; }
+  delete vacMap[id]; _vacs=_vacs.filter(v=>v.id!==id);
+  renderVacancies(); renderDashboard();
 }
 
 function renderVacancies(){
-  const arr = getVacancies();
-  const tbody = document.getElementById('vacancies-tbody');
-  if(!arr.length){
-    tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="icon">💼</div><p>No vacancies yet. Click "Post Vacancy" to add one.</p></div></td></tr>';
-    return;
-  }
-  tbody.innerHTML = arr.map((v,i)=>`
+  const tbody=document.getElementById('vacancies-tbody');
+  if(!_vacs.length){ tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="icon">💼</div><p>No vacancies yet. Click "Post Vacancy" to add one.</p></div></td></tr>'; return; }
+  tbody.innerHTML=_vacs.map(v=>`
     <tr>
-      <td><strong>${v.title}</strong><br><span style="font-size:.75rem;color:var(--text-muted);">${v.date||''}</span></td>
-      <td>${v.sector}</td>
-      <td>${v.location||'—'}</td>
-      <td>${v.salary||'—'}</td>
-      <td><span class="tag tag-${v.status.toLowerCase()}">${v.status}</span></td>
+      <td><strong>${esc(v.title)}</strong><br><span style="font-size:.75rem;color:var(--text-muted);">${fmt(v.created_at)}</span></td>
+      <td>${esc(v.sector||'')}</td>
+      <td>${esc(v.location||'—')}</td>
+      <td>${esc(v.salary||'—')}</td>
+      <td><span class="tag tag-${(v.status||'active').toLowerCase()}">${esc(v.status||'')}</span></td>
       <td style="display:flex;gap:6px;">
-        <button class="btn-edit" onclick="openVacancyModal(${i})">Edit</button>
-        <button class="btn-danger" onclick="deleteVacancy(${i})">Delete</button>
+        <button class="btn-edit" onclick="openVacancyModal('${v.id}')">Edit</button>
+        <button class="btn-danger" onclick="deleteVacancy('${v.id}')">Delete</button>
       </td>
     </tr>`).join('');
 }
 
 // ── APPLICATIONS ──
 function renderApplications(){
-  const arr = getApplications();
-  const tbody = document.getElementById('applications-tbody');
-  if(!arr.length){
-    tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="icon">📋</div><p>No applications received yet.</p></div></td></tr>';
-    return;
-  }
-  tbody.innerHTML = arr.map(a=>`
+  const tbody=document.getElementById('applications-tbody');
+  if(!_apps.length){ tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="icon">📋</div><p>No applications received yet.</p></div></td></tr>'; return; }
+  tbody.innerHTML=_apps.map(a=>`
     <tr>
-      <td><strong>${a.name||'—'}</strong></td>
-      <td>${a.job||'—'}</td>
-      <td>${a.nationality||'—'}</td>
-      <td>${a.phone||'—'}</td>
-      <td>${a.date||'—'}</td>
+      <td><strong>${esc(a.name||'—')}</strong></td>
+      <td>${esc(a.job||'—')}</td>
+      <td>${esc(a.nationality||'—')}</td>
+      <td>${esc(a.phone||'—')}</td>
+      <td>${fmt(a.created_at)}</td>
     </tr>`).join('');
 }
 
 // ── ENQUIRIES ──
 function renderEnquiries(){
-  const arr = getEnquiries();
-  const list = document.getElementById('enquiries-list');
-  if(!arr.length){
-    list.innerHTML='<div class="empty"><div class="icon">📩</div><p>No enquiries received yet.</p></div>';
-    return;
-  }
-  list.innerHTML = arr.map((e,i)=>`
+  const list=document.getElementById('enquiries-list');
+  if(!_enqs.length){ list.innerHTML='<div class="empty"><div class="icon">📩</div><p>No enquiries received yet.</p></div>'; return; }
+  list.innerHTML=_enqs.map(e=>`
     <div class="enq-card">
       <div class="enq-top">
-        <span class="enq-name">${e.name||'Unknown'}</span>
+        <span class="enq-name">${esc(e.name||'Unknown')}</span>
         <span class="${e.read?'tag-read':'tag-new'}">${e.read?'Read':'New'}</span>
       </div>
-      <div class="enq-meta">${e.company?e.company+' · ':''} ${e.email||''} ${e.phone?' · '+e.phone:''} · ${e.date||''}</div>
-      <div class="enq-body">${e.message||'No message.'}</div>
+      <div class="enq-meta">${e.company?esc(e.company)+' · ':''}${esc(e.email||'')}${e.phone?' · '+esc(e.phone):''} · ${fmt(e.created_at)}</div>
+      <div class="enq-body">${esc(e.message||'No message.')}</div>
     </div>`).join('');
 }
 
 // ── SETTINGS ──
 function saveCredentials(){
-  const u = document.getElementById('newUser').value.trim();
-  const p = document.getElementById('newPass').value;
-  const c = document.getElementById('confirmPass').value;
-  const msg = document.getElementById('settings-msg');
+  const u=document.getElementById('newUser').value.trim();
+  const p=document.getElementById('newPass').value;
+  const c=document.getElementById('confirmPass').value;
+  const msg=document.getElementById('settings-msg');
   if(!u||!p){ msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Please fill in all fields.'; return; }
   if(p!==c){ msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Passwords do not match.'; return; }
   localStorage.setItem('yf_admin_user',u);
@@ -596,10 +582,7 @@ function saveCredentials(){
   document.getElementById('confirmPass').value='';
 }
 
-// Close modal on bg click
-document.getElementById('vacancyModal').addEventListener('click',function(e){
-  if(e.target===this) closeModal();
-});
+document.getElementById('vacancyModal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
 </script>
 </body>
 </html>

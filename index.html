@@ -117,6 +117,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,400&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --navy:#0D2B4E; --navy-deep:#081A31; --sky:#1BA3E8; --sky-light:#5EC5F5;
@@ -1099,53 +1100,6 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       <button class="filter-btn" onclick="filterJobs('security',this)">Security</button>
     </div>
     <div class="jobs-grid" id="jobsGrid">
-
-      <!-- ★ ACTIVE VACANCY 1 -->
-      <div class="job-card" data-cat="uae domestic" data-title="Housemaid IMDAD Center" style="border-color:var(--sky);border-width:2px;">
-        <div class="job-card-top">
-          <div class="job-logo">🏠</div>
-          <div class="job-meta">
-            <div class="job-title">Housemaid</div>
-            <div class="job-company">IMDAD Center for Domestic Workers — UAE</div>
-          </div>
-          <span class="job-badge badge-hiring">HIRING NOW</span>
-        </div>
-        <div class="job-tags">
-          <span class="job-tag">🇦🇪 UAE</span>
-          <span class="job-tag">Full-time</span>
-          <span class="job-tag">Live-in</span>
-          <span class="job-tag">Domestic</span>
-          <span class="job-tag">Accommodation Incl.</span>
-        </div>
-        <div class="job-footer">
-          <div class="job-salary">AED 1,000 – 1,200 / mo</div>
-          <button class="apply-btn" onclick="openApply('Housemaid','IMDAD Center for Domestic Workers, UAE')">Apply Now</button>
-        </div>
-      </div>
-
-      <!-- ★ ACTIVE VACANCY 2 -->
-      <div class="job-card" data-cat="uae domestic" data-title="Cleaner SERVEU Union Properties" style="border-color:var(--sky);border-width:2px;">
-        <div class="job-card-top">
-          <div class="job-logo">🧹</div>
-          <div class="job-meta">
-            <div class="job-title">Cleaner</div>
-            <div class="job-company">SERVEU Union Properties PJSC — UAE</div>
-          </div>
-          <span class="job-badge badge-hiring">HIRING NOW</span>
-        </div>
-        <div class="job-tags">
-          <span class="job-tag">🇦🇪 UAE</span>
-          <span class="job-tag">Full-time</span>
-          <span class="job-tag">Shift Work</span>
-          <span class="job-tag">Cleaning Services</span>
-          <span class="job-tag">Transport Incl.</span>
-        </div>
-        <div class="job-footer">
-          <div class="job-salary">AED 1,100 – 1,400 / mo</div>
-          <button class="apply-btn" onclick="openApply('Cleaner','SERVEU Union Properties PJSC, UAE')">Apply Now</button>
-        </div>
-      </div>
-
       </div>
       <div class="no-jobs" id="noJobs">No jobs match your search. <a href="#" onclick="filterJobs('all',null);return false;" style="color:var(--sky);">Clear filter</a></div>
     </div>
@@ -1927,6 +1881,7 @@ function navigate(pageId, filter){
   const target = document.querySelector('.page[data-page="'+pageId+'"]');
   if(target){
     target.classList.add('active');
+    if(pageId==='jobs') loadVacancies();
     // animate reveals: stagger them in so the page feels alive
     setTimeout(() => {
       target.querySelectorAll('.reveal').forEach((el, i) => {
@@ -2060,14 +2015,36 @@ function openEmployerFor(sector){
   openModal('employerModal');
 }
 
-function submitForm(modalId){
+async function submitForm(modalId){
   const suffix=modalId.replace('Modal','');
-  const formId=suffix+'Form'+(modalId==='applyModal'?'':'');
-  const successId=suffix+'Success'+(modalId==='applyModal'?'':'');
-  // map modal ids correctly
   const formEl=document.getElementById(modalId==='applyModal'?'applyForm':suffix+'Form');
   const successEl=document.getElementById(modalId==='applyModal'?'applySuccess':suffix+'Success');
   if(!formEl||!successEl)return;
+  // Read n-th form field (0-indexed) by order inside the form
+  const val=(n)=>{
+    const els=formEl.querySelectorAll('input:not([type=button]):not([type=submit]),select,textarea');
+    return(els[n]?.value||'').trim();
+  };
+  try{
+    if(modalId==='applyModal'){
+      const name=(val(0)+' '+val(1)).trim(),phone=val(2),email=val(3),nationality=val(4),experience=val(5),message=val(6);
+      const lbl=document.getElementById('applyJobLabel')?.textContent||'';
+      const m=lbl.match(/^Position:\s*(.+?)\s+at\s+(.+)$/);
+      await _sb.from('applications').insert([{name,job:m?.[1]||'',company:m?.[2]||'',phone,email,nationality,experience,message,type:'apply'}]);
+    } else if(modalId==='registerModal'){
+      const name=(val(0)+' '+val(1)).trim(),phone=val(2),email=val(3),job=val(4);
+      const message='Destination: '+val(5)+' | Passport: '+val(6);
+      await _sb.from('applications').insert([{name,job,phone,email,message,type:'register'}]);
+    } else if(modalId==='employerModal'){
+      const name=val(0),company=val(1),phone=val(2),email=val(3),sector=val(5);
+      const workers_needed=parseInt(val(6))||null,message=val(7);
+      await _sb.from('enquiries').insert([{name,company,phone,email,sector,workers_needed,message,type:'employer',read:false}]);
+    } else if(modalId==='travelModal'){
+      const name=val(0),phone=val(1),service=val(2),destination=val(3),travel_date=val(4);
+      const travellers=val(5),message=val(6)+(travellers?' | Travellers: '+travellers:'');
+      await _sb.from('enquiries').insert([{name,phone,sector:service,destination,travel_date,message,type:'travel',read:false}]);
+    }
+  } catch(e){ console.error('Form save error:',e); }
   formEl.style.display='none';
   successEl.classList.add('show');
   showToast('Submitted! We\'ll be in touch shortly. 🎉','sky');
@@ -2200,6 +2177,49 @@ window.addEventListener('scroll',()=>{
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){document.querySelectorAll('.modal-backdrop.open').forEach(m=>closeModal(m.id));}
 });
+
+/* ── SUPABASE — live vacancies & form submissions ── */
+const _sb = supabase.createClient(
+  'https://kefsvaettxwuzrusufmi.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZnN2YWV0dHh3dXpydXN1Zm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTE3MzQsImV4cCI6MjEwNTI2NzczNH0.u7yPSyKzets54SQmrJ72d7MqRK2XuZnfanp3ZIALxK8'
+);
+const _ICONS={Domestic:'🏠',Construction:'🏗️',Hospitality:'🏨',Healthcare:'⚕️',Cleaning:'🧹',Sales:'🎫',Driving:'🚗',Security:'🛡️'};
+function _esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+async function loadVacancies(){
+  const grid=document.getElementById('jobsGrid');
+  if(!grid) return;
+  grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Loading vacancies…</div>';
+  const {data,error}=await _sb.from('vacancies').select('*').eq('status','Active').order('created_at',{ascending:false});
+  if(error||!data?.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No active vacancies at the moment — check back soon!</div>';
+    return;
+  }
+  grid.innerHTML=data.map(v=>{
+    const icon=_ICONS[v.sector]||'💼';
+    const loc=_esc(v.location||'UAE');
+    const tags=[
+      '<span class="job-tag">🇦🇪 '+loc+'</span>',
+      '<span class="job-tag">Full-time</span>',
+      v.sector?'<span class="job-tag">'+_esc(v.sector)+'</span>':'',
+      v.slots?'<span class="job-tag">'+v.slots+' slots</span>':''
+    ].filter(Boolean).join('');
+    return '<div class="job-card" data-cat="'+_esc((v.sector||'').toLowerCase())+' '+_esc((v.location||'').toLowerCase())+'" data-title="'+_esc(v.title)+' '+_esc(v.location||'')+'" style="border-color:var(--sky);border-width:2px;">'
+      +'<div class="job-card-top">'
+      +'<div class="job-logo">'+icon+'</div>'
+      +'<div class="job-meta"><div class="job-title">'+_esc(v.title)+'</div><div class="job-company">'+loc+'</div></div>'
+      +'<span class="job-badge badge-hiring">HIRING NOW</span>'
+      +'</div>'
+      +'<div class="job-tags">'+tags+'</div>'
+      +(v.description?'<div style="font-size:.82rem;color:var(--text-muted);line-height:1.5;margin:0 0 4px;">'+_esc(v.description)+'</div>':'')
+      +'<div class="job-footer">'
+      +'<div class="job-salary">'+_esc(v.salary||'Competitive')+'</div>'
+      +'<button class="apply-btn" onclick="openApply(\''+_esc(v.title)+'\',\''+_esc(v.location||'UAE')+'\')">Apply Now</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  filterJobs('all',null);
+}
 </script>
 </body>
 </html>
