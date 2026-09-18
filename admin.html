@@ -136,12 +136,82 @@ tr:hover td{background:var(--ground);}
 .tag-new{background:var(--sky-pale);color:var(--sky);font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:99px;}
 .tag-read{background:var(--ground);color:var(--text-muted);font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:99px;}
 
+/* ── TABLE SCROLL ── */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+
+/* ── MOBILE ── */
 @media(max-width:768px){
-  .sidebar{width:60px;}
-  .sidebar-brand span,.sidebar-brand small,.nav-label,.nav-item span{display:none;}
-  .nav-item{justify-content:center;padding:12px;}
-  .stats-row{grid-template-columns:1fr 1fr;}
+  /* Hide desktop sidebar */
+  .sidebar{display:none;}
+
+  /* App takes full height */
+  #app{height:100%;min-height:100vh;height:100dvh;}
+  .shell{flex-direction:column;height:100%;}
+
+  /* Main fills width, leaves room for bottom nav */
+  .main{width:100%;padding-bottom:64px;}
+
+  /* Topbar */
+  .topbar{padding:0 16px;height:52px;}
+  .topbar h1{font-size:.92rem;}
+  .topbar-right .badge-live{display:none;}
+  .topbar-right span:last-child{font-size:.75rem;}
+
+  /* Content */
+  .content{padding:16px;}
+
+  /* Stats — 2 cols */
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .stat-tile{padding:14px 12px;}
+  .stat-tile .value{font-size:1.5rem;}
+  .stat-tile .label{font-size:.65rem;}
+  .stat-tile .sub{font-size:.68rem;}
+
+  /* Sec head */
+  .sec-head{flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .sec-head h2{font-size:.92rem;}
+
+  /* Tables */
+  table{min-width:480px;}
+  th,td{padding:9px 12px;font-size:.82rem;}
+
+  /* Cards */
+  .enq-card{padding:14px 14px;}
+  .enq-card .enq-name{font-size:.85rem;}
+  .enq-card .enq-meta{font-size:.73rem;}
+
+  /* Modal */
+  .modal-bg{align-items:flex-end;}
+  .modal{border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-width:100%;max-height:92vh;padding:24px 18px;}
   .form-grid{grid-template-columns:1fr;}
+
+  /* Login box */
+  .login-box{padding:32px 22px;margin:16px;}
+
+  /* Bottom nav bar */
+  .bottom-nav{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--navy-deep);
+    border-top:1px solid rgba(255,255,255,.1);
+    height:60px;z-index:200;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .bottom-nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;color:rgba(255,255,255,.5);font-size:.6rem;font-weight:700;letter-spacing:.03em;
+    cursor:pointer;transition:color .15s;padding:4px 2px;
+    text-transform:uppercase;
+  }
+  .bottom-nav-item .bn-icon{font-size:1.2rem;line-height:1;}
+  .bottom-nav-item.active{color:var(--sky-light);}
+  .bottom-nav-item:active{background:rgba(255,255,255,.06);}
+}
+
+/* Show bottom nav only on mobile */
+.bottom-nav{display:none;}
+@media(max-width:768px){
+  .bottom-nav{display:flex;}
 }
 </style>
 </head>
@@ -187,25 +257,25 @@ tr:hover td{background:var(--ground);}
       <nav>
         <div class="nav-group">
           <div class="nav-label">Main</div>
-          <div class="nav-item active" onclick="showPanel('dashboard')">
+          <div class="nav-item active" onclick="showPanel('dashboard',this)">
             <span class="icon">📊</span><span>Dashboard</span>
           </div>
-          <div class="nav-item" onclick="showPanel('vacancies')">
+          <div class="nav-item" onclick="showPanel('vacancies',this)">
             <span class="icon">💼</span><span>Vacancies</span>
           </div>
-          <div class="nav-item" onclick="showPanel('applications')">
+          <div class="nav-item" onclick="showPanel('applications',this)">
             <span class="icon">📋</span><span>Applications</span>
           </div>
-          <div class="nav-item" onclick="showPanel('enquiries')">
+          <div class="nav-item" onclick="showPanel('enquiries',this)">
             <span class="icon">📩</span><span>Enquiries</span>
           </div>
-          <div class="nav-item" onclick="showPanel('questionnaires')">
+          <div class="nav-item" onclick="showPanel('questionnaires',this)">
             <span class="icon">📝</span><span>Questionnaires</span>
           </div>
         </div>
         <div class="nav-group">
           <div class="nav-label">Settings</div>
-          <div class="nav-item" onclick="showPanel('settings')">
+          <div class="nav-item" onclick="showPanel('settings',this)">
             <span class="icon">⚙️</span><span>Settings</span>
           </div>
         </div>
@@ -336,6 +406,29 @@ tr:hover td{background:var(--ground);}
       </div><!-- /content -->
     </div><!-- /main -->
   </div><!-- /shell -->
+
+  <!-- BOTTOM NAV (mobile only) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="bottom-nav-item active" id="bn-dashboard" onclick="showPanel('dashboard',this,'bn-dashboard')">
+      <span class="bn-icon">📊</span><span>Dashboard</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-vacancies" onclick="showPanel('vacancies',this,'bn-vacancies')">
+      <span class="bn-icon">💼</span><span>Jobs</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-applications" onclick="showPanel('applications',this,'bn-applications')">
+      <span class="bn-icon">📋</span><span>Apply</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-enquiries" onclick="showPanel('enquiries',this,'bn-enquiries')">
+      <span class="bn-icon">📩</span><span>Enquiries</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-questionnaires" onclick="showPanel('questionnaires',this,'bn-questionnaires')">
+      <span class="bn-icon">📝</span><span>HR Forms</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-settings" onclick="showPanel('settings',this,'bn-settings')">
+      <span class="bn-icon">⚙️</span><span>Settings</span>
+    </div>
+  </nav>
+
 </div><!-- /app -->
 
 <!-- VACANCY MODAL -->
@@ -436,13 +529,20 @@ if(localStorage.getItem('yf_admin_session')==='1'){
 }
 
 // ── NAVIGATION ──
-function showPanel(name){
+function showPanel(name, el, bnId){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
-  event.currentTarget.classList.add('active');
+  // Highlight sidebar item (desktop)
+  if(el) el.classList.add('active');
+  else if(event?.currentTarget) event.currentTarget.classList.add('active');
+  // Highlight bottom nav item (mobile)
+  const bnEl=document.getElementById(bnId||'bn-'+name);
+  if(bnEl) bnEl.classList.add('active');
   const titles={dashboard:'Dashboard',vacancies:'Job Vacancies',applications:'Applications',enquiries:'Enquiries',questionnaires:'HR Questionnaires',settings:'Settings'};
   document.getElementById('panelTitle').textContent=titles[name]||name;
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 // ── LOAD ALL (single round-trip) ──
