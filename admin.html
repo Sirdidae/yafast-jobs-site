@@ -136,82 +136,124 @@ tr:hover td{background:var(--ground);}
 .tag-new{background:var(--sky-pale);color:var(--sky);font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:99px;}
 .tag-read{background:var(--ground);color:var(--text-muted);font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:99px;}
 
-/* ── TABLE SCROLL ── */
+/* ── TABLE SCROLL (all sizes) ── */
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+
+/* ── BOTTOM NAV — hidden by default, shown on mobile ── */
+.bottom-nav{display:none;}
 
 /* ── MOBILE ── */
 @media(max-width:768px){
-  /* Hide desktop sidebar */
-  .sidebar{display:none;}
 
-  /* App takes full height */
-  #app{height:100%;min-height:100vh;height:100dvh;}
-  .shell{flex-direction:column;height:100%;}
+  /* Prevent horizontal overflow */
+  html,body{overflow-x:hidden;width:100%;}
 
-  /* Main fills width, leaves room for bottom nav */
-  .main{width:100%;padding-bottom:64px;}
+  /* Kill fixed-height layout — let page scroll naturally */
+  #app{
+    height:auto !important;
+    min-height:100vh;
+    overflow:visible !important;
+    display:block !important;
+  }
+  .shell{
+    display:flex;
+    flex-direction:row; /* keep row so sidebar + main sit beside each other */
+    height:auto;
+    min-height:100vh;
+  }
 
-  /* Topbar */
-  .topbar{padding:0 16px;height:52px;}
-  .topbar h1{font-size:.92rem;}
+  /* Sidebar: completely hidden on mobile */
+  .sidebar{display:none !important;}
+
+  /* Main: full width, natural scroll, room for bottom nav */
+  .main{
+    flex:1;
+    width:100%;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    overflow:visible;
+    height:auto;
+    padding-bottom:68px;
+  }
+
+  /* Topbar: sticky at top */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    padding:0 14px;height:50px;
+  }
+  .topbar h1{font-size:.9rem;}
   .topbar-right .badge-live{display:none;}
-  .topbar-right span:last-child{font-size:.75rem;}
+  .topbar-right span:last-child{font-size:.72rem;}
 
-  /* Content */
-  .content{padding:16px;}
+  /* Content area: natural height */
+  .content{
+    flex:1;
+    overflow:visible;
+    padding:14px;
+  }
 
-  /* Stats — 2 cols */
+  /* Stats: 2 cols */
   .stats-row{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-  .stat-tile{padding:14px 12px;}
-  .stat-tile .value{font-size:1.5rem;}
-  .stat-tile .label{font-size:.65rem;}
-  .stat-tile .sub{font-size:.68rem;}
+  .stat-tile{padding:12px 10px;}
+  .stat-tile .value{font-size:1.4rem;}
+  .stat-tile .label{font-size:.62rem;}
+  .stat-tile .sub{font-size:.65rem;}
 
-  /* Sec head */
+  /* Section header */
   .sec-head{flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-  .sec-head h2{font-size:.92rem;}
+  .sec-head h2{font-size:.9rem;}
+  .btn-primary{padding:8px 14px;font-size:.75rem;}
 
-  /* Tables */
-  table{min-width:480px;}
-  th,td{padding:9px 12px;font-size:.82rem;}
+  /* Tables — horizontal scroll container */
+  .table-wrap{border-radius:var(--radius-md);}
+  table{min-width:500px;}
+  th,td{padding:9px 12px;font-size:.8rem;white-space:nowrap;}
 
-  /* Cards */
-  .enq-card{padding:14px 14px;}
-  .enq-card .enq-name{font-size:.85rem;}
-  .enq-card .enq-meta{font-size:.73rem;}
+  /* Enquiry cards */
+  .enq-card{padding:14px;}
+  .enq-card .enq-name{font-size:.84rem;}
+  .enq-card .enq-meta{font-size:.72rem;}
 
-  /* Modal */
+  /* Modal: slides up from bottom */
   .modal-bg{align-items:flex-end;}
-  .modal{border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-width:100%;max-height:92vh;padding:24px 18px;}
+  .modal{
+    border-radius:16px 16px 0 0;
+    max-width:100%;
+    width:100%;
+    max-height:90vh;
+    padding:22px 16px 28px;
+  }
   .form-grid{grid-template-columns:1fr;}
+  .modal-btns{flex-direction:column-reverse;}
+  .modal-btns button{width:100%;}
 
-  /* Login box */
-  .login-box{padding:32px 22px;margin:16px;}
+  /* Login */
+  .login-box{padding:28px 20px;margin:16px;max-width:100%;}
+  #loginScreen{padding:16px;align-items:center;}
 
-  /* Bottom nav bar */
+  /* Bottom nav */
   .bottom-nav{
     display:flex;
     position:fixed;bottom:0;left:0;right:0;
     background:var(--navy-deep);
-    border-top:1px solid rgba(255,255,255,.1);
-    height:60px;z-index:200;
-    padding-bottom:env(safe-area-inset-bottom);
+    border-top:1px solid rgba(255,255,255,.12);
+    height:58px;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    z-index:200;
   }
   .bottom-nav-item{
     flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:3px;color:rgba(255,255,255,.5);font-size:.6rem;font-weight:700;letter-spacing:.03em;
-    cursor:pointer;transition:color .15s;padding:4px 2px;
-    text-transform:uppercase;
+    gap:2px;color:rgba(255,255,255,.45);font-size:.55rem;font-weight:700;
+    letter-spacing:.02em;text-transform:uppercase;cursor:pointer;
+    transition:color .15s,background .15s;
+    padding:6px 2px;
+    -webkit-tap-highlight-color:transparent;
   }
-  .bottom-nav-item .bn-icon{font-size:1.2rem;line-height:1;}
+  .bottom-nav-item .bn-icon{font-size:1.15rem;line-height:1.1;}
   .bottom-nav-item.active{color:var(--sky-light);}
-  .bottom-nav-item:active{background:rgba(255,255,255,.06);}
-}
+  .bottom-nav-item:active{background:rgba(255,255,255,.07);}
 
-/* Show bottom nav only on mobile */
-.bottom-nav{display:none;}
-@media(max-width:768px){
-  .bottom-nav{display:flex;}
 }
 </style>
 </head>
