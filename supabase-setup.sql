@@ -79,5 +79,5 @@ values
     'AED 1,100 – 1,400 / mo',
     10,
     'Active',
-    'Professional cleaning role at SERVEU Union Properties PJSC. Transport and uniform included.'
+    'Professional cleaning role in Dubai, UAE. Accommodation, transport and work uniform provided.'
   );
