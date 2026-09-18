@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nanny / Housemaid Application — Yafast</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0F3568; --blue: #1565A0; --sky: #2196F3;
+      --bg: #f4f6f9; --white: #fff; --text: #1a1a2e;
+      --muted: #64748b; --border: #dde1e7; --green: #16a34a;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    .page-header { background: linear-gradient(135deg, var(--navy), var(--blue)); color: white; padding: 24px 20px 28px; text-align: center; }
+    .brand { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: .75; margin-bottom: 8px; }
+    .page-header h1 { font-size: clamp(18px, 5vw, 24px); font-weight: 800; line-height: 1.25; }
+    .page-header p { font-size: 13px; opacity: .8; margin-top: 6px; }
+
+    .progress-wrap { background: #c8d8f0; height: 5px; }
+    .progress-bar { background: var(--sky); height: 5px; transition: width .4s ease; }
+    .step-label { text-align: center; font-size: 12px; color: var(--muted); padding: 7px; background: #e8f0fe; font-weight: 500; }
+
+    .container { max-width: 700px; margin: 0 auto; padding: 0 16px 110px; }
+
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+
+    .section-head { background: var(--white); border-left: 4px solid var(--sky); padding: 14px 18px; margin: 22px 0 14px; border-radius: 0 8px 8px 0; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .section-head h2 { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .section-head p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .card { background: white; border-radius: 10px; padding: 18px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+
+    .form-group { margin-bottom: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    label.lbl { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
+    label.lbl.req::after { content: ' *'; color: #e53e3e; }
+
+    input[type=text], input[type=tel], input[type=email], input[type=date],
+    input[type=number], select, textarea {
+      width: 100%; padding: 9px 11px; border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: 14px; font-family: inherit; color: var(--text);
+      background: white; transition: border-color .2s;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--sky); box-shadow: 0 0 0 3px rgba(33,150,243,.1); }
+    textarea { min-height: 75px; resize: vertical; }
+
+    /* Yes / No pills */
+    .yn { display: flex; gap: 8px; }
+    .yn input[type=radio] { display: none; }
+    .yn label { flex: 1; display: block; text-align: center; padding: 8px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .2s; }
+    .yn input:checked + label { border-color: var(--sky); background: #e8f4ff; color: var(--sky); }
+
+    /* Multi-option radio pills */
+    .pills { display: flex; flex-wrap: wrap; gap: 7px; }
+    .pill input[type=radio] { display: none; }
+    .pill label { display: block; padding: 6px 13px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); transition: all .2s; }
+    .pill input:checked + label { border-color: var(--sky); background: var(--sky); color: white; }
+
+    /* Checkbox grid */
+    .cb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    @media (max-width: 380px) { .cb-grid { grid-template-columns: 1fr; } }
+    .cb-item { display: flex; align-items: center; gap: 8px; padding: 8px 11px; border: 1.5px solid var(--border); border-radius: 7px; cursor: pointer; transition: border-color .2s; }
+    .cb-item:hover { border-color: var(--sky); }
+    .cb-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--sky); cursor: pointer; flex-shrink: 0; }
+    .cb-item span { font-size: 13px; font-weight: 500; }
+
+    /* Housekeeping table */
+    .hk-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 9px 13px; background: #f8fafc; border-radius: 7px; border: 1.5px solid var(--border); margin-bottom: 6px; }
+    .hk-label { font-size: 13px; font-weight: 500; }
+    .hk-yn { display: flex; gap: 6px; }
+    .hk-yn input[type=radio] { display: none; }
+    .hk-yn label { padding: 3px 12px; border: 1.5px solid var(--border); border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .2s; }
+    .hk-yn input:checked + label { border-color: var(--sky); background: var(--sky); color: white; }
+
+    /* Meals */
+    .meals { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    @media (max-width: 380px) { .meals { grid-template-columns: 1fr; } }
+
+    /* Fixed nav */
+    .form-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; z-index: 100; }
+    .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .btn-back { background: #f1f5f9; color: var(--navy); }
+    .btn-next { background: var(--navy); color: white; }
+    .btn-submit { background: var(--green); color: white; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* Success */
+    #successScreen { display: none; text-align: center; padding: 60px 20px; max-width: 480px; margin: 0 auto; }
+    .success-icon { font-size: 56px; margin-bottom: 16px; }
+    #successScreen h2 { color: var(--navy); font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    #successScreen p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    .divider { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .sub-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="brand">Ya Fast Job Links &amp; Travel Services — Malawi</div>
+  <h1>UAE Domestic Worker / Nanny<br>HR Interview Questionnaire</h1>
+  <p>Complete all sections honestly. This form is confidential.</p>
+</div>
+
+<div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:16.67%"></div></div>
+<div class="step-label" id="stepLabel">Step 1 of 6 — Personal Information</div>
+
+<div class="container">
+  <form id="qForm">
+
+    <!-- ══ STEP 1: PERSONAL INFO ══ -->
+    <div class="form-step active" id="step1">
+      <div class="section-head"><h2>1. Personal Information</h2><p>Your basic details</p></div>
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group"><label class="lbl req">Full Name</label><input type="text" name="full_name" placeholder="e.g. Tamanda Mwale" /></div>
+          <div class="form-group"><label class="lbl">Date of Birth</label><input type="date" name="dob" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Age</label><input type="number" name="age" placeholder="e.g. 27" min="18" max="65" /></div>
+          <div class="form-group"><label class="lbl">Nationality</label><input type="text" name="nationality" placeholder="e.g. Malawian" /></div>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Marital Status</label>
+          <div class="pills">
+            <div class="pill"><input type="radio" name="marital_status" id="ms_s" value="Single"><label for="ms_s">Single</label></div>
+            <div class="pill"><input type="radio" name="marital_status" id="ms_m" value="Married"><label for="ms_m">Married</label></div>
+            <div class="pill"><input type="radio" name="marital_status" id="ms_o" value="Other"><label for="ms_o">Other</label></div>
+          </div>
+        </div>
+        <div class="form-group"><label class="lbl">Number of Children</label><input type="number" name="num_children" placeholder="0" min="0" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl req">Phone / WhatsApp</label><input type="tel" name="phone" placeholder="+265 9XX XXX XXX" /></div>
+          <div class="form-group"><label class="lbl">Current Location</label><input type="text" name="location" placeholder="e.g. Blantyre, Malawi" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Passport Number</label><input type="text" name="passport_no" placeholder="e.g. MWP1234567" /></div>
+          <div class="form-group"><label class="lbl">Passport Expiry Date</label><input type="date" name="passport_expiry" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Emergency Contact Name</label><input type="text" name="emergency_name" placeholder="Full name" /></div>
+          <div class="form-group"><label class="lbl">Emergency Contact Phone</label><input type="tel" name="emergency_phone" placeholder="+265 9XX XXX XXX" /></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2: POSITION & EXPERIENCE ══ -->
+    <div class="form-step" id="step2">
+      <div class="section-head"><h2>2. Position &amp; Experience</h2><p>The role you want and your work history</p></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl req">Position Applied For</label>
+          <div class="pills">
+            <div class="pill"><input type="radio" name="position" id="pos_nn" value="Newborn Nanny"><label for="pos_nn">Newborn Nanny</label></div>
+            <div class="pill"><input type="radio" name="position" id="pos_nh" value="Nanny + Housemaid"><label for="pos_nh">Nanny + Housemaid</label></div>
+            <div class="pill"><input type="radio" name="position" id="pos_nc" value="Nanny + Cook"><label for="pos_nc">Nanny + Cook</label></div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="form-group">
+          <label class="lbl">Have you worked as a domestic worker before?</label>
+          <div class="yn">
+            <input type="radio" name="prev_work" id="pw_y" value="Yes"><label for="pw_y">Yes</label>
+            <input type="radio" name="prev_work" id="pw_n" value="No"><label for="pw_n">No</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Country / Countries Worked In</label><input type="text" name="countries_worked" placeholder="e.g. UAE, South Africa" /></div>
+          <div class="form-group">
+            <label class="lbl">Years of Experience</label>
+            <select name="years_experience">
+              <option value="">Select…</option>
+              <option>No experience</option><option>Less than 1 year</option>
+              <option>1–2 years</option><option>3–5 years</option><option>5+ years</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Previous Employer's Nationality</label><input type="text" name="prev_employer_nat" placeholder="e.g. Emirati" /></div>
+          <div class="form-group"><label class="lbl">Number of Children Cared For</label><input type="number" name="num_children_cared" placeholder="e.g. 2" min="0" /></div>
+        </div>
+        <div class="form-group"><label class="lbl">Age(s) of Youngest Child You Cared For</label><input type="text" name="youngest_child_age" placeholder="e.g. 3 months, 2 years" /></div>
+        <div class="form-group">
+          <label class="lbl">Have you cared for a newborn baby (0–3 months)?</label>
+          <div class="yn">
+            <input type="radio" name="cared_newborn" id="cn_y" value="Yes"><label for="cn_y">Yes</label>
+            <input type="radio" name="cared_newborn" id="cn_n" value="No"><label for="cn_n">No</label>
+          </div>
+        </div>
+        <div class="form-group"><label class="lbl">If yes, how many newborns have you cared for?</label><input type="number" name="num_newborns" placeholder="e.g. 1" min="0" /></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3: BABY & CHILDCARE ══ -->
+    <div class="form-step" id="step3">
+      <div class="section-head"><h2>3. Newborn &amp; Baby Care</h2><p>Answer honestly based on your actual experience</p></div>
+      <div class="card">
+        <div class="form-group"><label class="lbl">Do you have practical experience caring for newborn babies?</label><div class="yn"><input type="radio" name="newborn_exp" id="ne_y" value="Yes"><label for="ne_y">Yes</label><input type="radio" name="newborn_exp" id="ne_n" value="No"><label for="ne_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Can you prepare a baby's bottle safely?</label><div class="yn"><input type="radio" name="prepare_bottle" id="pb_y" value="Yes"><label for="pb_y">Yes</label><input type="radio" name="prepare_bottle" id="pb_n" value="No"><label for="pb_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Do you know how to sterilize baby bottles and feeding equipment?</label><div class="yn"><input type="radio" name="sterilize_bottles" id="sb_y" value="Yes"><label for="sb_y">Yes</label><input type="radio" name="sterilize_bottles" id="sb_n" value="No"><label for="sb_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">If yes, explain how you sterilize bottles:</label><textarea name="sterilize_explain" placeholder="Describe the steps you follow…"></textarea></div>
+        <div class="form-group"><label class="lbl">Can you change a baby's diaper correctly?</label><div class="yn"><input type="radio" name="change_diaper" id="cd_y" value="Yes"><label for="cd_y">Yes</label><input type="radio" name="change_diaper" id="cd_n" value="No"><label for="cd_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Can you bathe a newborn safely?</label><div class="yn"><input type="radio" name="bathe_newborn" id="bn_y" value="Yes"><label for="bn_y">Yes</label><input type="radio" name="bathe_newborn" id="bn_n" value="No"><label for="bn_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">What would you do if a baby starts crying continuously?</label><textarea name="baby_crying" placeholder="Describe what you would do…"></textarea></div>
+        <div class="form-group"><label class="lbl">What would you do if a baby refuses to feed?</label><textarea name="baby_refuses_feed" placeholder="Describe your approach…"></textarea></div>
+        <div class="form-group"><label class="lbl">How would you safely carry and handle a newborn?</label><textarea name="carry_newborn" placeholder="Describe how you support the head and body…"></textarea></div>
+        <div class="form-group"><label class="lbl">Do you know how to keep a baby's sleeping area clean and safe?</label><div class="yn"><input type="radio" name="sleeping_area" id="sa_y" value="Yes"><label for="sa_y">Yes</label><input type="radio" name="sleeping_area" id="sa_n" value="No"><label for="sa_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Have you cared for a baby during the night?</label><div class="yn"><input type="radio" name="night_care" id="nc_y" value="Yes"><label for="nc_y">Yes</label><input type="radio" name="night_care" id="nc_n" value="No"><label for="nc_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">If yes, explain your night care process:</label><textarea name="night_care_explain" placeholder="What do you do when caring for a baby at night?"></textarea></div>
+      </div>
+
+      <div class="section-head"><h2>4. Childcare Questions</h2><p>For older children (1 year and above)</p></div>
+      <div class="card">
+        <div class="form-group"><label class="lbl">What activities would you use to keep a young child active and happy?</label><textarea name="child_activities" placeholder="List activities you enjoy doing with children…"></textarea></div>
+        <div class="form-group"><label class="lbl">How would you handle a child who is crying or having a tantrum?</label><textarea name="child_tantrum" placeholder="Describe your approach…"></textarea></div>
+        <div class="form-group"><label class="lbl">How would you respond if a child refuses to eat?</label><textarea name="child_no_eat" placeholder="What do you do?"></textarea></div>
+        <div class="form-group"><label class="lbl">Can you prepare simple, healthy meals for children?</label><div class="yn"><input type="radio" name="child_meals" id="cm_y" value="Yes"><label for="cm_y">Yes</label><input type="radio" name="child_meals" id="cm_n" value="No"><label for="cm_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">If yes, describe what you prepare:</label><textarea name="child_meals_explain" placeholder="e.g. porridge, mashed vegetables, fruit puree…"></textarea></div>
+        <div class="form-group"><label class="lbl">Can you assist children with bathing, dressing and personal hygiene?</label><div class="yn"><input type="radio" name="child_hygiene" id="ch_y" value="Yes"><label for="ch_y">Yes</label><input type="radio" name="child_hygiene" id="ch_n" value="No"><label for="ch_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Can you supervise children while they are playing?</label><div class="yn"><input type="radio" name="child_supervise" id="csp_y" value="Yes"><label for="csp_y">Yes</label><input type="radio" name="child_supervise" id="csp_n" value="No"><label for="csp_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Can you accompany children to school or other activities when instructed?</label><div class="yn"><input type="radio" name="child_school" id="csc_y" value="Yes"><label for="csc_y">Yes</label><input type="radio" name="child_school" id="csc_n" value="No"><label for="csc_n">No</label></div></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 4: HOUSEKEEPING & COOKING ══ -->
+    <div class="form-step" id="step4">
+      <div class="section-head"><h2>5. Housekeeping Skills</h2><p>Indicate Yes or No for each duty</p></div>
+      <div class="card">
+        <div class="hk-row"><span class="hk-label">Cleaning bedrooms</span><div class="hk-yn"><input type="radio" name="hk_bedrooms" id="hk_br_y" value="Yes"><label for="hk_br_y">Yes</label><input type="radio" name="hk_bedrooms" id="hk_br_n" value="No"><label for="hk_br_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Cleaning bathrooms</span><div class="hk-yn"><input type="radio" name="hk_bathrooms" id="hk_bt_y" value="Yes"><label for="hk_bt_y">Yes</label><input type="radio" name="hk_bathrooms" id="hk_bt_n" value="No"><label for="hk_bt_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Sweeping and mopping</span><div class="hk-yn"><input type="radio" name="hk_sweep" id="hk_sw_y" value="Yes"><label for="hk_sw_y">Yes</label><input type="radio" name="hk_sweep" id="hk_sw_n" value="No"><label for="hk_sw_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Dusting furniture</span><div class="hk-yn"><input type="radio" name="hk_dusting" id="hk_d_y" value="Yes"><label for="hk_d_y">Yes</label><input type="radio" name="hk_dusting" id="hk_d_n" value="No"><label for="hk_d_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Laundry</span><div class="hk-yn"><input type="radio" name="hk_laundry" id="hk_l_y" value="Yes"><label for="hk_l_y">Yes</label><input type="radio" name="hk_laundry" id="hk_l_n" value="No"><label for="hk_l_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Ironing clothes</span><div class="hk-yn"><input type="radio" name="hk_ironing" id="hk_i_y" value="Yes"><label for="hk_i_y">Yes</label><input type="radio" name="hk_ironing" id="hk_i_n" value="No"><label for="hk_i_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Washing dishes</span><div class="hk-yn"><input type="radio" name="hk_dishes" id="hk_wd_y" value="Yes"><label for="hk_wd_y">Yes</label><input type="radio" name="hk_dishes" id="hk_wd_n" value="No"><label for="hk_wd_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Kitchen cleaning</span><div class="hk-yn"><input type="radio" name="hk_kitchen" id="hk_k_y" value="Yes"><label for="hk_k_y">Yes</label><input type="radio" name="hk_kitchen" id="hk_k_n" value="No"><label for="hk_k_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Bed making</span><div class="hk-yn"><input type="radio" name="hk_beds" id="hk_b_y" value="Yes"><label for="hk_b_y">Yes</label><input type="radio" name="hk_beds" id="hk_b_n" value="No"><label for="hk_b_n">No</label></div></div>
+        <div class="hk-row"><span class="hk-label">Organizing household items</span><div class="hk-yn"><input type="radio" name="hk_organize" id="hk_o_y" value="Yes"><label for="hk_o_y">Yes</label><input type="radio" name="hk_organize" id="hk_o_n" value="No"><label for="hk_o_n">No</label></div></div>
+      </div>
+
+      <div class="section-head"><h2>6. Cooking Skills</h2></div>
+      <div class="card">
+        <div class="form-group"><label class="lbl">Can you cook?</label><div class="yn"><input type="radio" name="can_cook" id="cc_y" value="Yes"><label for="cc_y">Yes</label><input type="radio" name="can_cook" id="cc_n" value="No"><label for="cc_n">No</label></div></div>
+        <div class="form-group">
+          <label class="lbl">Types of food you can cook (select all that apply):</label>
+          <div class="cb-grid">
+            <label class="cb-item"><input type="checkbox" name="cook_types" value="African"><span>African</span></label>
+            <label class="cb-item"><input type="checkbox" name="cook_types" value="Arabic"><span>Arabic</span></label>
+            <label class="cb-item"><input type="checkbox" name="cook_types" value="Asian"><span>Asian</span></label>
+            <label class="cb-item"><input type="checkbox" name="cook_types" value="European"><span>European</span></label>
+            <label class="cb-item"><input type="checkbox" name="cook_types" value="Children's Meals"><span>Children's Meals</span></label>
+            <label class="cb-item"><input type="checkbox" name="cook_types" value="Healthy / Diet"><span>Healthy / Diet</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="lbl">List up to 5 meals you can prepare:</label>
+          <div class="meals">
+            <input type="text" name="meal_1" placeholder="Meal 1" />
+            <input type="text" name="meal_2" placeholder="Meal 2" />
+            <input type="text" name="meal_3" placeholder="Meal 3" />
+            <input type="text" name="meal_4" placeholder="Meal 4" />
+            <input type="text" name="meal_5" placeholder="Meal 5" />
+          </div>
+        </div>
+        <div class="form-group"><label class="lbl">Can you follow a recipe / employer's cooking instructions if trained?</label><div class="yn"><input type="radio" name="follow_recipe" id="fr_y" value="Yes"><label for="fr_y">Yes</label><input type="radio" name="follow_recipe" id="fr_n" value="No"><label for="fr_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Can you prepare food according to dietary restrictions if trained to?</label><div class="yn"><input type="radio" name="dietary_ok" id="dr_y" value="Yes"><label for="dr_y">Yes</label><input type="radio" name="dietary_ok" id="dr_n" value="No"><label for="dr_n">No</label></div></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 5: PERSONALITY & UAE READINESS ══ -->
+    <div class="form-step" id="step5">
+      <div class="section-head"><h2>7. Personality &amp; Work Attitude</h2></div>
+      <div class="card">
+        <div class="form-group"><label class="lbl">Why do you want to work in Dubai, UAE?</label><textarea name="why_dubai" placeholder="Share your reason…" style="min-height:85px;"></textarea></div>
+        <div class="form-group"><label class="lbl">What does good housekeeping mean to you?</label><textarea name="hk_meaning" placeholder="In your own words…"></textarea></div>
+        <div class="form-group"><label class="lbl">How do you handle instructions from your employer?</label><textarea name="handle_instructions" placeholder="Describe how you respond…"></textarea></div>
+        <div class="form-group"><label class="lbl">How do you handle stressful situations at work?</label><textarea name="handle_stress" placeholder="Give an example if possible…"></textarea></div>
+        <hr class="divider">
+        <div class="form-group"><label class="lbl">Are you patient with children?</label><div class="yn"><input type="radio" name="patient" id="pa_y" value="Yes"><label for="pa_y">Yes</label><input type="radio" name="patient" id="pa_n" value="No"><label for="pa_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Are you comfortable working around pets if required?</label><div class="yn"><input type="radio" name="ok_pets" id="op_y" value="Yes"><label for="op_y">Yes</label><input type="radio" name="ok_pets" id="op_n" value="No"><label for="op_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Are you willing to work according to the employer's household schedule and lawful instructions?</label><div class="yn"><input type="radio" name="follow_schedule" id="fs_y" value="Yes"><label for="fs_y">Yes</label><input type="radio" name="follow_schedule" id="fs_n" value="No"><label for="fs_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Are you willing to respect the privacy and confidentiality of your employer and family?</label><div class="yn"><input type="radio" name="respect_privacy" id="rp_y" value="Yes"><label for="rp_y">Yes</label><input type="radio" name="respect_privacy" id="rp_n" value="No"><label for="rp_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Can you work independently without constant supervision?</label><div class="yn"><input type="radio" name="work_independent" id="wi_y" value="Yes"><label for="wi_y">Yes</label><input type="radio" name="work_independent" id="wi_n" value="No"><label for="wi_n">No</label></div></div>
+      </div>
+
+      <div class="section-head"><h2>8. UAE Employment Readiness</h2></div>
+      <div class="card">
+        <div class="form-group"><label class="lbl">Are you willing to work in Dubai, UAE?</label><div class="yn"><input type="radio" name="willing_dubai" id="wd_y" value="Yes"><label for="wd_y">Yes</label><input type="radio" name="willing_dubai" id="wd_n" value="No"><label for="wd_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Are you willing to sign a three-year employment contract if selected?</label><div class="yn"><input type="radio" name="sign_3yr" id="s3_y" value="Yes"><label for="s3_y">Yes</label><input type="radio" name="sign_3yr" id="s3_n" value="No"><label for="s3_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Are you ready to travel after completing the required recruitment and visa process?</label><div class="yn"><input type="radio" name="ready_travel" id="rt_y" value="Yes"><label for="rt_y">Yes</label><input type="radio" name="ready_travel" id="rt_n" value="No"><label for="rt_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Are you willing to undergo the required medical / health screening?</label><div class="yn"><input type="radio" name="medical_ok" id="mo_y" value="Yes"><label for="mo_y">Yes</label><input type="radio" name="medical_ok" id="mo_n" value="No"><label for="mo_n">No</label></div></div>
+        <div class="form-group"><label class="lbl">Do you understand that employment will be governed by UAE domestic-worker rules and your contract?</label><div class="yn"><input type="radio" name="understand_rules" id="ur_y" value="Yes"><label for="ur_y">Yes</label><input type="radio" name="understand_rules" id="ur_n" value="No"><label for="ur_n">No</label></div></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 6: LANGUAGE, REFERENCES & DECLARATION ══ -->
+    <div class="form-step" id="step6">
+      <div class="section-head"><h2>9. Language &amp; Communication</h2></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl">Languages spoken (select all that apply):</label>
+          <div class="cb-grid">
+            <label class="cb-item"><input type="checkbox" name="languages" value="English"><span>English</span></label>
+            <label class="cb-item"><input type="checkbox" name="languages" value="Chichewa"><span>Chichewa</span></label>
+            <label class="cb-item"><input type="checkbox" name="languages" value="Tumbuka"><span>Tumbuka</span></label>
+            <label class="cb-item"><input type="checkbox" name="languages" value="Other"><span>Other</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="lbl">English communication level:</label>
+          <div class="pills">
+            <div class="pill"><input type="radio" name="english_level" id="el_e" value="Excellent"><label for="el_e">Excellent</label></div>
+            <div class="pill"><input type="radio" name="english_level" id="el_g" value="Good"><label for="el_g">Good</label></div>
+            <div class="pill"><input type="radio" name="english_level" id="el_f" value="Fair"><label for="el_f">Fair</label></div>
+            <div class="pill"><input type="radio" name="english_level" id="el_b" value="Basic"><label for="el_b">Basic</label></div>
+          </div>
+        </div>
+        <div class="form-group"><label class="lbl">Can you understand basic English instructions?</label><div class="yn"><input type="radio" name="basic_english" id="be_y" value="Yes"><label for="be_y">Yes</label><input type="radio" name="basic_english" id="be_n" value="No"><label for="be_n">No</label></div></div>
+      </div>
+
+      <div class="section-head"><h2>10. References &amp; Previous Employment</h2></div>
+      <div class="card">
+        <p class="sub-label">Reference 1</p>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Previous Employer Name</label><input type="text" name="ref1_employer" placeholder="Full name" /></div>
+          <div class="form-group"><label class="lbl">Country</label><input type="text" name="ref1_country" placeholder="e.g. UAE" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Position Held</label><input type="text" name="ref1_position" placeholder="e.g. Nanny / Housemaid" /></div>
+          <div class="form-group"><label class="lbl">Employment Period</label><input type="text" name="ref1_period" placeholder="e.g. 2021 – 2024" /></div>
+        </div>
+        <div class="form-group"><label class="lbl">Reference Phone Number</label><input type="tel" name="ref1_phone" placeholder="+971 XX XXX XXXX" /></div>
+        <div class="form-group"><label class="lbl">Reason for Leaving</label><textarea name="ref1_reason" placeholder="Why did you leave?" style="min-height:60px;"></textarea></div>
+        <hr class="divider">
+        <p class="sub-label">Reference 2 (optional)</p>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Reference Name</label><input type="text" name="ref2_name" placeholder="Full name" /></div>
+          <div class="form-group"><label class="lbl">Phone Number</label><input type="tel" name="ref2_phone" placeholder="+XXX XX XXX XXXX" /></div>
+        </div>
+      </div>
+
+      <div class="section-head" style="border-left-color:#16a34a;"><h2>Candidate Declaration</h2></div>
+      <div class="card">
+        <p style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px;">
+          I confirm that the information provided in this questionnaire is <strong>true and accurate</strong> to the best of my knowledge. I understand that providing false information regarding my experience, qualifications or personal details may affect my employment application.
+        </p>
+        <label class="cb-item" style="border-color:#16a34a;cursor:pointer;margin-bottom:10px;">
+          <input type="checkbox" name="decl_agree" id="decl_agree" value="agreed">
+          <span style="font-size:13px;font-weight:600;color:#15803d;">I agree to the above declaration ✓</span>
+        </label>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;"><em>Note: This is an HR recruitment questionnaire, not an official UAE government form. Candidates must complete all required visa, medical, contract and domestic-worker procedures applicable to the UAE.</em></p>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="successScreen">
+    <div class="success-icon">🎉</div>
+    <h2>Questionnaire Submitted!</h2>
+    <p>Thank you, <strong id="successName"></strong>. Your HR questionnaire has been received by the Yafast team. We will review your answers and contact you on your WhatsApp number within <strong>48 hours</strong>.</p>
+    <p style="margin-top:12px;font-size:13px;color:var(--muted);">Keep your phone on and check your WhatsApp regularly.</p>
+  </div>
+</div>
+
+<!-- FIXED NAVIGATION -->
+<div class="form-nav" id="formNav">
+  <button class="btn btn-back" id="prevBtn" onclick="prevStep()" style="display:none">← Back</button>
+  <button class="btn btn-next" id="nextBtn" onclick="nextStep()">Next →</button>
+  <button class="btn btn-submit" id="submitBtn" onclick="submitQuestionnaire()" style="display:none">Submit Application →</button>
+</div>
+
+<script>
+  const _sb = supabase.createClient(
+    'https://kefsvaettxwuzrusufmi.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZnN2YWV0dHh3dXpydXN1Zm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTE3MzQsImV4cCI6MjEwNTI2NzczNH0.u7yPSyKzets54SQmrJ72d7MqRK2XuZnfanp3ZIALxK8'
+  );
+  const NOTIFY_KEY = 'face650a-59f4-42d9-9618-dd67a24e77de';
+
+  let currentStep = 1;
+  const TOTAL = 6;
+  const LABELS = ['','Step 1 of 6 — Personal Information','Step 2 of 6 — Position & Experience','Step 3 of 6 — Baby & Childcare','Step 4 of 6 — Housekeeping & Cooking','Step 5 of 6 — Personality & UAE Readiness','Step 6 of 6 — Language, References & Declaration'];
+
+  function showStep(n) {
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    document.getElementById('progressBar').style.width = (n / TOTAL * 100) + '%';
+    document.getElementById('stepLabel').textContent = LABELS[n];
+    document.getElementById('prevBtn').style.display = n > 1 ? 'block' : 'none';
+    document.getElementById('nextBtn').style.display = n < TOTAL ? 'block' : 'none';
+    document.getElementById('submitBtn').style.display = n === TOTAL ? 'block' : 'none';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  function nextStep() { if (currentStep < TOTAL) { currentStep++; showStep(currentStep); } }
+  function prevStep() { if (currentStep > 1) { currentStep--; showStep(currentStep); } }
+
+  function collectData() {
+    const f = document.getElementById('qForm');
+    const d = {};
+    f.querySelectorAll('input:not([type=radio]):not([type=checkbox]), select, textarea').forEach(el => {
+      if (el.name) d[el.name] = el.value.trim();
+    });
+    f.querySelectorAll('input[type=radio]:checked').forEach(el => { d[el.name] = el.value; });
+    const cbGroups = {};
+    f.querySelectorAll('input[type=checkbox]').forEach(el => {
+      if (!el.name || el.name === 'decl_agree') return;
+      if (!cbGroups[el.name]) cbGroups[el.name] = [];
+      if (el.checked) cbGroups[el.name].push(el.value);
+    });
+    Object.assign(d, cbGroups);
+    return d;
+  }
+
+  async function submitQuestionnaire() {
+    if (!document.getElementById('decl_agree').checked) {
+      alert('Please tick the declaration checkbox before submitting.');
+      return;
+    }
+    const data = collectData();
+    const name = data.full_name || '';
+    const phone = data.phone || '';
+    const position = data.position || '';
+    const nationality = data.nationality || '';
+    if (!name || !phone) {
+      alert('Please fill in your Full Name and Phone number on Step 1.');
+      currentStep = 1; showStep(1); return;
+    }
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    try {
+      await _sb.from('questionnaires').insert([{ name, phone, position, nationality, data }]);
+    } catch(e) { console.error(e); }
+    if (NOTIFY_KEY) {
+      const meals = [data.meal_1,data.meal_2,data.meal_3,data.meal_4,data.meal_5].filter(Boolean).join(', ');
+      const body = [
+        'Name: '+name, 'Phone: '+phone, 'Position: '+position, 'Nationality: '+nationality,
+        'Experience: '+(data.years_experience||'N/A'), 'Countries worked: '+(data.countries_worked||'N/A'),
+        'English level: '+(data.english_level||'N/A'), 'Passport: '+(data.passport_no||'N/A')+' (Exp: '+(data.passport_expiry||'N/A')+')',
+        'Can cook: '+(data.can_cook||'N/A')+(meals?' — '+meals:''),
+        '---','View full answers in Yafast admin panel (Questionnaires tab).'
+      ].join('\n');
+      fetch('https://api.web3forms.com/submit',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ access_key: NOTIFY_KEY, subject:'[Yafast] New HR Questionnaire — '+name+' ('+position+')', message: body, from_name:'Yafast Questionnaire Form' })
+      }).catch(()=>{});
+    }
+    document.getElementById('qForm').style.display = 'none';
+    document.getElementById('formNav').style.display = 'none';
+    document.getElementById('successName').textContent = name.split(' ')[0];
+    document.getElementById('successScreen').style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  showStep(1);
+</script>
+</body>
+</html>
