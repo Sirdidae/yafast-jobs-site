@@ -757,7 +757,10 @@ function renderQuestionnaires(){
     return `<div class="enq-card" style="margin-bottom:12px;">
       <div class="enq-top" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
         <span class="enq-name">${esc(q.name||'—')}</span>
-        <span class="tag-new" style="white-space:nowrap;">${esc(q.position||'—')}</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="tag-new" style="white-space:nowrap;">${esc(q.position||'—')}</span>
+          <button class="btn-danger" style="padding:4px 10px;font-size:.72rem;" onclick="deleteQuestionnaire('${q.id}')">Delete</button>
+        </div>
       </div>
       <div class="enq-meta">${esc(q.phone||'—')} · ${esc(q.nationality||'—')} · ${fmt(q.created_at)}</div>
       <div style="margin-top:8px;">
@@ -806,6 +809,14 @@ function renderQuestionnaires(){
   }).join('');
 }
 function toggleQ(id){ const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
+
+async function deleteQuestionnaire(id){
+  if(!confirm('Delete this questionnaire? This cannot be undone.')) return;
+  const {error}=await db.from('questionnaires').delete().eq('id',id);
+  if(error){ alert('Error: '+error.message); return; }
+  _qs=_qs.filter(q=>q.id!==id);
+  renderQuestionnaires(); renderDashboard();
+}
 
 // ── SETTINGS ──
 function saveCredentials(){
