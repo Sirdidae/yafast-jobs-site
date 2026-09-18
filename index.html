@@ -2223,16 +2223,23 @@ const _sb = supabase.createClient(
 const _ICONS={Domestic:'🏠',Construction:'🏗️',Hospitality:'🏨',Healthcare:'⚕️',Cleaning:'🧹',Sales:'🎫',Driving:'🚗',Security:'🛡️'};
 function _esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
+const _FALLBACK_VACANCIES=[
+  {id:'f1',title:'Housemaid',sector:'Domestic',location:'Dubai, UAE',salary:'AED 1,000 – 1,200 / mo',slots:5,status:'Active',description:'Direct placement at IMDAD Center for Domestic Workers, UAE. Accommodation and meals included.'},
+  {id:'f2',title:'Cleaner',sector:'Cleaning',location:'Dubai, UAE',salary:'AED 1,100 – 1,400 / mo',slots:10,status:'Active',description:'Professional cleaning role at SERVEU Union Properties PJSC. Transport and uniform included.'}
+];
 async function loadVacancies(){
   const grid=document.getElementById('jobsGrid');
   if(!grid) return;
   grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Loading vacancies…</div>';
-  const {data,error}=await _sb.from('vacancies').select('*').eq('status','Active').order('created_at',{ascending:false});
-  if(error||!data?.length){
+  const timeout=new Promise(r=>setTimeout(()=>r({data:null,error:'timeout'}),5000));
+  const query=_sb.from('vacancies').select('*').eq('status','Active').order('created_at',{ascending:false});
+  const {data,error}=await Promise.race([query,timeout]);
+  const vacancies=(error||!data?.length)?_FALLBACK_VACANCIES:data;
+  if(!vacancies.length){
     grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No active vacancies at the moment — check back soon!</div>';
     return;
   }
-  grid.innerHTML=data.map(v=>{
+  grid.innerHTML=vacancies.map(v=>{
     const icon=_ICONS[v.sector]||'💼';
     const loc=_esc(v.location||'UAE');
     const tags=[
