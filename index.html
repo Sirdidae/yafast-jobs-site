@@ -2205,15 +2205,20 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ── ADMIN NOTIFICATIONS ── */
-// Get your free key: go to web3forms.com → enter desiregondwe@gmail.com → check email → paste key below
-const NOTIFY_KEY = 'face650a-59f4-42d9-9618-dd67a24e77de';
+const NOTIFY_KEY = 'face650a-59f4-42d9-9618-dd67a24e77de'; // web3forms key → yafastservices@gmail.com (update when new key received)
+const CALLMEBOT_KEY = ''; // CallMeBot WhatsApp key for +265 986 483 410 (paste when received)
 function notifyAdmin(subject, body){
-  if(!NOTIFY_KEY) return;
-  fetch('https://api.web3forms.com/submit',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({access_key:NOTIFY_KEY,subject:'[Yafast] '+subject,message:body,from_name:'Yafast Website'})
-  }).catch(()=>{});
+  if(NOTIFY_KEY){
+    fetch('https://api.web3forms.com/submit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({access_key:NOTIFY_KEY,subject:'[Yafast] '+subject,message:body,from_name:'Yafast Website'})
+    }).catch(()=>{});
+  }
+  if(CALLMEBOT_KEY){
+    const msg=encodeURIComponent('[Yafast] '+subject+'\n\n'+body.substring(0,400));
+    fetch('https://api.callmebot.com/whatsapp.php?phone=265986483410&text='+msg+'&apikey='+CALLMEBOT_KEY).catch(()=>{});
+  }
 }
 
 /* ── SUPABASE — live vacancies & form submissions ── */
