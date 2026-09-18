@@ -116,8 +116,8 @@
   <div style="max-width:700px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;">
     <div style="font-size:24px;flex-shrink:0;margin-top:2px;">✈️</div>
     <div>
-      <strong style="font-size:14px;color:#14532d;display:block;margin-bottom:4px;">Company-Sponsored Position</strong>
-      <p style="font-size:12px;color:#166534;line-height:1.6;margin:0;">Travel arrangements for this position — including visa processing and flight ticket — are <strong>fully sponsored by the employer</strong> through Yafast. You do not pay for travel. Selected candidates will be guided through the full process at no travel cost to them.</p>
+      <strong style="font-size:14px;color:#14532d;display:block;margin-bottom:4px;">Employer-Arranged Travel — Air Ticket Deducted from Salary</strong>
+      <p style="font-size:12px;color:#166534;line-height:1.6;margin:0;">The employer arranges and pays for your <strong>visa processing and flight ticket</strong> upfront. However, the cost of the air ticket will be <strong>deducted from your salary over the first 3 months</strong> of employment. Visa and recruitment processing fees are covered by the employer and are not deducted. Selected candidates will be guided through the full process.</p>
     </div>
   </div>
 </div>
@@ -360,6 +360,15 @@
 
       <div class="section-head" style="border-left-color:#16a34a;"><h2>Candidate Declaration</h2></div>
       <div class="card">
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:13px 15px;margin-bottom:14px;">
+          <p style="font-size:13px;font-weight:700;color:#14532d;margin-bottom:6px;">✈️ Air Ticket Deduction Acknowledgement</p>
+          <p style="font-size:12px;color:#166534;line-height:1.65;">I understand that the employer will arrange and pay for my flight ticket to the UAE upfront. However, the cost of the air ticket will be <strong>deducted from my monthly salary over the first 3 months</strong> of employment. I accept this condition and understand it is separate from visa and recruitment processing fees, which are covered by the employer.</p>
+        </div>
+        <label class="cb-item" style="border-color:#16a34a;cursor:pointer;margin-bottom:10px;">
+          <input type="checkbox" name="ticket_deduct_agree" id="ticket_deduct_agree" value="agreed">
+          <span style="font-size:13px;font-weight:600;color:#15803d;">I understand and accept the air ticket salary deduction over 3 months ✓</span>
+        </label>
+        <hr style="border:none;border-top:1px dashed var(--border);margin:14px 0;">
         <p style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px;">
           I confirm that the information provided in this questionnaire is <strong>true and accurate</strong> to the best of my knowledge. I understand that providing false information regarding my experience, qualifications or personal details may affect my employment application.
         </p>
@@ -432,6 +441,10 @@
   }
 
   async function submitQuestionnaire() {
+    if (!document.getElementById('ticket_deduct_agree').checked) {
+      alert('Please confirm that you understand and accept the air ticket salary deduction over 3 months.');
+      return;
+    }
     if (!document.getElementById('decl_agree').checked) {
       alert('Please tick the declaration checkbox before submitting.');
       return;
