@@ -2252,7 +2252,12 @@ async function loadVacancies(){
       +(v.description?'<div style="font-size:.82rem;color:var(--text-muted);line-height:1.5;margin:0 0 4px;">'+_esc(v.description)+'</div>':'')
       +'<div class="job-footer">'
       +'<div class="job-salary">'+_esc(v.salary||'Competitive')+'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
       +'<button class="apply-btn" onclick="openApply(\''+_esc(v.title)+'\',\''+_esc(v.location||'UAE')+'\')">Apply Now</button>'
+      +((v.title.toLowerCase().includes('housemaid')||v.title.toLowerCase().includes('nanny'))
+        ?'<a href="questionnaire.html" class="apply-btn" style="background:var(--navy);text-decoration:none;display:inline-flex;align-items:center;gap:6px;" target="_blank">📋 HR Questionnaire</a>'
+        :'')
+      +'</div>'
       +'</div>'
       +'</div>';
   }).join('');
