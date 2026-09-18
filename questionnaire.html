@@ -386,7 +386,6 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZnN2YWV0dHh3dXpydXN1Zm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTE3MzQsImV4cCI6MjEwNTI2NzczNH0.u7yPSyKzets54SQmrJ72d7MqRK2XuZnfanp3ZIALxK8'
   );
   const NOTIFY_KEY = 'face650a-59f4-42d9-9618-dd67a24e77de'; // update to yafastservices@gmail.com key when received
-  const CALLMEBOT_KEY = ''; // CallMeBot WhatsApp key for +265 986 483 410
 
   let currentStep = 1;
   const TOTAL = 6;
@@ -455,10 +454,6 @@
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ access_key: NOTIFY_KEY, subject:'[Yafast] New HR Questionnaire — '+name+' ('+position+')', message: body, from_name:'Yafast Questionnaire Form' })
       }).catch(()=>{});
-      if(CALLMEBOT_KEY){
-        const waMsg=encodeURIComponent('[Yafast] New HR Questionnaire\nName: '+name+'\nPhone: '+phone+'\nPosition: '+position);
-        fetch('https://api.callmebot.com/whatsapp.php?phone=265986483410&text='+waMsg+'&apikey='+CALLMEBOT_KEY).catch(()=>{});
-      }
     }
     document.getElementById('qForm').style.display = 'none';
     document.getElementById('formNav').style.display = 'none';
