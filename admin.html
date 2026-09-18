@@ -199,6 +199,9 @@ tr:hover td{background:var(--ground);}
           <div class="nav-item" onclick="showPanel('enquiries')">
             <span class="icon">📩</span><span>Enquiries</span>
           </div>
+          <div class="nav-item" onclick="showPanel('questionnaires')">
+            <span class="icon">📝</span><span>Questionnaires</span>
+          </div>
         </div>
         <div class="nav-group">
           <div class="nav-label">Settings</div>
@@ -242,9 +245,9 @@ tr:hover td{background:var(--ground);}
               <div class="sub">Employer / General</div>
             </div>
             <div class="stat-tile">
-              <div class="label">Domain</div>
-              <div class="value" style="font-size:1rem;padding-top:6px;">✅</div>
-              <div class="sub">yafastservices.com</div>
+              <div class="label">Questionnaires</div>
+              <div class="value" id="stat-questionnaires">0</div>
+              <div class="sub">HR interviews</div>
             </div>
           </div>
           <div class="table-wrap">
@@ -297,6 +300,14 @@ tr:hover td{background:var(--ground);}
           <div class="sec-head"><h2>Employer &amp; General Enquiries</h2></div>
           <div id="enquiries-list">
             <div class="empty"><div class="icon">📩</div><p>No enquiries received yet.</p></div>
+          </div>
+        </div>
+
+        <!-- QUESTIONNAIRES -->
+        <div class="panel" id="panel-questionnaires">
+          <div class="sec-head"><h2>HR Questionnaires</h2></div>
+          <div id="questionnaires-list">
+            <div class="empty"><div class="icon">📝</div><p>No questionnaires received yet.</p></div>
           </div>
         </div>
 
@@ -393,7 +404,7 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 function fmt(ts){ if(!ts) return '—'; return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
 
 // ── CACHED DATA ──
-let _vacs=[], _apps=[], _enqs=[], vacMap={};
+let _vacs=[], _apps=[], _enqs=[], _qs=[], vacMap={};
 
 // ── CREDENTIALS (localStorage) ──
 const DEFAULT_USER='YAFAST26', DEFAULT_PASS='*Faster*';
@@ -430,20 +441,21 @@ function showPanel(name){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
   event.currentTarget.classList.add('active');
-  const titles={dashboard:'Dashboard',vacancies:'Job Vacancies',applications:'Applications',enquiries:'Enquiries',settings:'Settings'};
+  const titles={dashboard:'Dashboard',vacancies:'Job Vacancies',applications:'Applications',enquiries:'Enquiries',questionnaires:'HR Questionnaires',settings:'Settings'};
   document.getElementById('panelTitle').textContent=titles[name]||name;
 }
 
 // ── LOAD ALL (single round-trip) ──
 async function loadAll(){
-  const [vR,aR,eR]=await Promise.all([
+  const [vR,aR,eR,qR]=await Promise.all([
     db.from('vacancies').select('*').order('created_at',{ascending:false}),
     db.from('applications').select('*').order('created_at',{ascending:false}),
-    db.from('enquiries').select('*').order('created_at',{ascending:false})
+    db.from('enquiries').select('*').order('created_at',{ascending:false}),
+    db.from('questionnaires').select('*').order('created_at',{ascending:false})
   ]);
-  _vacs=vR.data||[]; _apps=aR.data||[]; _enqs=eR.data||[];
+  _vacs=vR.data||[]; _apps=aR.data||[]; _enqs=eR.data||[]; _qs=qR.data||[];
   _vacs.forEach(v=>{ vacMap[v.id]=v; });
-  renderDashboard(); renderVacancies(); renderApplications(); renderEnquiries();
+  renderDashboard(); renderVacancies(); renderApplications(); renderEnquiries(); renderQuestionnaires();
 }
 
 // ── DASHBOARD ──
@@ -451,6 +463,7 @@ function renderDashboard(){
   document.getElementById('stat-vacancies').textContent=_vacs.filter(v=>v.status==='Active').length;
   document.getElementById('stat-applications').textContent=_apps.length;
   document.getElementById('stat-enquiries').textContent=_enqs.length;
+  document.getElementById('stat-questionnaires').textContent=_qs.length;
   const tbody=document.getElementById('dash-vacancies-tbody');
   if(!_vacs.length){ tbody.innerHTML='<tr><td colspan="4"><div class="empty"><div class="icon">💼</div><p>No vacancies posted yet.</p></div></td></tr>'; return; }
   tbody.innerHTML=_vacs.slice(0,5).map(v=>`
@@ -565,6 +578,71 @@ function renderEnquiries(){
       <div class="enq-body">${esc(e.message||'No message.')}</div>
     </div>`).join('');
 }
+
+// ── QUESTIONNAIRES ──
+function renderQuestionnaires(){
+  const list=document.getElementById('questionnaires-list');
+  if(!_qs.length){ list.innerHTML='<div class="empty"><div class="icon">📝</div><p>No questionnaires received yet.</p></div>'; return; }
+  list.innerHTML=_qs.map((q,i)=>{
+    const d=q.data||{};
+    const hk=['hk_bedrooms','hk_bathrooms','hk_sweep','hk_dusting','hk_laundry','hk_ironing','hk_dishes','hk_kitchen','hk_beds','hk_organize'];
+    const hkLabels=['Bedrooms','Bathrooms','Sweeping/Mopping','Dusting','Laundry','Ironing','Dishes','Kitchen','Beds','Organizing'];
+    const hkRow=hk.map((k,j)=>`<span style="display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:.75rem;background:${d[k]==='Yes'?'#d1fae5':'#fee2e2'};color:${d[k]==='Yes'?'#065f46':'#991b1b'}">${hkLabels[j]}: ${d[k]||'—'}</span>`).join('');
+    const langs=(d.languages||[]).join(', ')||'—';
+    const meals=[d.meal_1,d.meal_2,d.meal_3,d.meal_4,d.meal_5].filter(Boolean).join(', ')||'—';
+    const yn=(v)=>v==='Yes'?'<span style="color:#16a34a;font-weight:700;">✓ Yes</span>':'<span style="color:#dc2626;font-weight:700;">✗ No</span>';
+    return `<div class="enq-card" style="margin-bottom:12px;">
+      <div class="enq-top" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+        <span class="enq-name">${esc(q.name||'—')}</span>
+        <span class="tag-new" style="white-space:nowrap;">${esc(q.position||'—')}</span>
+      </div>
+      <div class="enq-meta">${esc(q.phone||'—')} · ${esc(q.nationality||'—')} · ${fmt(q.created_at)}</div>
+      <div style="margin-top:8px;">
+        <button onclick="toggleQ('qd${i}')" style="background:var(--sky-pale);border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:.78rem;font-weight:700;color:var(--navy);cursor:pointer;">View Full Answers ▼</button>
+      </div>
+      <div id="qd${i}" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
+        <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:40%;font-weight:600;">Date of Birth</td><td>${esc(d.dob||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Marital Status</td><td>${esc(d.marital_status||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Location</td><td>${esc(d.location||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Passport No.</td><td>${esc(d.passport_no||'—')} (Exp: ${esc(d.passport_expiry||'—')})</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Emergency Contact</td><td>${esc(d.emergency_name||'—')} · ${esc(d.emergency_phone||'—')}</td></tr>
+          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Experience</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Prev. Domestic Work</td><td>${esc(d.prev_work||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Countries Worked</td><td>${esc(d.countries_worked||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Years Experience</td><td>${esc(d.years_experience||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Prev. Employer Nat.</td><td>${esc(d.prev_employer_nat||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Children Cared For</td><td>${esc(d.num_children_cared||'—')} (youngest: ${esc(d.youngest_child_age||'—')})</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Newborn Care</td><td>${yn(d.cared_newborn)} — ${esc(d.num_newborns||'0')} newborns</td></tr>
+          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Baby &amp; Childcare</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Prepare bottle</td><td>${yn(d.prepare_bottle)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Sterilize bottles</td><td>${yn(d.sterilize_bottles)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Change diaper</td><td>${yn(d.change_diaper)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Bathe newborn</td><td>${yn(d.bathe_newborn)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Night care</td><td>${yn(d.night_care)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Baby crying response</td><td>${esc(d.baby_crying||'—')}</td></tr>
+          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Housekeeping</td></tr>
+          <tr><td colspan="2" style="padding:4px 0;">${hkRow}</td></tr>
+          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Cooking</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Can cook</td><td>${yn(d.can_cook)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Types</td><td>${esc((d.cook_types||[]).join(', ')||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Meals</td><td>${esc(meals)}</td></tr>
+          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Personality &amp; Readiness</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Why Dubai</td><td>${esc(d.why_dubai||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Patient w/ children</td><td>${yn(d.patient)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Sign 3-yr contract</td><td>${yn(d.sign_3yr)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Medical screening</td><td>${yn(d.medical_ok)}</td></tr>
+          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Language &amp; References</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Languages</td><td>${esc(langs)}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">English level</td><td>${esc(d.english_level||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Ref 1</td><td>${esc(d.ref1_employer||'—')} · ${esc(d.ref1_country||'—')} · ${esc(d.ref1_period||'—')} · ${esc(d.ref1_phone||'—')}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Reason for leaving</td><td>${esc(d.ref1_reason||'—')}</td></tr>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleQ(id){ const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
 
 // ── SETTINGS ──
 function saveCredentials(){
