@@ -105,6 +105,11 @@
     .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
     .sub-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
     .info-box { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #1e40af; margin-bottom: 14px; }
+    .sponsor-banner { background: #fff7ed; border-bottom: 2px solid #f97316; padding: 14px 20px; }
+    .sponsor-inner { max-width: 700px; margin: 0 auto; display: flex; gap: 12px; align-items: flex-start; }
+    .sponsor-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+    .sponsor-banner strong { font-size: 14px; color: #9a3412; display: block; margin-bottom: 4px; }
+    .sponsor-banner p { font-size: 12px; color: #7c2d12; line-height: 1.6; margin: 0; }
   </style>
 </head>
 <body>
@@ -115,6 +120,15 @@
   <p>Complete all sections honestly. This form is confidential.</p>
 </div>
 <div class="age-banner">⚠️ Age Requirement: Applicants must be between 21 and 38 years old</div>
+<div class="sponsor-banner">
+  <div class="sponsor-inner">
+    <div class="sponsor-icon">💰</div>
+    <div>
+      <strong>100% Self-Sponsored Position</strong>
+      <p>This is a self-sponsored job. All recruitment services — including visa processing, medical screening, flight ticket and agency fees — are charged directly to you (the applicant). No costs are covered by the employer or Yafast. Make sure you are prepared for these expenses before applying.</p>
+    </div>
+  </div>
+</div>
 
 <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:20%"></div></div>
 <div class="step-label" id="stepLabel">Step 1 of 5 — Personal Information</div>
@@ -365,8 +379,17 @@
 
       <div class="section-head" style="border-left-color:#16a34a;"><h2>Candidate Declaration</h2></div>
       <div class="card">
+        <div style="background:#fff7ed;border:1.5px solid #f97316;border-radius:8px;padding:13px 15px;margin-bottom:14px;">
+          <p style="font-size:13px;font-weight:700;color:#9a3412;margin-bottom:6px;">💰 Self-Sponsorship Acknowledgement</p>
+          <p style="font-size:12px;color:#7c2d12;line-height:1.65;">I fully understand that this Cleaner position is <strong>100% self-sponsored</strong>. All costs related to recruitment, visa processing, medical screening, flight ticket and any agency fees will be <strong>charged directly to me</strong>. The employer and Yafast do not cover any of these expenses. I accept this condition before applying.</p>
+        </div>
+        <label class="cb-item" style="border-color:#f97316;cursor:pointer;margin-bottom:10px;">
+          <input type="checkbox" name="sponsor_agree" id="sponsor_agree" value="agreed">
+          <span style="font-size:13px;font-weight:600;color:#9a3412;">I understand and accept that all costs are my own responsibility ✓</span>
+        </label>
+        <hr style="border:none;border-top:1px dashed var(--border);margin:14px 0;">
         <p style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px;">
-          I confirm that the information provided in this questionnaire is <strong>true and accurate</strong> to the best of my knowledge. I understand that providing false information may affect my employment application and could lead to rejection or contract termination.
+          I also confirm that the information provided in this questionnaire is <strong>true and accurate</strong> to the best of my knowledge. I understand that providing false information may affect my employment application and could lead to rejection or contract termination.
         </p>
         <label class="cb-item" style="border-color:#16a34a;cursor:pointer;margin-bottom:10px;">
           <input type="checkbox" name="decl_agree" id="decl_agree" value="agreed">
@@ -486,6 +509,10 @@
   }
 
   async function submitQuestionnaire() {
+    if (!document.getElementById('sponsor_agree').checked) {
+      alert('Please confirm that you understand and accept the self-sponsorship terms.');
+      return;
+    }
     if (!document.getElementById('decl_agree').checked) {
       alert('Please tick the declaration checkbox before submitting.');
       return;
