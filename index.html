@@ -1736,6 +1736,19 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       <div class="form-group"><label>Years of Experience</label>
         <select><option value="">Select…</option><option>No experience</option><option>Less than 1 year</option><option>1–3 years</option><option>3–5 years</option><option>5+ years</option></select>
       </div>
+      <div class="form-group"><label>Country of Previous Experience</label>
+        <select><option value="">Select…</option><option>UAE</option><option>Qatar</option><option>Saudi Arabia</option><option>Kuwait</option><option>Bahrain</option><option>Oman</option><option>South Africa</option><option>United Kingdom</option><option>Malawi (local)</option><option>No previous experience</option><option>Other</option></select>
+      </div>
+      <div class="form-group"><label>Work Contract Duration</label>
+        <select><option value="">Select…</option><option>1 year</option><option>2 years</option><option>3 years</option><option>4 years</option><option>5+ years</option></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Worked From (Year)</label><input type="number" placeholder="e.g. 2020" min="2000" max="2030" /></div>
+        <div class="form-group"><label>Worked Until (Year)</label><input type="number" placeholder="e.g. 2024" min="2000" max="2030" /></div>
+      </div>
+      <div class="form-group"><label>Previous Employer Nationality</label>
+        <select><option value="">Select…</option><option>Emirati (UAE)</option><option>Qatari</option><option>Saudi</option><option>Kuwaiti</option><option>Bahraini</option><option>Omani</option><option>South African</option><option>British</option><option>Malawian</option><option>Other</option></select>
+      </div>
       <div class="form-group"><label>Brief Message (optional)</label><textarea placeholder="Tell us about yourself or ask a question…"></textarea></div>
       <button class="form-submit" onclick="submitForm('applyModal')">Submit Application →</button>
     </div>
@@ -2029,13 +2042,15 @@ async function submitForm(modalId){
   let notifSubject='', notifBody='';
   try{
     if(modalId==='applyModal'){
-      const name=(val(0)+' '+val(1)).trim(),phone=val(2),email=val(3),nationality=val(4),experience=val(5),message=val(6);
+      const name=(val(0)+' '+val(1)).trim(),phone=val(2),email=val(3),nationality=val(4),experience=val(5);
+      const countryExp=val(6),contractYrs=val(7),workFrom=val(8),workTo=val(9),prevNat=val(10),userNote=val(11);
       const lbl=document.getElementById('applyJobLabel')?.textContent||'';
       const m=lbl.match(/^Position:\s*(.+?)\s+at\s+(.+)$/);
       const job=m?.[1]||'',company=m?.[2]||'';
-      await _sb.from('applications').insert([{name,job,company,phone,email,nationality,experience,message,type:'apply'}]);
+      const details=[countryExp?'Country of Exp: '+countryExp:'',contractYrs?'Contract: '+contractYrs:'',workFrom||workTo?'Period: '+(workFrom||'?')+' – '+(workTo||'Present'):'',prevNat?'Prev Employer Nationality: '+prevNat:'',userNote?'Note: '+userNote:''].filter(Boolean).join(' | ');
+      await _sb.from('applications').insert([{name,job,company,phone,email,nationality,experience,message:details,type:'apply'}]);
       notifSubject='New Job Application — '+job;
-      notifBody='Name: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nNationality: '+nationality+'\nJob: '+job+' at '+company+'\nExperience: '+experience+(message?'\nMessage: '+message:'');
+      notifBody='Name: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nNationality: '+nationality+'\nJob: '+job+' at '+company+'\nExperience: '+experience+(countryExp?'\nCountry of Experience: '+countryExp:'')+(contractYrs?'\nContract Duration: '+contractYrs:'')+(workFrom||workTo?'\nWorked: '+(workFrom||'?')+' – '+(workTo||'Present'):'')+(prevNat?'\nPrev Employer Nationality: '+prevNat:'')+(userNote?'\nNote: '+userNote:'');
     } else if(modalId==='registerModal'){
       const name=(val(0)+' '+val(1)).trim(),phone=val(2),email=val(3),job=val(4),dest=val(5),passport=val(6);
       await _sb.from('applications').insert([{name,job,phone,email,message:'Destination: '+dest+' | Passport: '+passport,type:'register'}]);
