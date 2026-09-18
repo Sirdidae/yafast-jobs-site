@@ -2022,31 +2022,40 @@ async function submitForm(modalId){
   const formEl=document.getElementById(modalId==='applyModal'?'applyForm':suffix+'Form');
   const successEl=document.getElementById(modalId==='applyModal'?'applySuccess':suffix+'Success');
   if(!formEl||!successEl)return;
-  // Read n-th form field (0-indexed) by order inside the form
   const val=(n)=>{
     const els=formEl.querySelectorAll('input:not([type=button]):not([type=submit]),select,textarea');
     return(els[n]?.value||'').trim();
   };
+  let notifSubject='', notifBody='';
   try{
     if(modalId==='applyModal'){
       const name=(val(0)+' '+val(1)).trim(),phone=val(2),email=val(3),nationality=val(4),experience=val(5),message=val(6);
       const lbl=document.getElementById('applyJobLabel')?.textContent||'';
       const m=lbl.match(/^Position:\s*(.+?)\s+at\s+(.+)$/);
-      await _sb.from('applications').insert([{name,job:m?.[1]||'',company:m?.[2]||'',phone,email,nationality,experience,message,type:'apply'}]);
+      const job=m?.[1]||'',company=m?.[2]||'';
+      await _sb.from('applications').insert([{name,job,company,phone,email,nationality,experience,message,type:'apply'}]);
+      notifSubject='New Job Application — '+job;
+      notifBody='Name: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nNationality: '+nationality+'\nJob: '+job+' at '+company+'\nExperience: '+experience+(message?'\nMessage: '+message:'');
     } else if(modalId==='registerModal'){
-      const name=(val(0)+' '+val(1)).trim(),phone=val(2),email=val(3),job=val(4);
-      const message='Destination: '+val(5)+' | Passport: '+val(6);
-      await _sb.from('applications').insert([{name,job,phone,email,message,type:'register'}]);
+      const name=(val(0)+' '+val(1)).trim(),phone=val(2),email=val(3),job=val(4),dest=val(5),passport=val(6);
+      await _sb.from('applications').insert([{name,job,phone,email,message:'Destination: '+dest+' | Passport: '+passport,type:'register'}]);
+      notifSubject='New Candidate Registration';
+      notifBody='Name: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nInterested in: '+job+'\nDestination: '+dest+'\nPassport: '+passport;
     } else if(modalId==='employerModal'){
       const name=val(0),company=val(1),phone=val(2),email=val(3),sector=val(5);
       const workers_needed=parseInt(val(6))||null,message=val(7);
       await _sb.from('enquiries').insert([{name,company,phone,email,sector,workers_needed,message,type:'employer',read:false}]);
+      notifSubject='New Employer Request — '+company;
+      notifBody='Contact: '+name+'\nCompany: '+company+'\nPhone: '+phone+'\nEmail: '+email+'\nSector: '+sector+(workers_needed?'\nWorkers needed: '+workers_needed:'')+(message?'\nRequirements: '+message:'');
     } else if(modalId==='travelModal'){
       const name=val(0),phone=val(1),service=val(2),destination=val(3),travel_date=val(4);
       const travellers=val(5),message=val(6)+(travellers?' | Travellers: '+travellers:'');
       await _sb.from('enquiries').insert([{name,phone,sector:service,destination,travel_date,message,type:'travel',read:false}]);
+      notifSubject='New Travel Enquiry — '+destination;
+      notifBody='Name: '+name+'\nPhone: '+phone+'\nService: '+service+'\nDestination: '+destination+(travel_date?'\nDate: '+travel_date:'')+(travellers?'\nTravellers: '+travellers:'');
     }
   } catch(e){ console.error('Form save error:',e); }
+  if(notifSubject) notifyAdmin(notifSubject, notifBody);
   formEl.style.display='none';
   successEl.classList.add('show');
   showToast('Submitted! We\'ll be in touch shortly. 🎉','sky');
@@ -2179,6 +2188,18 @@ window.addEventListener('scroll',()=>{
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){document.querySelectorAll('.modal-backdrop.open').forEach(m=>closeModal(m.id));}
 });
+
+/* ── ADMIN NOTIFICATIONS ── */
+// Get your free key: go to web3forms.com → enter desiregondwe@gmail.com → check email → paste key below
+const NOTIFY_KEY = '';
+function notifyAdmin(subject, body){
+  if(!NOTIFY_KEY) return;
+  fetch('https://api.web3forms.com/submit',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({access_key:NOTIFY_KEY,subject:'[Yafast] '+subject,message:body,from_name:'Yafast Website'})
+  }).catch(()=>{});
+}
 
 /* ── SUPABASE — live vacancies & form submissions ── */
 const _sb = supabase.createClient(
