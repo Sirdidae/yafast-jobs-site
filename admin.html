@@ -868,8 +868,9 @@ function renderQuestionnaires(){
         </div>
       </div>
       <div class="enq-meta">${esc(q.phone||'—')} · ${esc(q.nationality||'—')} · ${fmt(q.created_at)}</div>
-      <div style="margin-top:8px;">
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
         <button onclick="toggleQ('qd${i}')" style="background:var(--sky-pale);border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:.78rem;font-weight:700;color:var(--navy);cursor:pointer;">View Full Answers ▼</button>
+        <button onclick="printQuestionnaire(${i})" style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:5px 14px;font-size:.78rem;font-weight:700;color:#15803d;cursor:pointer;">⬇ Download PDF</button>
       </div>
       <div id="qd${i}" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
         <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
@@ -881,6 +882,164 @@ function renderQuestionnaires(){
   }).join('');
 }
 function toggleQ(id){ const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
+
+function printQuestionnaire(idx){
+  const q=_qs[idx]; if(!q) return;
+  const d=q.data||{};
+  const isCleaner=(q.position||'').toLowerCase()==='cleaner';
+  const arr=(v)=>(Array.isArray(v)?v:typeof v==='string'?[v]:[]).join(', ')||'—';
+  const yn=(v)=>v==='Yes'?'✓ Yes':'✗ No';
+  const row=(label,val)=>`<tr><td class="lbl">${label}</td><td>${val}</td></tr>`;
+  const hd=(label)=>`<tr><th colspan="2" class="section-hd">${label}</th></tr>`;
+  const langs=(Array.isArray(d.languages)?d.languages:typeof d.languages==='string'?[d.languages]:[]).join(', ')||'—';
+  const meals=[d.meal_1,d.meal_2,d.meal_3,d.meal_4,d.meal_5].filter(Boolean).join(', ')||'—';
+  const hk=['hk_bedrooms','hk_bathrooms','hk_sweep','hk_dusting','hk_laundry','hk_ironing','hk_dishes','hk_kitchen','hk_beds','hk_organize'];
+  const hkLabels=['Bedrooms','Bathrooms','Sweeping/Mopping','Dusting','Laundry','Ironing','Dishes','Kitchen','Beds','Organizing'];
+  const hkRow=hk.map((k,j)=>`<span class="badge ${d[k]==='Yes'?'yes':'no'}">${hkLabels[j]}: ${d[k]||'—'}</span>`).join('');
+
+  const commonRows=[
+    hd('Personal Details'),
+    row('Full Name', esc(q.name||'—')),
+    row('Phone / WhatsApp', esc(q.phone||'—')),
+    row('Nationality', esc(q.nationality||'—')),
+    row('Date of Birth', esc(d.dob||'—')),
+    row('Age', esc(d.age||'—')),
+    row('Marital Status', esc(d.marital_status||'—')),
+    row('No. of Children', esc(d.num_children||'—')),
+    row('Location', esc(d.location||'—')),
+    row('Passport No.', esc(d.passport_no||'—')+' (Exp: '+esc(d.passport_expiry||'—')+')'),
+    row('Emergency Contact', esc(d.emergency_name||'—')+' · '+esc(d.emergency_phone||'—')),
+  ].join('');
+
+  const cleanerRows=isCleaner?[
+    hd('Cleaning Experience'),
+    row('Prev. Cleaning Work', yn(d.prev_cleaning)),
+    row('Years Experience', esc(d.years_experience||'—')),
+    row('Countries Worked', esc(d.countries_worked||'—')),
+    row('Facility Types', arr(d.facility_types)),
+    row('Prev. Employer', esc(d.prev_employer||'—')),
+    row('Employment Period', esc(d.prev_period||'—')),
+    row('Reason for Leaving', esc(d.reason_leaving||'—')),
+    hd('Cleaning Skills'),
+    row('Sweeping & Mopping', yn(d.sk_sweep_mop)),
+    row('Vacuuming', yn(d.sk_vacuum)),
+    row('Cleaning Bathrooms', yn(d.sk_bathrooms)),
+    row('Windows & Glass', yn(d.sk_windows)),
+    row('Dusting & Wiping', yn(d.sk_dusting)),
+    row('Deep Cleaning Kitchens', yn(d.sk_kitchen)),
+    row('Disinfecting Surfaces', yn(d.sk_disinfect)),
+    row('Waste Disposal', yn(d.sk_waste)),
+    row('Stairs & Elevators', yn(d.sk_stairs)),
+    row('Outdoor Cleaning', yn(d.sk_outdoor)),
+    hd('Equipment & Chemicals'),
+    row('Equipment Operated', arr(d.equipment)),
+    row('Handles Chemicals Safely', yn(d.chemicals_safe)),
+    row('Knows Disinfectants/Detergents', yn(d.chemicals_knowledge)),
+    row('Wears PPE', yn(d.wears_ppe)),
+    hd('Physical Fitness'),
+    row('Can Stand 8 hrs', yn(d.stand_8hrs)),
+    row('Can Lift 20 kg', yn(d.lift_heavy)),
+    row('Works in Heat', yn(d.work_heat)),
+    row('Medical Issues', yn(d.medical_issues)),
+    row('Medical Details', esc(d.medical_details||'—')),
+    hd('Work Attitude'),
+    row('Why Dubai', esc(d.why_dubai||'—')),
+    row('Works Independently', yn(d.work_independent)),
+    row('Team Player', yn(d.team_player)),
+    row('Shift Work OK', yn(d.shift_ok)),
+    row('Weekends OK', yn(d.weekends_ok)),
+    hd('UAE Readiness'),
+    row('Willing to Work in Dubai', yn(d.willing_dubai)),
+    row('Sign 2-yr Contract', yn(d.sign_contract)),
+    row('Ready to Travel', yn(d.ready_travel)),
+    row('Medical Screening OK', yn(d.medical_ok)),
+    row('Salary Expectation', esc(d.salary_expectation||'—')),
+    row('Availability', esc(d.availability||'—')),
+    hd('Language & References'),
+    row('Languages', esc(langs)),
+    row('English Level', esc(d.english_level||'—')),
+    row('Understands Basic English', yn(d.basic_english)),
+    row('Ref 1', esc(d.ref1_employer||'—')+' · '+esc(d.ref1_country||'—')+' · '+esc(d.ref1_period||'—')+' · '+esc(d.ref1_phone||'—')),
+    row('Ref 2', esc(d.ref2_name||'—')+' · '+esc(d.ref2_phone||'—')),
+  ].join('') : '';
+
+  const housemaidRows=!isCleaner?[
+    hd('Experience'),
+    row('Prev. Domestic Work', esc(d.prev_work||'—')),
+    row('Countries Worked', esc(d.countries_worked||'—')),
+    row('Years Experience', esc(d.years_experience||'—')),
+    row('Prev. Employer Nationality', esc(d.prev_employer_nat||'—')),
+    row('Children Cared For', esc(d.num_children_cared||'—')+' (youngest: '+esc(d.youngest_child_age||'—')+')'),
+    row('Newborn Care', yn(d.cared_newborn)+' — '+esc(d.num_newborns||'0')+' newborns'),
+    hd('Baby & Childcare'),
+    row('Prepare bottle', yn(d.prepare_bottle)),
+    row('Sterilize bottles', yn(d.sterilize_bottles)),
+    row('Change diaper', yn(d.change_diaper)),
+    row('Bathe newborn', yn(d.bathe_newborn)),
+    row('Night care', yn(d.night_care)),
+    row('Baby crying response', esc(d.baby_crying||'—')),
+    hd('Housekeeping'),
+    `<tr><td colspan="2" style="padding:6px 0;">${hkRow}</td></tr>`,
+    hd('Cooking'),
+    row('Can cook', yn(d.can_cook)),
+    row('Cook types', arr(d.cook_types)),
+    row('Meals', esc(meals)),
+    hd('Personality & Readiness'),
+    row('Why Dubai', esc(d.why_dubai||'—')),
+    row('Patient with children', yn(d.patient)),
+    row('Sign 3-yr contract', yn(d.sign_3yr)),
+    row('Medical screening', yn(d.medical_ok)),
+    hd('Language & References'),
+    row('Languages', esc(langs)),
+    row('English level', esc(d.english_level||'—')),
+    row('Ref 1', esc(d.ref1_employer||'—')+' · '+esc(d.ref1_country||'—')+' · '+esc(d.ref1_period||'—')+' · '+esc(d.ref1_phone||'—')),
+    row('Reason for leaving', esc(d.ref1_reason||'—')),
+  ].join('') : '';
+
+  const filesRows=(d.file_passport||d.file_extras)?[
+    hd('Uploaded Documents'),
+    d.file_passport?row('Passport Copy','<a href="'+esc(d.file_passport)+'" style="color:#1565A0;">'+esc(d.file_passport)+'</a>'):'',
+    ...(d.file_extras||[]).map((u,xi)=>row('Extra File '+(xi+1),'<a href="'+esc(u)+'" style="color:#1565A0;">'+esc(u)+'</a>')),
+  ].join('') : '';
+
+  const submitted=q.created_at?new Date(q.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Questionnaire — ${esc(q.name||'Applicant')}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Arial,sans-serif;font-size:12px;color:#111;background:#fff;padding:20px;}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0F3568;padding-bottom:12px;margin-bottom:16px;}
+  .logo{font-size:20px;font-weight:800;color:#0F3568;letter-spacing:.5px;}
+  .logo span{color:#2196F3;}
+  .meta{text-align:right;font-size:11px;color:#555;}
+  .meta strong{display:block;font-size:14px;color:#111;}
+  .badge-pos{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;background:${isCleaner?'#fff7ed':'#eff6ff'};color:${isCleaner?'#9a3412':'#1e40af'};border:1px solid ${isCleaner?'#f97316':'#93c5fd'};}
+  table{width:100%;border-collapse:collapse;margin-bottom:4px;}
+  td,th{padding:4px 6px;vertical-align:top;}
+  .lbl{color:#555;width:42%;font-weight:600;white-space:nowrap;}
+  .section-hd{background:#f1f5f9;color:#0F3568;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:6px 6px 4px;border-top:1px solid #cbd5e1;}
+  tr:nth-child(even) td{background:#fafafa;}
+  .badge{display:inline-block;padding:2px 7px;margin:2px;border-radius:4px;font-size:10px;}
+  .badge.yes{background:#d1fae5;color:#065f46;}
+  .badge.no{background:#fee2e2;color:#991b1b;}
+  .footer{margin-top:20px;border-top:1px solid #e2e8f0;padding-top:8px;font-size:10px;color:#888;display:flex;justify-content:space-between;}
+  @media print{body{padding:0;}button{display:none!important;}}
+</style>
+</head><body>
+<div class="header">
+  <div><div class="logo">YA<span>FAST</span> Services</div><div style="font-size:11px;color:#555;margin-top:2px;">yafastservices.com</div></div>
+  <div class="meta"><strong>${esc(q.name||'—')}</strong>${esc(q.phone||'—')} · ${esc(q.nationality||'—')}<br><span class="badge-pos">${esc(q.position||'—')}</span><br>Submitted: ${submitted}</div>
+</div>
+<table>${commonRows}${isCleaner?cleanerRows:housemaidRows}${filesRows}</table>
+<div class="footer"><span>Yafast Job Links &amp; Travel Services — Confidential HR Document</span><span>Printed: ${new Date().toLocaleString('en-GB')}</span></div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`;
+
+  const w=window.open('','_blank','width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+}
 
 async function deleteQuestionnaire(id){
   if(!confirm('Delete this questionnaire? This cannot be undone.')) return;
