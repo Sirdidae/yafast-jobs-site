@@ -746,19 +746,124 @@ async function deleteEnquiry(id){
 function renderQuestionnaires(){
   const list=document.getElementById('questionnaires-list');
   if(!_qs.length){ list.innerHTML='<div class="empty"><div class="icon">📝</div><p>No questionnaires received yet.</p></div>'; return; }
+  const td=(label,val)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">${label}</td><td>${val}</td></tr>`;
+  const th=(label)=>`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">${label}</td></tr>`;
+  const yn=(v)=>v==='Yes'?'<span style="color:#16a34a;font-weight:700;">✓ Yes</span>':'<span style="color:#dc2626;font-weight:700;">✗ No</span>';
+  const arr=(v)=>(Array.isArray(v)?v:typeof v==='string'?[v]:[]).join(', ')||'—';
+
   list.innerHTML=_qs.map((q,i)=>{
     const d=q.data||{};
+    const langs=arr(d.languages);
+    const isCleaner=(q.position||'').toLowerCase()==='cleaner';
+
+    // ── COMMON HEADER ROWS ──
+    const commonRows=[
+      th('Personal Details'),
+      td('Date of Birth', esc(d.dob||'—')),
+      td('Age', esc(d.age||'—')),
+      td('Marital Status', esc(d.marital_status||'—')),
+      td('No. of Children', esc(d.num_children||'—')),
+      td('Location', esc(d.location||'—')),
+      td('Passport No.', esc(d.passport_no||'—')+' (Exp: '+esc(d.passport_expiry||'—')+')'),
+      td('Emergency Contact', esc(d.emergency_name||'—')+' · '+esc(d.emergency_phone||'—')),
+    ].join('');
+
+    // ── CLEANER-SPECIFIC ROWS ──
+    const cleanerRows=isCleaner?[
+      th('Cleaning Experience'),
+      td('Prev. Cleaning Work', yn(d.prev_cleaning)),
+      td('Years Experience', esc(d.years_experience||'—')),
+      td('Countries Worked', esc(d.countries_worked||'—')),
+      td('Facility Types', arr(d.facility_types)),
+      td('Prev. Employer', esc(d.prev_employer||'—')),
+      td('Employment Period', esc(d.prev_period||'—')),
+      td('Reason for Leaving', esc(d.reason_leaving||'—')),
+      th('Cleaning Skills'),
+      td('Sweeping &amp; Mopping', yn(d.sk_sweep_mop)),
+      td('Vacuuming', yn(d.sk_vacuum)),
+      td('Cleaning Bathrooms', yn(d.sk_bathrooms)),
+      td('Windows &amp; Glass', yn(d.sk_windows)),
+      td('Dusting &amp; Wiping', yn(d.sk_dusting)),
+      td('Deep Cleaning Kitchens', yn(d.sk_kitchen)),
+      td('Disinfecting Surfaces', yn(d.sk_disinfect)),
+      td('Waste Disposal', yn(d.sk_waste)),
+      td('Stairs &amp; Elevators', yn(d.sk_stairs)),
+      td('Outdoor Cleaning', yn(d.sk_outdoor)),
+      th('Equipment &amp; Chemicals'),
+      td('Equipment Operated', arr(d.equipment)),
+      td('Handles Chemicals Safely', yn(d.chemicals_safe)),
+      td('Knows Disinfectants/Detergents', yn(d.chemicals_knowledge)),
+      td('Wears PPE', yn(d.wears_ppe)),
+      th('Physical Fitness'),
+      td('Can Stand 8 hrs', yn(d.stand_8hrs)),
+      td('Can Lift 20 kg', yn(d.lift_heavy)),
+      td('Works in Heat', yn(d.work_heat)),
+      td('Medical Issues', yn(d.medical_issues)),
+      td('Medical Details', esc(d.medical_details||'—')),
+      th('Work Attitude'),
+      td('Why Dubai', esc(d.why_dubai||'—')),
+      td('Works Independently', yn(d.work_independent)),
+      td('Team Player', yn(d.team_player)),
+      td('Shift Work OK', yn(d.shift_ok)),
+      td('Weekends OK', yn(d.weekends_ok)),
+      th('UAE Readiness'),
+      td('Willing to Work in Dubai', yn(d.willing_dubai)),
+      td('Sign 2-yr Contract', yn(d.sign_contract)),
+      td('Ready to Travel', yn(d.ready_travel)),
+      td('Medical Screening OK', yn(d.medical_ok)),
+      td('Salary Expectation', esc(d.salary_expectation||'—')),
+      td('Availability', esc(d.availability||'—')),
+      th('Language &amp; References'),
+      td('Languages', esc(langs)),
+      td('English Level', esc(d.english_level||'—')),
+      td('Understands Basic English', yn(d.basic_english)),
+      td('Ref 1', esc(d.ref1_employer||'—')+' · '+esc(d.ref1_country||'—')+' · '+esc(d.ref1_period||'—')+' · '+esc(d.ref1_phone||'—')),
+      td('Ref 2', esc(d.ref2_name||'—')+' · '+esc(d.ref2_phone||'—')),
+    ].join('') : '';
+
+    // ── HOUSEMAID/NANNY-SPECIFIC ROWS ──
     const hk=['hk_bedrooms','hk_bathrooms','hk_sweep','hk_dusting','hk_laundry','hk_ironing','hk_dishes','hk_kitchen','hk_beds','hk_organize'];
     const hkLabels=['Bedrooms','Bathrooms','Sweeping/Mopping','Dusting','Laundry','Ironing','Dishes','Kitchen','Beds','Organizing'];
     const hkRow=hk.map((k,j)=>`<span style="display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:.75rem;background:${d[k]==='Yes'?'#d1fae5':'#fee2e2'};color:${d[k]==='Yes'?'#065f46':'#991b1b'}">${hkLabels[j]}: ${d[k]||'—'}</span>`).join('');
-    const langs=(d.languages||[]).join(', ')||'—';
     const meals=[d.meal_1,d.meal_2,d.meal_3,d.meal_4,d.meal_5].filter(Boolean).join(', ')||'—';
-    const yn=(v)=>v==='Yes'?'<span style="color:#16a34a;font-weight:700;">✓ Yes</span>':'<span style="color:#dc2626;font-weight:700;">✗ No</span>';
+    const housemaidRows=!isCleaner?[
+      th('Experience'),
+      td('Prev. Domestic Work', esc(d.prev_work||'—')),
+      td('Countries Worked', esc(d.countries_worked||'—')),
+      td('Years Experience', esc(d.years_experience||'—')),
+      td('Prev. Employer Nat.', esc(d.prev_employer_nat||'—')),
+      td('Children Cared For', esc(d.num_children_cared||'—')+' (youngest: '+esc(d.youngest_child_age||'—')+')'),
+      td('Newborn Care', yn(d.cared_newborn)+' — '+esc(d.num_newborns||'0')+' newborns'),
+      th('Baby &amp; Childcare'),
+      td('Prepare bottle', yn(d.prepare_bottle)),
+      td('Sterilize bottles', yn(d.sterilize_bottles)),
+      td('Change diaper', yn(d.change_diaper)),
+      td('Bathe newborn', yn(d.bathe_newborn)),
+      td('Night care', yn(d.night_care)),
+      td('Baby crying response', esc(d.baby_crying||'—')),
+      th('Housekeeping'),
+      `<tr><td colspan="2" style="padding:4px 0;">${hkRow}</td></tr>`,
+      th('Cooking'),
+      td('Can cook', yn(d.can_cook)),
+      td('Cook types', arr(d.cook_types)),
+      td('Meals', esc(meals)),
+      th('Personality &amp; Readiness'),
+      td('Why Dubai', esc(d.why_dubai||'—')),
+      td('Patient w/ children', yn(d.patient)),
+      td('Sign 3-yr contract', yn(d.sign_3yr)),
+      td('Medical screening', yn(d.medical_ok)),
+      th('Language &amp; References'),
+      td('Languages', esc(langs)),
+      td('English level', esc(d.english_level||'—')),
+      td('Ref 1', esc(d.ref1_employer||'—')+' · '+esc(d.ref1_country||'—')+' · '+esc(d.ref1_period||'—')+' · '+esc(d.ref1_phone||'—')),
+      td('Reason for leaving', esc(d.ref1_reason||'—')),
+    ].join('') : '';
+
     return `<div class="enq-card" style="margin-bottom:12px;">
       <div class="enq-top" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
         <span class="enq-name">${esc(q.name||'—')}</span>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span class="tag-new" style="white-space:nowrap;">${esc(q.position||'—')}</span>
+          <span class="${isCleaner?'':'tag-new'}" style="white-space:nowrap;${isCleaner?'background:#fff7ed;color:#9a3412;border:1px solid #f97316;border-radius:12px;padding:2px 10px;font-size:.75rem;font-weight:700;':''}">${esc(q.position||'—')}</span>
           <button class="btn-danger" style="padding:4px 10px;font-size:.72rem;" onclick="deleteQuestionnaire('${q.id}')">Delete</button>
         </div>
       </div>
@@ -768,41 +873,7 @@ function renderQuestionnaires(){
       </div>
       <div id="qd${i}" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
         <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:40%;font-weight:600;">Date of Birth</td><td>${esc(d.dob||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Marital Status</td><td>${esc(d.marital_status||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Location</td><td>${esc(d.location||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Passport No.</td><td>${esc(d.passport_no||'—')} (Exp: ${esc(d.passport_expiry||'—')})</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Emergency Contact</td><td>${esc(d.emergency_name||'—')} · ${esc(d.emergency_phone||'—')}</td></tr>
-          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Experience</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Prev. Domestic Work</td><td>${esc(d.prev_work||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Countries Worked</td><td>${esc(d.countries_worked||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Years Experience</td><td>${esc(d.years_experience||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Prev. Employer Nat.</td><td>${esc(d.prev_employer_nat||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Children Cared For</td><td>${esc(d.num_children_cared||'—')} (youngest: ${esc(d.youngest_child_age||'—')})</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Newborn Care</td><td>${yn(d.cared_newborn)} — ${esc(d.num_newborns||'0')} newborns</td></tr>
-          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Baby &amp; Childcare</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Prepare bottle</td><td>${yn(d.prepare_bottle)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Sterilize bottles</td><td>${yn(d.sterilize_bottles)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Change diaper</td><td>${yn(d.change_diaper)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Bathe newborn</td><td>${yn(d.bathe_newborn)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Night care</td><td>${yn(d.night_care)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Baby crying response</td><td>${esc(d.baby_crying||'—')}</td></tr>
-          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Housekeeping</td></tr>
-          <tr><td colspan="2" style="padding:4px 0;">${hkRow}</td></tr>
-          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Cooking</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Can cook</td><td>${yn(d.can_cook)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Types</td><td>${esc((d.cook_types||[]).join(', ')||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Meals</td><td>${esc(meals)}</td></tr>
-          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Personality &amp; Readiness</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Why Dubai</td><td>${esc(d.why_dubai||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Patient w/ children</td><td>${yn(d.patient)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Sign 3-yr contract</td><td>${yn(d.sign_3yr)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Medical screening</td><td>${yn(d.medical_ok)}</td></tr>
-          <tr><td colspan="2" style="padding:8px 0 2px;font-weight:700;color:var(--navy);">Language &amp; References</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Languages</td><td>${esc(langs)}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">English level</td><td>${esc(d.english_level||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Ref 1</td><td>${esc(d.ref1_employer||'—')} · ${esc(d.ref1_country||'—')} · ${esc(d.ref1_period||'—')} · ${esc(d.ref1_phone||'—')}</td></tr>
-          <tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);font-weight:600;">Reason for leaving</td><td>${esc(d.ref1_reason||'—')}</td></tr>
+          ${commonRows}${isCleaner?cleanerRows:housemaidRows}
         </table>
       </div>
     </div>`;
