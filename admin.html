@@ -874,6 +874,7 @@ function renderQuestionnaires(){
       <div id="qd${i}" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
         <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
           ${commonRows}${isCleaner?cleanerRows:housemaidRows}
+          ${(d.file_passport||d.file_extras)?`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">📁 Uploaded Documents</td></tr>${d.file_passport?`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Passport Copy</td><td><a href="${esc(d.file_passport)}" target="_blank" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`:''}${(d.file_extras&&d.file_extras.length)?d.file_extras.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Extra File ${xi+1}</td><td><a href="${esc(u)}" target="_blank" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}`:'' }
         </table>
       </div>
     </div>`;
