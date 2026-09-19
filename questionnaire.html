@@ -102,6 +102,17 @@
     .divider { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
     .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
     .sub-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+
+    /* File upload */
+    .file-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 16px 14px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; background: #fafbfc; }
+    .file-zone:hover { border-color: var(--sky); background: #eff6ff; }
+    .file-zone.has-file { border-color: var(--green); background: #f0fdf4; }
+    .file-zone-icon { font-size: 22px; margin-bottom: 4px; }
+    .file-zone-text { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .file-zone-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .file-tag { display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: #0369a1; margin: 4px 2px; word-break: break-all; }
+    .file-tag .rm { cursor: pointer; color: #dc2626; font-weight: 800; margin-left: 2px; }
+    .upload-progress { font-size: 12px; color: var(--muted); margin-top: 6px; display: none; }
   </style>
 </head>
 <body>
@@ -358,6 +369,33 @@
         </div>
       </div>
 
+      <!-- ── SUPPORTING DOCUMENTS ── -->
+      <div class="section-head"><h2>Supporting Documents</h2><p>Attach your passport copy and any other relevant files</p></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl">Passport Copy <span style="font-weight:400;color:var(--muted)">(PDF, PNG or JPEG · max 5 MB)</span></label>
+          <div class="file-zone" id="passportZone" onclick="document.getElementById('passportFile').click()">
+            <div class="file-zone-icon">🛂</div>
+            <div class="file-zone-text">Tap to attach passport copy</div>
+            <div class="file-zone-sub">PDF, PNG or JPEG accepted</div>
+          </div>
+          <input type="file" id="passportFile" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleSingleFile(this,'passportZone','passportTags')">
+          <div id="passportTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label class="lbl">Additional Documents <span style="font-weight:400;color:var(--muted)">(optional — CV, certificates, ID · PDF, PNG or JPEG)</span></label>
+          <div class="file-zone" id="extraZone" onclick="document.getElementById('extraFiles').click()">
+            <div class="file-zone-icon">📎</div>
+            <div class="file-zone-text">Tap to attach more files</div>
+            <div class="file-zone-sub">You can select multiple files at once</div>
+          </div>
+          <input type="file" id="extraFiles" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleMultiFiles(this,'extraZone','extraTags')">
+          <div id="extraTags" style="margin-top:6px;"></div>
+        </div>
+        <p class="hint" style="margin-top:4px;">📁 Files are uploaded securely to Yafast. Only HR staff can access them.</p>
+        <div class="upload-progress" id="uploadProgress">⏳ Uploading files, please wait…</div>
+      </div>
+
       <div class="section-head" style="border-left-color:#16a34a;"><h2>Candidate Declaration</h2></div>
       <div class="card">
         <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:13px 15px;margin-bottom:14px;">
@@ -423,16 +461,68 @@
   function nextStep() { if (currentStep < TOTAL) { currentStep++; showStep(currentStep); } }
   function prevStep() { if (currentStep > 1) { currentStep--; showStep(currentStep); } }
 
+  // ── FILE UPLOAD HELPERS ──
+  function handleSingleFile(input, zoneId, tagsId) {
+    const f = input.files[0];
+    if (!f) return;
+    if (f.size > 5 * 1024 * 1024) { alert('File too large. Maximum size is 5 MB.'); input.value = ''; return; }
+    const zone = document.getElementById(zoneId);
+    zone.classList.add('has-file');
+    zone.innerHTML = '<div class="file-zone-icon">✅</div><div class="file-zone-text">'+f.name+'</div><div class="file-zone-sub">'+((f.size/1024).toFixed(0))+' KB · tap to change</div>';
+    document.getElementById(tagsId).innerHTML = '';
+  }
+
+  function handleMultiFiles(input, zoneId, tagsId) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const oversized = files.filter(f => f.size > 5*1024*1024);
+    if (oversized.length) { alert('These files exceed 5 MB: '+oversized.map(f=>f.name).join(', ')); input.value=''; return; }
+    const zone = document.getElementById(zoneId);
+    zone.classList.add('has-file');
+    zone.innerHTML = '<div class="file-zone-icon">✅</div><div class="file-zone-text">'+files.length+' file'+(files.length>1?'s':'')+' selected</div><div class="file-zone-sub">Tap to change</div>';
+    document.getElementById(tagsId).innerHTML = files.map(f=>'<span class="file-tag">📄 '+f.name+' <span style="color:var(--muted);font-weight:400;">('+((f.size/1024).toFixed(0))+' KB)</span></span>').join('');
+  }
+
+  async function uploadFiles(name, position) {
+    const urls = { passport: null, extras: [] };
+    const slug = (name||'applicant').replace(/\s+/g,'-').toLowerCase();
+    const folder = (position||'general').toLowerCase()+'/'+slug+'-'+Date.now();
+    const prog = document.getElementById('uploadProgress');
+    if (prog) prog.style.display = 'block';
+    try {
+      const pf = document.getElementById('passportFile').files[0];
+      if (pf) {
+        const path = folder+'/passport-'+pf.name;
+        const {error} = await _sb.storage.from('questionnaire-files').upload(path, pf, {upsert:true});
+        if (!error) {
+          const {data:u} = _sb.storage.from('questionnaire-files').getPublicUrl(path);
+          urls.passport = u.publicUrl;
+        }
+      }
+      const ef = document.getElementById('extraFiles').files;
+      for (let i=0;i<ef.length;i++) {
+        const path = folder+'/extra-'+i+'-'+ef[i].name;
+        const {error} = await _sb.storage.from('questionnaire-files').upload(path, ef[i], {upsert:true});
+        if (!error) {
+          const {data:u} = _sb.storage.from('questionnaire-files').getPublicUrl(path);
+          urls.extras.push(u.publicUrl);
+        }
+      }
+    } catch(e) { console.warn('File upload error:', e); }
+    if (prog) prog.style.display = 'none';
+    return urls;
+  }
+
   function collectData() {
     const f = document.getElementById('qForm');
     const d = {};
-    f.querySelectorAll('input:not([type=radio]):not([type=checkbox]), select, textarea').forEach(el => {
+    f.querySelectorAll('input:not([type=radio]):not([type=checkbox]):not([type=file]), select, textarea').forEach(el => {
       if (el.name) d[el.name] = el.value.trim();
     });
     f.querySelectorAll('input[type=radio]:checked').forEach(el => { d[el.name] = el.value; });
     const cbGroups = {};
     f.querySelectorAll('input[type=checkbox]').forEach(el => {
-      if (!el.name || el.name === 'decl_agree') return;
+      if (!el.name || el.name === 'decl_agree' || el.name === 'ticket_deduct_agree') return;
       if (!cbGroups[el.name]) cbGroups[el.name] = [];
       if (el.checked) cbGroups[el.name].push(el.value);
     });
@@ -459,7 +549,11 @@
       currentStep = 1; showStep(1); return;
     }
     const btn = document.getElementById('submitBtn');
-    btn.disabled = true; btn.textContent = 'Submitting…';
+    btn.disabled = true; btn.textContent = 'Uploading files…';
+    const fileUrls = await uploadFiles(name, position||'Housemaid');
+    if (fileUrls.passport) data.file_passport = fileUrls.passport;
+    if (fileUrls.extras.length) data.file_extras = fileUrls.extras;
+    btn.textContent = 'Submitting…';
     try {
       await _sb.from('questionnaires').insert([{ name, phone, position, nationality, data }]);
     } catch(e) { console.error(e); }
@@ -470,9 +564,11 @@
         'Experience: '+(data.years_experience||'N/A'), 'Countries worked: '+(data.countries_worked||'N/A'),
         'English level: '+(data.english_level||'N/A'), 'Passport: '+(data.passport_no||'N/A')+' (Exp: '+(data.passport_expiry||'N/A')+')',
         'Can cook: '+(data.can_cook||'N/A')+(meals?' — '+meals:''),
+        'Passport copy: '+(fileUrls.passport||'Not uploaded'),
+        'Extra files: '+(fileUrls.extras.length?fileUrls.extras.join(' | '):'None'),
         '---','View full answers in Yafast admin panel (Questionnaires tab).'
       ].join('\n');
-      if(NOTIFY_KEY) fetch('https://api.web3forms.com/submit',{
+      fetch('https://api.web3forms.com/submit',{
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ access_key: NOTIFY_KEY, subject:'[Yafast] New HR Questionnaire — '+name+' ('+position+')', message: body, from_name:'Yafast Questionnaire Form' })
       }).catch(()=>{});
