@@ -128,7 +128,7 @@
   <h1>Professional Cleaner — UAE<br>Job Application Questionnaire</h1>
   <p>Complete all sections honestly. This form is confidential.</p>
 </div>
-<div class="age-banner">⚠️ Age Requirement: Applicants must be between 21 and 38 years old</div>
+<div class="age-banner">⚠️ Male candidates only · Age requirement: 21–38 years</div>
 <div class="sponsor-banner">
   <div class="sponsor-inner">
     <div class="sponsor-icon">💰</div>
@@ -154,9 +154,17 @@
           <div class="form-group"><label class="lbl req">Date of Birth</label><input type="date" name="dob" id="dobField" /></div>
         </div>
         <div class="form-group">
-          <label class="lbl req">Age</label>
+          <label class="lbl req">Age <span style="font-weight:400;color:var(--muted)">(21–38 only)</span></label>
           <input type="number" name="age" id="ageField" placeholder="Must be 21–38" min="21" max="38" />
           <div class="age-error-msg" id="ageErrorMsg">❌ Sorry, applicants must be between 21 and 38 years old to apply for this position.</div>
+        </div>
+        <div class="form-group">
+          <label class="lbl req">Gender <span style="font-weight:400;color:var(--muted)">(male candidates only)</span></label>
+          <div class="pills">
+            <div class="pill"><input type="radio" name="gender" id="gen_m" value="Male"><label for="gen_m">Male</label></div>
+            <div class="pill"><input type="radio" name="gender" id="gen_f" value="Female"><label for="gen_f">Female</label></div>
+          </div>
+          <div class="age-error-msg" id="genderErrorMsg">❌ Sorry, this position is for male candidates only.</div>
         </div>
         <div class="form-row">
           <div class="form-group"><label class="lbl req">Nationality</label><input type="text" name="nationality" placeholder="e.g. Malawian" /></div>
@@ -485,6 +493,16 @@
     return true;
   }
 
+  function validateGender() {
+    const selected = document.querySelector('input[name="gender"]:checked');
+    const err = document.getElementById('genderErrorMsg');
+    if (selected && selected.value === 'Female') {
+      err.classList.add('show'); return false;
+    }
+    err.classList.remove('show'); return true;
+  }
+  document.querySelectorAll('input[name="gender"]').forEach(r => r.addEventListener('change', validateGender));
+
   document.getElementById('ageField').addEventListener('input', validateAge);
 
   document.getElementById('dobField').addEventListener('change', function() {
@@ -618,6 +636,10 @@
     const ageNum = parseInt(age, 10);
     if (ageNum && (ageNum < 21 || ageNum > 38)) {
       alert('Sorry, only applicants aged 21–38 can apply for this position.');
+      currentStep = 1; showStep(1); return;
+    }
+    if (data.gender === 'Female') {
+      alert('Sorry, this Cleaning position is for male candidates only.');
       currentStep = 1; showStep(1); return;
     }
     const btn = document.getElementById('submitBtn');
