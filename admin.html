@@ -295,13 +295,20 @@ tr:hover td{background:var(--ground);}
       <div class="login-err" id="loginErr">Incorrect email or password.</div>
     </div>
 
-    <!-- Step 2: Email OTP -->
+    <!-- Step 2: TOTP (Google Authenticator) -->
     <div id="loginStep2" style="display:none;">
       <div class="step-badge"><div class="step-dot done"></div><div class="step-dot active"></div></div>
-      <h2>Check your email</h2>
-      <p class="otp-email-hint">We sent a 6-digit code to</p>
-      <p style="font-weight:700;font-size:.9rem;text-align:center;margin-bottom:20px;" id="otpEmailDisplay"></p>
-      <div class="otp-inputs" id="otpInputs">
+
+      <!-- QR code panel (first-time setup only) -->
+      <div id="authSetupPanel" style="display:none;text-align:center;margin-bottom:16px;">
+        <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:10px;">Scan this QR code with Google Authenticator</p>
+        <img id="qrCodeImg" src="" alt="QR Code" style="width:160px;height:160px;border:2px solid var(--border);border-radius:8px;display:block;margin:0 auto;">
+        <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;">Then enter the 6-digit code below ↓</p>
+      </div>
+
+      <h2 id="authStepTitle">Authenticator Code</h2>
+      <p class="otp-email-hint" id="authStepHint">Enter the 6-digit code from Google Authenticator</p>
+      <div class="otp-inputs">
         <input type="text" inputmode="numeric" maxlength="1" id="otp0">
         <input type="text" inputmode="numeric" maxlength="1" id="otp1">
         <input type="text" inputmode="numeric" maxlength="1" id="otp2">
@@ -309,9 +316,8 @@ tr:hover td{background:var(--ground);}
         <input type="text" inputmode="numeric" maxlength="1" id="otp4">
         <input type="text" inputmode="numeric" maxlength="1" id="otp5">
       </div>
-      <button class="btn-login" id="otpBtn" onclick="verifyOtp()">Verify &amp; Sign In →</button>
-      <div class="login-err" id="otpErr">Invalid or expired code. Please try again.</div>
-      <button class="otp-resend" onclick="resendOtp()">Didn't receive it? Resend code</button>
+      <button class="btn-login" id="otpBtn" onclick="verifyMfa()">Verify &amp; Sign In →</button>
+      <div class="login-err" id="otpErr">Invalid code. Please try again.</div>
     </div>
   </div>
 </div>
@@ -574,8 +580,8 @@ function fmt(ts){ if(!ts) return '—'; return new Date(ts).toLocaleDateString('
 // ── CACHED DATA ──
 let _vacs=[], _apps=[], _enqs=[], _qs=[], vacMap={};
 
-// ── LOGIN (Supabase Auth + Email OTP 2FA) ──
-let _otpEmail='';
+// ── LOGIN (Supabase Auth + TOTP MFA via Google Authenticator) ──
+let _mfaFactorId='', _mfaChallengeId='', _mfaEnrolling=false;
 
 document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 document.getElementById('unInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
@@ -590,7 +596,7 @@ document.getElementById('unInput').addEventListener('keydown', e=>{ if(e.key==='
     });
     inp.addEventListener('keydown',e=>{
       if(e.key==='Backspace'&&!inp.value&&i>0) document.getElementById('otp'+(i-1)).focus();
-      if(e.key==='Enter') verifyOtp();
+      if(e.key==='Enter') verifyMfa();
     });
     inp.addEventListener('paste',e=>{
       const text=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'');
@@ -604,6 +610,12 @@ document.getElementById('unInput').addEventListener('keydown', e=>{ if(e.key==='
     });
   }
 })();
+
+function openAdmin(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  loadAll();
+}
 
 async function doLogin(){
   const email=document.getElementById('unInput').value.trim();
@@ -623,51 +635,80 @@ async function doLogin(){
     return;
   }
 
-  // Password verified — sign out immediately, require OTP next
-  await db.auth.signOut();
-  _otpEmail=email;
+  await checkMfa();
+}
 
-  const {error:otpErr}=await db.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
-  if(otpErr){
-    errEl.textContent='Could not send verification code. Please try again.';
-    errEl.style.display='block';
+async function checkMfa(){
+  const {data:{currentLevel,nextLevel}}=await db.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(nextLevel==='aal2'){
+    // TOTP enrolled — require authenticator code
+    const {data:factors}=await db.auth.mfa.listFactors();
+    const totp=factors&&factors.totp&&factors.totp[0];
+    if(!totp){ await startEnrollment(); return; }
+    _mfaFactorId=totp.id;
+    _mfaEnrolling=false;
+    const {data:ch,error:cErr}=await db.auth.mfa.challenge({factorId:_mfaFactorId});
+    if(cErr){
+      document.getElementById('loginErr').textContent='Error starting 2FA. Try again.';
+      document.getElementById('loginErr').style.display='block';
+      return;
+    }
+    _mfaChallengeId=ch.id;
+    document.getElementById('authSetupPanel').style.display='none';
+    document.getElementById('authStepTitle').textContent='Authenticator Code';
+    document.getElementById('authStepHint').textContent='Enter the 6-digit code from Google Authenticator';
+  } else {
+    // No TOTP enrolled yet — guide through first-time setup
+    await startEnrollment();
     return;
   }
-
-  document.getElementById('otpEmailDisplay').textContent=email;
   document.getElementById('loginStep1').style.display='none';
   document.getElementById('loginStep2').style.display='block';
   document.getElementById('otp0').focus();
 }
 
-async function verifyOtp(){
-  const token=[0,1,2,3,4,5].map(i=>document.getElementById('otp'+i).value).join('');
+async function startEnrollment(){
+  const {data:enrollment,error}=await db.auth.mfa.enroll({factorType:'totp'});
+  if(error){
+    document.getElementById('loginErr').textContent='Could not set up authenticator. Please try again.';
+    document.getElementById('loginErr').style.display='block';
+    return;
+  }
+  _mfaFactorId=enrollment.id;
+  _mfaEnrolling=true;
+  document.getElementById('qrCodeImg').src=enrollment.totp.qr_code;
+  document.getElementById('authSetupPanel').style.display='block';
+  document.getElementById('authStepTitle').textContent='Set Up Google Authenticator';
+  document.getElementById('authStepHint').textContent='After scanning, enter the 6-digit code shown in the app';
+  document.getElementById('loginStep1').style.display='none';
+  document.getElementById('loginStep2').style.display='block';
+  document.getElementById('otp0').focus();
+}
+
+async function verifyMfa(){
+  const code=[0,1,2,3,4,5].map(i=>document.getElementById('otp'+i).value).join('');
   const errEl=document.getElementById('otpErr');
   const btn=document.getElementById('otpBtn');
   errEl.style.display='none';
-  if(token.length<6){ errEl.textContent='Please enter all 6 digits.'; errEl.style.display='block'; return; }
+  if(code.length<6){ errEl.textContent='Please enter all 6 digits.'; errEl.style.display='block'; return; }
   btn.textContent='Verifying…';
   btn.disabled=true;
-  const {error}=await db.auth.verifyOtp({email:_otpEmail,token,type:'email'});
+  let verifyErr;
+  if(_mfaEnrolling){
+    const {error}=await db.auth.mfa.challengeAndVerify({factorId:_mfaFactorId,code});
+    verifyErr=error;
+  } else {
+    const {error}=await db.auth.mfa.verify({factorId:_mfaFactorId,challengeId:_mfaChallengeId,code});
+    verifyErr=error;
+  }
   btn.textContent='Verify & Sign In →';
   btn.disabled=false;
-  if(error){
-    errEl.textContent='Invalid or expired code. Please try again.';
+  if(verifyErr){
+    errEl.textContent='Invalid code. Please try again.';
     errEl.style.display='block';
     return;
   }
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('app').style.display='flex';
-  loadAll();
-}
-
-async function resendOtp(){
-  const btn=document.querySelector('.otp-resend');
-  btn.textContent='Sending…';
-  btn.disabled=true;
-  await db.auth.signInWithOtp({email:_otpEmail,options:{shouldCreateUser:false}});
-  btn.textContent='Code resent! Check your inbox';
-  setTimeout(()=>{ btn.textContent="Didn't receive it? Resend code"; btn.disabled=false; },5000);
+  openAdmin();
 }
 
 async function doLogout(){
@@ -676,11 +717,11 @@ async function doLogout(){
 }
 
 // Resume existing session on page load
-db.auth.getSession().then(({data:{session}})=>{
-  if(session){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('app').style.display='flex';
-    loadAll();
+db.auth.getSession().then(async ({data:{session}})=>{
+  if(!session) return;
+  const {data:{currentLevel,nextLevel}}=await db.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(currentLevel==='aal2'||(nextLevel==='aal1'&&currentLevel==='aal1')){
+    openAdmin();
   }
 });
 
