@@ -272,15 +272,15 @@ tr:hover td{background:var(--ground);}
     <h2>Admin Portal</h2>
     <p>Sign in to manage vacancies and content.</p>
     <div class="field">
-      <label>Username</label>
-      <input type="text" id="unInput" placeholder="Enter username" autocomplete="off">
+      <label>Email</label>
+      <input type="email" id="unInput" placeholder="Enter email address" autocomplete="email">
     </div>
     <div class="field">
       <label>Password</label>
       <input type="password" id="pwInput" placeholder="Enter password">
     </div>
     <button class="btn-login" onclick="doLogin()">Sign In →</button>
-    <div class="login-err" id="loginErr">Incorrect username or password.</div>
+    <div class="login-err" id="loginErr">Incorrect email or password.</div>
   </div>
 </div>
 
@@ -542,38 +542,39 @@ function fmt(ts){ if(!ts) return '—'; return new Date(ts).toLocaleDateString('
 // ── CACHED DATA ──
 let _vacs=[], _apps=[], _enqs=[], _qs=[], vacMap={};
 
-// ── CREDENTIALS ──
-// Stored as SHA-256 hashes — plaintext password is never in source.
-const DEFAULT_HASH_U='314a53fef04a80352e49cf0ed9971f758fac3bbea54c7bfdfda69be6b01f2b23';
-const DEFAULT_HASH_P='2e534f08ad6bde35613a1cf58c86af2edb885cb2a916bce310a1696cba664f76';
-async function sha256(s){ const b=new TextEncoder().encode(s); const h=await crypto.subtle.digest('SHA-256',b); return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join(''); }
-function getCreds(){ return {uh:localStorage.getItem('yf_admin_uh')||DEFAULT_HASH_U, ph:localStorage.getItem('yf_admin_ph')||DEFAULT_HASH_P}; }
-
-// ── LOGIN ──
+// ── LOGIN (Supabase Auth) ──
 document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 document.getElementById('unInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 
 async function doLogin(){
-  const u=document.getElementById('unInput').value.trim();
-  const p=document.getElementById('pwInput').value;
-  const c=getCreds();
-  const [uh,ph]=await Promise.all([sha256(u),sha256(p)]);
-  if(uh===c.uh&&ph===c.ph){
-    localStorage.setItem('yf_admin_session','1');
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('app').style.display='flex';
-    loadAll();
-  } else {
-    document.getElementById('loginErr').style.display='block';
+  const email=document.getElementById('unInput').value.trim();
+  const password=document.getElementById('pwInput').value;
+  const errEl=document.getElementById('loginErr');
+  errEl.style.display='none';
+  const {error}=await db.auth.signInWithPassword({email,password});
+  if(error){
+    errEl.textContent='Incorrect email or password.';
+    errEl.style.display='block';
+    return;
   }
-}
-function doLogout(){ localStorage.removeItem('yf_admin_session'); location.reload(); }
-
-if(localStorage.getItem('yf_admin_session')==='1'){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='flex';
   loadAll();
 }
+
+async function doLogout(){
+  await db.auth.signOut();
+  location.reload();
+}
+
+// Resume existing session on page load
+db.auth.getSession().then(({data:{session}})=>{
+  if(session){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    loadAll();
+  }
+});
 
 // ── NAVIGATION ──
 function showPanel(name, el, bnId){
@@ -1054,20 +1055,10 @@ async function deleteQuestionnaire(id){
 }
 
 // ── SETTINGS ──
-async function saveCredentials(){
-  const u=document.getElementById('newUser').value.trim();
-  const p=document.getElementById('newPass').value;
-  const c=document.getElementById('confirmPass').value;
+function saveCredentials(){
   const msg=document.getElementById('settings-msg');
-  if(!u||!p){ msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Please fill in all fields.'; return; }
-  if(p!==c){ msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Passwords do not match.'; return; }
-  const [uh,ph]=await Promise.all([sha256(u),sha256(p)]);
-  localStorage.setItem('yf_admin_uh',uh);
-  localStorage.setItem('yf_admin_ph',ph);
-  msg.style.display='block';msg.style.color='var(--green)';msg.textContent='Credentials updated successfully.';
-  document.getElementById('newUser').value='';
-  document.getElementById('newPass').value='';
-  document.getElementById('confirmPass').value='';
+  msg.style.display='block';msg.style.color='var(--muted)';
+  msg.textContent='To change your password, go to Supabase → Authentication → Users and update it there.';
 }
 
 document.getElementById('vacancyModal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
