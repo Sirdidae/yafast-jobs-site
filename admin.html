@@ -46,6 +46,16 @@ input,textarea,select{font-family:inherit;}
 .btn-login{width:100%;background:var(--navy);color:#fff;border:none;border-radius:var(--radius-md);padding:12px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.04em;margin-top:8px;transition:background .2s;}
 .btn-login:hover{background:var(--sky);}
 .login-err{color:var(--red);font-size:.83rem;margin-top:10px;display:none;}
+.otp-inputs{display:flex;gap:8px;justify-content:center;margin:20px 0;}
+.otp-inputs input{width:44px;height:52px;text-align:center;font-size:1.4rem;font-weight:700;border:2px solid var(--border);border-radius:8px;outline:none;transition:border-color .2s;font-family:'Montserrat',sans-serif;}
+.otp-inputs input:focus{border-color:var(--sky);}
+.otp-email-hint{font-size:.82rem;color:var(--text-muted);text-align:center;margin-bottom:4px;}
+.otp-resend{font-size:.8rem;color:var(--sky);cursor:pointer;text-align:center;margin-top:10px;background:none;border:none;padding:0;width:100%;}
+.otp-resend:hover{text-decoration:underline;}
+.step-badge{display:flex;gap:6px;justify-content:center;margin-bottom:20px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);}
+.step-dot.active{background:var(--sky);}
+.step-dot.done{background:#16a34a;}
 
 /* ── LAYOUT ── */
 #app{display:none;height:100vh;overflow:hidden;}
@@ -265,22 +275,44 @@ tr:hover td{background:var(--ground);}
   <div class="login-box">
     <div class="login-logo">
       <img src="logo.png" alt="Yafast">
-      <div>
-        <span>YAFAST</span>
+      <div><span>YAFAST</span></div>
+    </div>
+
+    <!-- Step 1: Email + Password -->
+    <div id="loginStep1">
+      <div class="step-badge"><div class="step-dot active"></div><div class="step-dot"></div></div>
+      <h2>Admin Portal</h2>
+      <p>Sign in to manage vacancies and content.</p>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="unInput" placeholder="Enter email address" autocomplete="email">
       </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="pwInput" placeholder="Enter password">
+      </div>
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">Continue →</button>
+      <div class="login-err" id="loginErr">Incorrect email or password.</div>
     </div>
-    <h2>Admin Portal</h2>
-    <p>Sign in to manage vacancies and content.</p>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="unInput" placeholder="Enter email address" autocomplete="email">
+
+    <!-- Step 2: Email OTP -->
+    <div id="loginStep2" style="display:none;">
+      <div class="step-badge"><div class="step-dot done"></div><div class="step-dot active"></div></div>
+      <h2>Check your email</h2>
+      <p class="otp-email-hint">We sent a 6-digit code to</p>
+      <p style="font-weight:700;font-size:.9rem;text-align:center;margin-bottom:20px;" id="otpEmailDisplay"></p>
+      <div class="otp-inputs" id="otpInputs">
+        <input type="text" inputmode="numeric" maxlength="1" id="otp0">
+        <input type="text" inputmode="numeric" maxlength="1" id="otp1">
+        <input type="text" inputmode="numeric" maxlength="1" id="otp2">
+        <input type="text" inputmode="numeric" maxlength="1" id="otp3">
+        <input type="text" inputmode="numeric" maxlength="1" id="otp4">
+        <input type="text" inputmode="numeric" maxlength="1" id="otp5">
+      </div>
+      <button class="btn-login" id="otpBtn" onclick="verifyOtp()">Verify &amp; Sign In →</button>
+      <div class="login-err" id="otpErr">Invalid or expired code. Please try again.</div>
+      <button class="otp-resend" onclick="resendOtp()">Didn't receive it? Resend code</button>
     </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="pwInput" placeholder="Enter password">
-    </div>
-    <button class="btn-login" onclick="doLogin()">Sign In →</button>
-    <div class="login-err" id="loginErr">Incorrect email or password.</div>
   </div>
 </div>
 
@@ -542,24 +574,100 @@ function fmt(ts){ if(!ts) return '—'; return new Date(ts).toLocaleDateString('
 // ── CACHED DATA ──
 let _vacs=[], _apps=[], _enqs=[], _qs=[], vacMap={};
 
-// ── LOGIN (Supabase Auth) ──
+// ── LOGIN (Supabase Auth + Email OTP 2FA) ──
+let _otpEmail='';
+
 document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 document.getElementById('unInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+// OTP digit auto-advance + paste support
+(function(){
+  for(let i=0;i<6;i++){
+    const inp=document.getElementById('otp'+i);
+    inp.addEventListener('input',()=>{
+      inp.value=inp.value.replace(/\D/g,'').slice(0,1);
+      if(inp.value&&i<5) document.getElementById('otp'+(i+1)).focus();
+    });
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Backspace'&&!inp.value&&i>0) document.getElementById('otp'+(i-1)).focus();
+      if(e.key==='Enter') verifyOtp();
+    });
+    inp.addEventListener('paste',e=>{
+      const text=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'');
+      for(let j=0;j<6&&j<text.length;j++){
+        const t=document.getElementById('otp'+j);
+        if(t) t.value=text[j];
+      }
+      const last=Math.min(5,text.length-1);
+      if(last>=0) document.getElementById('otp'+last).focus();
+      e.preventDefault();
+    });
+  }
+})();
 
 async function doLogin(){
   const email=document.getElementById('unInput').value.trim();
   const password=document.getElementById('pwInput').value;
   const errEl=document.getElementById('loginErr');
+  const btn=document.getElementById('loginBtn');
   errEl.style.display='none';
+  btn.textContent='Checking…';
+  btn.disabled=true;
+
   const {error}=await db.auth.signInWithPassword({email,password});
+  btn.textContent='Continue →';
+  btn.disabled=false;
   if(error){
     errEl.textContent='Incorrect email or password.';
+    errEl.style.display='block';
+    return;
+  }
+
+  // Password verified — sign out immediately, require OTP next
+  await db.auth.signOut();
+  _otpEmail=email;
+
+  const {error:otpErr}=await db.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
+  if(otpErr){
+    errEl.textContent='Could not send verification code. Please try again.';
+    errEl.style.display='block';
+    return;
+  }
+
+  document.getElementById('otpEmailDisplay').textContent=email;
+  document.getElementById('loginStep1').style.display='none';
+  document.getElementById('loginStep2').style.display='block';
+  document.getElementById('otp0').focus();
+}
+
+async function verifyOtp(){
+  const token=[0,1,2,3,4,5].map(i=>document.getElementById('otp'+i).value).join('');
+  const errEl=document.getElementById('otpErr');
+  const btn=document.getElementById('otpBtn');
+  errEl.style.display='none';
+  if(token.length<6){ errEl.textContent='Please enter all 6 digits.'; errEl.style.display='block'; return; }
+  btn.textContent='Verifying…';
+  btn.disabled=true;
+  const {error}=await db.auth.verifyOtp({email:_otpEmail,token,type:'email'});
+  btn.textContent='Verify & Sign In →';
+  btn.disabled=false;
+  if(error){
+    errEl.textContent='Invalid or expired code. Please try again.';
     errEl.style.display='block';
     return;
   }
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='flex';
   loadAll();
+}
+
+async function resendOtp(){
+  const btn=document.querySelector('.otp-resend');
+  btn.textContent='Sending…';
+  btn.disabled=true;
+  await db.auth.signInWithOtp({email:_otpEmail,options:{shouldCreateUser:false}});
+  btn.textContent='Code resent! Check your inbox';
+  setTimeout(()=>{ btn.textContent="Didn't receive it? Resend code"; btn.disabled=false; },5000);
 }
 
 async function doLogout(){
