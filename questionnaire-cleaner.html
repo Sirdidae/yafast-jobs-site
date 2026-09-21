@@ -190,6 +190,15 @@
           <div class="form-group"><label class="lbl">Emergency Contact Phone</label><input type="tel" name="emergency_phone" placeholder="+265 9XX XXX XXX" /></div>
         </div>
       </div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl req">Position Applied For</label>
+          <div id="positionPills" class="pills">
+            <span style="font-size:13px;color:var(--muted);">Loading available positions…</span>
+          </div>
+          <div id="positionErr" style="font-size:12px;color:var(--muted);margin-top:4px;display:none;"></div>
+        </div>
+      </div>
     </div>
 
     <!-- ══ STEP 2: WORK EXPERIENCE ══ -->
@@ -466,6 +475,27 @@
     'https://kefsvaettxwuzrusufmi.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZnN2YWV0dHh3dXpydXN1Zm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTE3MzQsImV4cCI6MjEwNTI2NzczNH0.u7yPSyKzets54SQmrJ72d7MqRK2XuZnfanp3ZIALxK8'
   );
+
+  (async function loadPositions() {
+    const container = document.getElementById('positionPills');
+    const errEl = document.getElementById('positionErr');
+    const { data, error } = await _sb
+      .from('vacancies')
+      .select('id, title')
+      .eq('sector', 'Cleaning')
+      .eq('status', 'Active')
+      .order('created_at', { ascending: false });
+    if (error || !data || !data.length) {
+      container.innerHTML = '';
+      errEl.textContent = 'No cleaning vacancies are currently available. Please check back soon.';
+      errEl.style.display = 'block';
+      return;
+    }
+    container.innerHTML = data.map((v, i) => {
+      const id = 'pos_' + i;
+      return `<div class="pill"><input type="radio" name="position" id="${id}" value="${v.title.replace(/"/g,'&quot;')}"><label for="${id}">${v.title}</label></div>`;
+    }).join('');
+  })();
   const NOTIFY_KEY = 'face650a-59f4-42d9-9618-dd67a24e77de';
 
   let currentStep = 1;
@@ -628,7 +658,7 @@
     const phone = data.phone || '';
     const nationality = data.nationality || '';
     const age = data.age || '';
-    const position = 'Cleaner';
+    const position = data.position || 'Cleaner';
     if (!name || !phone) {
       alert('Please fill in your Full Name and Phone number on Step 1.');
       currentStep = 1; showStep(1); return;
