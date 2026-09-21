@@ -410,12 +410,58 @@
           <input type="file" id="extraFiles" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleMultiFiles(this,'extraZone','extraTags')">
           <div id="extraTags" style="margin-top:6px;"></div>
         </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label class="lbl req">Proof of Experience <span style="font-weight:400;color:var(--muted)">(required · PDF, PNG or JPEG · max 5 MB each)</span></label>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px;">Accepted proof: <strong>(1)</strong> An experience / reference letter from a family or employer you worked for previously, <strong>or (2)</strong> Passport pages clearly showing entry and exit stamps for countries where you worked as a domestic helper.</p>
+          <div class="file-zone" id="expProofZone" onclick="document.getElementById('expProofFiles').click()">
+            <div class="file-zone-icon">📋</div>
+            <div class="file-zone-text">Tap to attach proof of experience</div>
+            <div class="file-zone-sub">Experience letter or passport stamps · PDF, PNG or JPEG</div>
+          </div>
+          <input type="file" id="expProofFiles" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleMultiFiles(this,'expProofZone','expProofTags')">
+          <div id="expProofTags" style="margin-top:6px;"></div>
+        </div>
         <p class="hint" style="margin-top:4px;">📁 Files are uploaded securely to Yafast. Only HR staff can access them.</p>
         <div class="upload-progress" id="uploadProgress">⏳ Uploading files, please wait…</div>
       </div>
 
       <div class="section-head" style="border-left-color:#16a34a;"><h2>Candidate Declaration</h2></div>
       <div class="card">
+        <!-- ── EMPLOYMENT TERMS ── -->
+        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:13px 15px;margin-bottom:14px;">
+          <p style="font-size:13px;font-weight:700;color:#7c2d12;margin-bottom:12px;">📋 Terms of Employment — Read Carefully &amp; Agree</p>
+
+          <!-- Duty hours -->
+          <div style="margin-bottom:10px;padding:11px 13px;background:white;border-radius:7px;border:1px solid #fed7aa;">
+            <p style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">⏰ Working Hours: 12 Hours or More Per Day</p>
+            <p style="font-size:12px;color:#374151;line-height:1.65;margin-bottom:9px;">This position requires <strong>12 hours or more of active duty per day</strong>. Duties may begin early morning and continue into the evening based on the employer's household schedule.</p>
+            <label class="cb-item" style="border-color:#f97316;cursor:pointer;">
+              <input type="checkbox" name="agree_duty_hours" id="agree_duty_hours" value="agreed">
+              <span style="font-size:13px;font-weight:600;color:#c2410c;">I understand and agree to work 12+ hours per day ✓</span>
+            </label>
+          </div>
+
+          <!-- No day off -->
+          <div style="margin-bottom:10px;padding:11px 13px;background:white;border-radius:7px;border:1px solid #fed7aa;">
+            <p style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">📅 Day Off: No Weekly Day Off</p>
+            <p style="font-size:12px;color:#374151;line-height:1.65;margin-bottom:9px;">This position does <strong>not include a weekly day off</strong>. You are expected to be available to your employer seven days a week as required by the household.</p>
+            <label class="cb-item" style="border-color:#f97316;cursor:pointer;">
+              <input type="checkbox" name="agree_no_dayoff" id="agree_no_dayoff" value="agreed">
+              <span style="font-size:13px;font-weight:600;color:#c2410c;">I understand and accept that there is no day off ✓</span>
+            </label>
+          </div>
+
+          <!-- 3-year contract -->
+          <div style="padding:11px 13px;background:white;border-radius:7px;border:1px solid #fed7aa;">
+            <p style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">📝 Contract: 3 Years — Minimum Commitment 24 Months</p>
+            <p style="font-size:12px;color:#374151;line-height:1.65;margin-bottom:9px;">The employment contract is for <strong>3 years (36 months)</strong>. You must commit to completing a <strong>minimum of 24 months</strong> of service. Leaving the employer before 24 months may result in consequences as specified in your employment contract.</p>
+            <label class="cb-item" style="border-color:#f97316;cursor:pointer;">
+              <input type="checkbox" name="agree_contract_min" id="agree_contract_min" value="agreed">
+              <span style="font-size:13px;font-weight:600;color:#c2410c;">I agree to the 3-year contract and commit to a minimum of 24 months ✓</span>
+            </label>
+          </div>
+        </div>
+
         <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:13px 15px;margin-bottom:14px;">
           <p style="font-size:13px;font-weight:700;color:#14532d;margin-bottom:6px;">✈️ Air Ticket Deduction Acknowledgement</p>
           <p style="font-size:12px;color:#166534;line-height:1.65;">I understand that the employer will arrange and pay for my flight ticket to the UAE upfront. However, the cost of the air ticket will be <strong>deducted from my monthly salary over the first 3 months</strong> of employment. I accept this condition and understand it is separate from visa and recruitment processing fees, which are covered by the employer.</p>
@@ -558,7 +604,7 @@
   }
 
   async function uploadFiles(name, position) {
-    const urls = { passport: null, extras: [] };
+    const urls = { passport: null, extras: [], expProof: [] };
     const slug = (name||'applicant').replace(/\s+/g,'-').toLowerCase();
     const folder = (position||'general').toLowerCase()+'/'+slug+'-'+Date.now();
     const prog = document.getElementById('uploadProgress');
@@ -582,6 +628,15 @@
           urls.extras.push(u.publicUrl);
         }
       }
+      const epf = document.getElementById('expProofFiles').files;
+      for (let i=0;i<epf.length;i++) {
+        const path = folder+'/exp-proof-'+i+'-'+epf[i].name;
+        const {error} = await _sb.storage.from('questionnaire-files').upload(path, epf[i], {upsert:true});
+        if (!error) {
+          const {data:u} = _sb.storage.from('questionnaire-files').getPublicUrl(path);
+          urls.expProof.push(u.publicUrl);
+        }
+      }
     } catch(e) { console.warn('File upload error:', e); }
     if (prog) prog.style.display = 'none';
     return urls;
@@ -596,7 +651,7 @@
     f.querySelectorAll('input[type=radio]:checked').forEach(el => { d[el.name] = el.value; });
     const cbGroups = {};
     f.querySelectorAll('input[type=checkbox]').forEach(el => {
-      if (!el.name || el.name === 'decl_agree' || el.name === 'ticket_deduct_agree') return;
+      if (!el.name || el.name === 'decl_agree' || el.name === 'ticket_deduct_agree' || el.name === 'agree_duty_hours' || el.name === 'agree_no_dayoff' || el.name === 'agree_contract_min') return;
       if (!cbGroups[el.name]) cbGroups[el.name] = [];
       if (el.checked) cbGroups[el.name].push(el.value);
     });
@@ -605,6 +660,22 @@
   }
 
   async function submitQuestionnaire() {
+    if (!document.getElementById('agree_duty_hours').checked) {
+      alert('Please confirm that you agree to work 12+ hours per day.');
+      return;
+    }
+    if (!document.getElementById('agree_no_dayoff').checked) {
+      alert('Please confirm that you understand there is no day off.');
+      return;
+    }
+    if (!document.getElementById('agree_contract_min').checked) {
+      alert('Please confirm that you agree to the 3-year contract with a minimum commitment of 24 months.');
+      return;
+    }
+    if (!document.getElementById('expProofFiles').files.length) {
+      alert('Please attach your proof of experience (experience letter or passport stamps) before submitting.');
+      return;
+    }
     if (!document.getElementById('ticket_deduct_agree').checked) {
       alert('Please confirm that you understand and accept the air ticket salary deduction over 3 months.');
       return;
@@ -636,6 +707,10 @@
     const fileUrls = await uploadFiles(name, position||'Housemaid');
     if (fileUrls.passport) data.file_passport = fileUrls.passport;
     if (fileUrls.extras.length) data.file_extras = fileUrls.extras;
+    if (fileUrls.expProof.length) data.file_exp_proof = fileUrls.expProof;
+    data.agreed_duty_hours = document.getElementById('agree_duty_hours').checked ? 'Yes' : 'No';
+    data.agreed_no_dayoff = document.getElementById('agree_no_dayoff').checked ? 'Yes' : 'No';
+    data.agreed_contract_min_24mo = document.getElementById('agree_contract_min').checked ? 'Yes' : 'No';
     btn.textContent = 'Submitting…';
     try {
       await _sb.from('questionnaires').insert([{ name, phone, position, nationality, data }]);
@@ -648,7 +723,9 @@
         'English level: '+(data.english_level||'N/A'), 'Passport: '+(data.passport_no||'N/A')+' (Exp: '+(data.passport_expiry||'N/A')+')',
         'Can cook: '+(data.can_cook||'N/A')+(meals?' — '+meals:''),
         'Passport copy: '+(fileUrls.passport||'Not uploaded'),
+        'Experience proof: '+(fileUrls.expProof.length?fileUrls.expProof.join(' | '):'Not uploaded'),
         'Extra files: '+(fileUrls.extras.length?fileUrls.extras.join(' | '):'None'),
+        'Agreed — 12h+ duty: Yes | No day off: Yes | Min 24mo contract: Yes',
         '---','View full answers in Yafast admin panel (Questionnaires tab).'
       ].join('\n');
       fetch('https://api.web3forms.com/submit',{
