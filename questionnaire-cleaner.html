@@ -43,7 +43,8 @@
     @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
     label.lbl { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
-    label.lbl.req::after { content: ' *'; color: #e53e3e; }
+    label.lbl::after { content: ' *'; color: #e53e3e; }
+    label.lbl.opt::after { content: ''; }
 
     input[type=text], input[type=tel], input[type=email], input[type=date],
     input[type=number], select, textarea {
@@ -312,7 +313,7 @@
         <div class="sk-row"><span class="sk-label">Can you lift and carry heavy cleaning equipment (up to 20 kg)?</span><div class="sk-yn"><input type="radio" name="lift_heavy" id="lh_y" value="Yes"><label for="lh_y">Yes</label><input type="radio" name="lift_heavy" id="lh_n" value="No"><label for="lh_n">No</label></div></div>
         <div class="sk-row"><span class="sk-label">Can you work in hot outdoor environments?</span><div class="sk-yn"><input type="radio" name="work_heat" id="wh_y" value="Yes"><label for="wh_y">Yes</label><input type="radio" name="work_heat" id="wh_n" value="No"><label for="wh_n">No</label></div></div>
         <div class="sk-row"><span class="sk-label">Do you have any medical conditions that may affect physical work?</span><div class="sk-yn"><input type="radio" name="medical_issues" id="mi_y" value="Yes"><label for="mi_y">Yes</label><input type="radio" name="medical_issues" id="mi_n" value="No"><label for="mi_n">No</label></div></div>
-        <div class="form-group" style="margin-top:10px;"><label class="lbl">If yes, please describe the condition:</label><textarea name="medical_details" placeholder="Only if applicable…" style="min-height:55px;"></textarea></div>
+        <div class="form-group" style="margin-top:10px;"><label class="lbl opt">If yes, please describe the condition:</label><textarea name="medical_details" placeholder="Only if applicable…" style="min-height:55px;"></textarea></div>
       </div>
 
       <div class="section-head"><h2>Work Attitude &amp; Personality</h2></div>
@@ -398,8 +399,8 @@
         <hr class="divider">
         <p class="sub-label">Reference 2 (optional)</p>
         <div class="form-row">
-          <div class="form-group"><label class="lbl">Reference Name</label><input type="text" name="ref2_name" placeholder="Full name" /></div>
-          <div class="form-group"><label class="lbl">Phone Number</label><input type="tel" name="ref2_phone" placeholder="+XXX XX XXX XXXX" /></div>
+          <div class="form-group"><label class="lbl opt">Reference Name</label><input type="text" name="ref2_name" placeholder="Full name" /></div>
+          <div class="form-group"><label class="lbl opt">Phone Number</label><input type="tel" name="ref2_phone" placeholder="+XXX XX XXX XXXX" /></div>
         </div>
       </div>
 
@@ -498,6 +499,101 @@
   })();
   const NOTIFY_KEY = 'face650a-59f4-42d9-9618-dd67a24e77de';
 
+  // Fields excluded from mandatory validation (conditional or explicitly optional)
+  const OPTIONAL_FIELDS = new Set([
+    'ref2_name', 'ref2_phone',
+    'medical_details'  // conditional on medical_issues = Yes
+  ]);
+
+  function showStepError(msg) {
+    let b = document.getElementById('stepErrBanner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'stepErrBanner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#dc2626;color:white;padding:12px 16px;font-size:13px;font-weight:700;z-index:300;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.3);display:none;';
+      document.body.prepend(b);
+    }
+    b.textContent = msg;
+    b.style.display = 'block';
+    clearTimeout(b._t);
+    b._t = setTimeout(() => { b.style.display = 'none'; }, 5000);
+  }
+
+  function clearStepHighlights(step) {
+    step.querySelectorAll('input, select, textarea').forEach(el => { el.style.borderColor = ''; el.style.boxShadow = ''; });
+    step.querySelectorAll('.yn, .pills, .sk-yn, .cb-grid').forEach(c => { c.style.outline = ''; c.style.borderRadius = ''; });
+    step.querySelectorAll('.file-zone').forEach(z => { z.style.borderColor = ''; });
+  }
+
+  function validateStep(n) {
+    const step = document.getElementById('step' + n);
+    clearStepHighlights(step);
+    let firstErr = null;
+
+    function fail(el) {
+      if (!el) return;
+      const isField = el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA';
+      if (isField) { el.style.borderColor = 'var(--red)'; el.style.boxShadow = '0 0 0 3px rgba(220,38,38,.15)'; }
+      else { el.style.outline = '2px solid var(--red)'; el.style.borderRadius = '8px'; }
+      if (!firstErr) firstErr = el;
+    }
+
+    // 1. All text / number / date / tel / select / textarea fields
+    step.querySelectorAll('input:not([type=radio]):not([type=checkbox]):not([type=file]), select, textarea').forEach(el => {
+      if (!el.name || OPTIONAL_FIELDS.has(el.name)) return;
+      if (!el.value.trim()) fail(el);
+    });
+
+    // 2. Every radio group must have a selection
+    const radioNames = new Set();
+    step.querySelectorAll('input[type=radio]').forEach(r => radioNames.add(r.name));
+    radioNames.forEach(name => {
+      if (OPTIONAL_FIELDS.has(name)) return;
+      if (!step.querySelector('input[name="' + name + '"]:checked')) {
+        const first = step.querySelector('input[name="' + name + '"]');
+        const container = first && (first.closest('.yn') || first.closest('.pills') || first.closest('.sk-yn'));
+        fail(container || first);
+      }
+    });
+
+    // 3. Step 2: facility_types (at least one, only if prev_cleaning = Yes)
+    if (n === 2) {
+      const prevCl = step.querySelector('input[name="prev_cleaning"]:checked');
+      if (prevCl && prevCl.value === 'Yes') {
+        if (!step.querySelector('input[name="facility_types"]:checked')) {
+          fail(step.querySelector('.cb-grid'));
+        }
+      }
+    }
+
+    // 4. Step 3: equipment (at least one required)
+    if (n === 3) {
+      if (!step.querySelector('input[name="equipment"]:checked')) {
+        fail(step.querySelector('.cb-grid'));
+      }
+    }
+
+    // 5. Step 5: languages (at least one) + passport file required
+    if (n === 5) {
+      if (!step.querySelector('input[name="languages"]:checked')) {
+        fail(step.querySelector('.cb-grid'));
+      }
+      const pf = document.getElementById('passportFile');
+      if (!pf.files.length) {
+        const pz = document.getElementById('passportZone');
+        pz.style.borderColor = 'var(--red)';
+        if (!firstErr) firstErr = pz;
+      }
+    }
+
+    if (firstErr) {
+      firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showStepError('⚠️ Please complete all required fields before continuing.');
+      return false;
+    }
+    return true;
+  }
+
   let currentStep = 1;
   const TOTAL = 5;
   const LABELS = [
@@ -559,18 +655,7 @@
   }
 
   function nextStep() {
-    if (currentStep === 1) {
-      const name = document.querySelector('[name=full_name]').value.trim();
-      const phone = document.querySelector('[name=phone]').value.trim();
-      if (!name || !phone) {
-        alert('Please fill in your Full Name and Phone number.');
-        return;
-      }
-      if (!validateAge()) {
-        alert('Sorry, this position requires applicants to be between 21 and 38 years old.');
-        return;
-      }
-    }
+    if (!validateStep(currentStep)) return;
     if (currentStep < TOTAL) { currentStep++; showStep(currentStep); }
   }
   function prevStep() { if (currentStep > 1) { currentStep--; showStep(currentStep); } }
