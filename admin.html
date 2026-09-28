@@ -1029,7 +1029,7 @@ function renderQuestionnaires(){
       <div id="qd${i}" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
         <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
           ${commonRows}${isCleaner?cleanerRows:housemaidRows}
-          ${(d.file_passport||d.file_extras)?`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">📁 Uploaded Documents</td></tr>${d.file_passport?`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Passport Copy</td><td><a href="${esc(d.file_passport)}" target="_blank" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`:''}${(d.file_extras&&d.file_extras.length)?d.file_extras.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Extra File ${xi+1}</td><td><a href="${esc(u)}" target="_blank" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}`:'' }
+          ${(d.file_passport||d.file_extras||d.file_exp_proof)?`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">📁 Uploaded Documents</td></tr>${d.file_passport?`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Passport Copy</td><td><a href="#" onclick="openSignedFile(event,'${esc(d.file_passport)}')" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`:''}${(d.file_extras&&d.file_extras.length)?d.file_extras.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Extra File ${xi+1}</td><td><a href="#" onclick="openSignedFile(event,'${esc(u)}')" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}${(d.file_exp_proof&&d.file_exp_proof.length)?d.file_exp_proof.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Exp. Proof ${xi+1}</td><td><a href="#" onclick="openSignedFile(event,'${esc(u)}')" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}`:'' }
         </table>
       </div>
     </div>`;
@@ -1037,7 +1037,24 @@ function renderQuestionnaires(){
 }
 function toggleQ(id){ const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
 
-function printQuestionnaire(idx){
+// Generate a 1-hour signed URL for a private storage file, or open a legacy public URL directly
+async function openSignedFile(e, path){
+  e.preventDefault();
+  if(path.startsWith('https://')){ window.open(path,'_blank'); return; }
+  const {data,error}=await db.storage.from('questionnaire-files').createSignedUrl(path,3600);
+  if(data?.signedUrl) window.open(data.signedUrl,'_blank');
+  else alert('Could not generate file link. Please try again.');
+}
+
+// Resolve a stored file value to a URL (signed for paths, direct for legacy public URLs)
+async function resolveFileUrl(val){
+  if(!val) return null;
+  if(val.startsWith('https://')) return val;
+  const {data}=await db.storage.from('questionnaire-files').createSignedUrl(val,3600);
+  return data?.signedUrl||null;
+}
+
+async function printQuestionnaire(idx){
   const q=_qs[idx]; if(!q) return;
   const d=q.data||{};
   const isCleaner=(q.position||'').toLowerCase()==='cleaner';
@@ -1150,10 +1167,16 @@ function printQuestionnaire(idx){
     row('Reason for leaving', esc(d.ref1_reason||'—')),
   ].join('') : '';
 
-  const filesRows=(d.file_passport||d.file_extras)?[
+  // Pre-resolve all file URLs (signed or legacy public) before building print HTML
+  const passportUrl = await resolveFileUrl(d.file_passport);
+  const extraUrls   = await Promise.all((d.file_extras||[]).map(resolveFileUrl));
+  const expUrls     = await Promise.all((d.file_exp_proof||[]).map(resolveFileUrl));
+  function printFileLink(url,label){ return url?`<a href="${esc(url)}" style="color:#1565A0;">${label} ↗</a>`:'—'; }
+  const filesRows=(passportUrl||extraUrls.some(Boolean)||expUrls.some(Boolean))?[
     hd('Uploaded Documents'),
-    d.file_passport?row('Passport Copy','<a href="'+esc(d.file_passport)+'" style="color:#1565A0;">'+esc(d.file_passport)+'</a>'):'',
-    ...(d.file_extras||[]).map((u,xi)=>row('Extra File '+(xi+1),'<a href="'+esc(u)+'" style="color:#1565A0;">'+esc(u)+'</a>')),
+    passportUrl?row('Passport Copy',printFileLink(passportUrl,'View Passport')):'',
+    ...extraUrls.map((u,xi)=>u?row('Extra File '+(xi+1),printFileLink(u,'View File '+(xi+1))):''),
+    ...expUrls.map((u,xi)=>u?row('Experience Proof '+(xi+1),printFileLink(u,'View Proof '+(xi+1))):''),
   ].join('') : '';
 
   const submitted=q.created_at?new Date(q.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';

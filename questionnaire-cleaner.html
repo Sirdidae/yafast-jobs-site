@@ -700,19 +700,13 @@
       if (pf) {
         const path = folder+'/passport-'+pf.name;
         const {error} = await _sb.storage.from('questionnaire-files').upload(path, pf, {upsert:true});
-        if (!error) {
-          const {data:u} = _sb.storage.from('questionnaire-files').getPublicUrl(path);
-          urls.passport = u.publicUrl;
-        }
+        if (!error) urls.passport = path;
       }
       const ef = document.getElementById('extraFiles').files;
       for (let i=0;i<ef.length;i++) {
         const path = folder+'/extra-'+i+'-'+ef[i].name;
         const {error} = await _sb.storage.from('questionnaire-files').upload(path, ef[i], {upsert:true});
-        if (!error) {
-          const {data:u} = _sb.storage.from('questionnaire-files').getPublicUrl(path);
-          urls.extras.push(u.publicUrl);
-        }
+        if (!error) urls.extras.push(path);
       }
     } catch(e) { console.warn('File upload error:', e); }
     if (prog) prog.style.display = 'none';
