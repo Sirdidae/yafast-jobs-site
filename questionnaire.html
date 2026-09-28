@@ -47,7 +47,8 @@
     @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
     label.lbl { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
-    label.lbl.req::after { content: ' *'; color: #e53e3e; }
+    label.lbl::after { content: ' *'; color: #e53e3e; }
+    label.lbl.opt::after { content: ''; }
 
     input[type=text], input[type=tel], input[type=email], input[type=date],
     input[type=number], select, textarea {
@@ -235,7 +236,7 @@
             <input type="radio" name="cared_newborn" id="cn_n" value="No"><label for="cn_n">No</label>
           </div>
         </div>
-        <div class="form-group"><label class="lbl">If yes, how many newborns have you cared for?</label><input type="number" name="num_newborns" placeholder="e.g. 1" min="0" /></div>
+        <div class="form-group"><label class="lbl opt">If yes, how many newborns have you cared for?</label><input type="number" name="num_newborns" placeholder="e.g. 1" min="0" /></div>
       </div>
     </div>
 
@@ -246,7 +247,7 @@
         <div class="form-group"><label class="lbl">Do you have practical experience caring for newborn babies?</label><div class="yn"><input type="radio" name="newborn_exp" id="ne_y" value="Yes"><label for="ne_y">Yes</label><input type="radio" name="newborn_exp" id="ne_n" value="No"><label for="ne_n">No</label></div></div>
         <div class="form-group"><label class="lbl">Can you prepare a baby's bottle safely?</label><div class="yn"><input type="radio" name="prepare_bottle" id="pb_y" value="Yes"><label for="pb_y">Yes</label><input type="radio" name="prepare_bottle" id="pb_n" value="No"><label for="pb_n">No</label></div></div>
         <div class="form-group"><label class="lbl">Do you know how to sterilize baby bottles and feeding equipment?</label><div class="yn"><input type="radio" name="sterilize_bottles" id="sb_y" value="Yes"><label for="sb_y">Yes</label><input type="radio" name="sterilize_bottles" id="sb_n" value="No"><label for="sb_n">No</label></div></div>
-        <div class="form-group"><label class="lbl">If yes, explain how you sterilize bottles:</label><textarea name="sterilize_explain" placeholder="Describe the steps you follow…"></textarea></div>
+        <div class="form-group"><label class="lbl opt">If yes, explain how you sterilize bottles:</label><textarea name="sterilize_explain" placeholder="Describe the steps you follow…"></textarea></div>
         <div class="form-group"><label class="lbl">Can you change a baby's diaper correctly?</label><div class="yn"><input type="radio" name="change_diaper" id="cd_y" value="Yes"><label for="cd_y">Yes</label><input type="radio" name="change_diaper" id="cd_n" value="No"><label for="cd_n">No</label></div></div>
         <div class="form-group"><label class="lbl">Can you bathe a newborn safely?</label><div class="yn"><input type="radio" name="bathe_newborn" id="bn_y" value="Yes"><label for="bn_y">Yes</label><input type="radio" name="bathe_newborn" id="bn_n" value="No"><label for="bn_n">No</label></div></div>
         <div class="form-group"><label class="lbl">What would you do if a baby starts crying continuously?</label><textarea name="baby_crying" placeholder="Describe what you would do…"></textarea></div>
@@ -254,7 +255,7 @@
         <div class="form-group"><label class="lbl">How would you safely carry and handle a newborn?</label><textarea name="carry_newborn" placeholder="Describe how you support the head and body…"></textarea></div>
         <div class="form-group"><label class="lbl">Do you know how to keep a baby's sleeping area clean and safe?</label><div class="yn"><input type="radio" name="sleeping_area" id="sa_y" value="Yes"><label for="sa_y">Yes</label><input type="radio" name="sleeping_area" id="sa_n" value="No"><label for="sa_n">No</label></div></div>
         <div class="form-group"><label class="lbl">Have you cared for a baby during the night?</label><div class="yn"><input type="radio" name="night_care" id="nc_y" value="Yes"><label for="nc_y">Yes</label><input type="radio" name="night_care" id="nc_n" value="No"><label for="nc_n">No</label></div></div>
-        <div class="form-group"><label class="lbl">If yes, explain your night care process:</label><textarea name="night_care_explain" placeholder="What do you do when caring for a baby at night?"></textarea></div>
+        <div class="form-group"><label class="lbl opt">If yes, explain your night care process:</label><textarea name="night_care_explain" placeholder="What do you do when caring for a baby at night?"></textarea></div>
       </div>
 
       <div class="section-head"><h2>4. Childcare Questions</h2><p>For older children (1 year and above)</p></div>
@@ -263,7 +264,7 @@
         <div class="form-group"><label class="lbl">How would you handle a child who is crying or having a tantrum?</label><textarea name="child_tantrum" placeholder="Describe your approach…"></textarea></div>
         <div class="form-group"><label class="lbl">How would you respond if a child refuses to eat?</label><textarea name="child_no_eat" placeholder="What do you do?"></textarea></div>
         <div class="form-group"><label class="lbl">Can you prepare simple, healthy meals for children?</label><div class="yn"><input type="radio" name="child_meals" id="cm_y" value="Yes"><label for="cm_y">Yes</label><input type="radio" name="child_meals" id="cm_n" value="No"><label for="cm_n">No</label></div></div>
-        <div class="form-group"><label class="lbl">If yes, describe what you prepare:</label><textarea name="child_meals_explain" placeholder="e.g. porridge, mashed vegetables, fruit puree…"></textarea></div>
+        <div class="form-group"><label class="lbl opt">If yes, describe what you prepare:</label><textarea name="child_meals_explain" placeholder="e.g. porridge, mashed vegetables, fruit puree…"></textarea></div>
         <div class="form-group"><label class="lbl">Can you assist children with bathing, dressing and personal hygiene?</label><div class="yn"><input type="radio" name="child_hygiene" id="ch_y" value="Yes"><label for="ch_y">Yes</label><input type="radio" name="child_hygiene" id="ch_n" value="No"><label for="ch_n">No</label></div></div>
         <div class="form-group"><label class="lbl">Can you supervise children while they are playing?</label><div class="yn"><input type="radio" name="child_supervise" id="csp_y" value="Yes"><label for="csp_y">Yes</label><input type="radio" name="child_supervise" id="csp_n" value="No"><label for="csp_n">No</label></div></div>
         <div class="form-group"><label class="lbl">Can you accompany children to school or other activities when instructed?</label><div class="yn"><input type="radio" name="child_school" id="csc_y" value="Yes"><label for="csc_y">Yes</label><input type="radio" name="child_school" id="csc_n" value="No"><label for="csc_n">No</label></div></div>
@@ -382,8 +383,8 @@
         <hr class="divider">
         <p class="sub-label">Reference 2 (optional)</p>
         <div class="form-row">
-          <div class="form-group"><label class="lbl">Reference Name</label><input type="text" name="ref2_name" placeholder="Full name" /></div>
-          <div class="form-group"><label class="lbl">Phone Number</label><input type="tel" name="ref2_phone" placeholder="+XXX XX XXX XXXX" /></div>
+          <div class="form-group"><label class="lbl opt">Reference Name</label><input type="text" name="ref2_name" placeholder="Full name" /></div>
+          <div class="form-group"><label class="lbl opt">Phone Number</label><input type="tel" name="ref2_phone" placeholder="+XXX XX XXX XXXX" /></div>
         </div>
       </div>
 
@@ -529,6 +530,93 @@
 
   const NOTIFY_KEY = 'face650a-59f4-42d9-9618-dd67a24e77de'; // update to yafastservices@gmail.com key when received
 
+  // Fields excluded from mandatory validation (conditional or explicitly optional)
+  const OPTIONAL_FIELDS = new Set([
+    'ref2_name', 'ref2_phone',
+    'meal_1', 'meal_2', 'meal_3', 'meal_4', 'meal_5',
+    'num_newborns', 'sterilize_explain', 'night_care_explain', 'child_meals_explain'
+  ]);
+
+  function showStepError(msg) {
+    let b = document.getElementById('stepErrBanner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'stepErrBanner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#dc2626;color:white;padding:12px 16px;font-size:13px;font-weight:700;z-index:300;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.3);display:none;';
+      document.body.prepend(b);
+    }
+    b.textContent = msg;
+    b.style.display = 'block';
+    clearTimeout(b._t);
+    b._t = setTimeout(() => { b.style.display = 'none'; }, 5000);
+  }
+
+  function clearStepHighlights(step) {
+    step.querySelectorAll('input, select, textarea').forEach(el => { el.style.borderColor = ''; el.style.boxShadow = ''; });
+    step.querySelectorAll('.yn, .pills, .hk-yn, .cb-grid').forEach(c => { c.style.outline = ''; c.style.borderRadius = ''; });
+    step.querySelectorAll('.file-zone').forEach(z => { z.style.borderColor = ''; });
+  }
+
+  function validateStep(n) {
+    const step = document.getElementById('step' + n);
+    clearStepHighlights(step);
+    let firstErr = null;
+
+    function fail(el) {
+      if (!el) return;
+      const isField = el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA';
+      if (isField) { el.style.borderColor = 'var(--red)'; el.style.boxShadow = '0 0 0 3px rgba(220,38,38,.15)'; }
+      else { el.style.outline = '2px solid var(--red)'; el.style.borderRadius = '8px'; }
+      if (!firstErr) firstErr = el;
+    }
+
+    // 1. All text / number / date / tel / select / textarea fields
+    step.querySelectorAll('input:not([type=radio]):not([type=checkbox]):not([type=file]), select, textarea').forEach(el => {
+      if (!el.name || OPTIONAL_FIELDS.has(el.name)) return;
+      if (!el.value.trim()) fail(el);
+    });
+
+    // 2. Every radio group must have a selection
+    const radioNames = new Set();
+    step.querySelectorAll('input[type=radio]').forEach(r => radioNames.add(r.name));
+    radioNames.forEach(name => {
+      if (OPTIONAL_FIELDS.has(name)) return;
+      if (!step.querySelector('input[name="' + name + '"]:checked')) {
+        const first = step.querySelector('input[name="' + name + '"]');
+        const container = first && (first.closest('.yn') || first.closest('.pills') || first.closest('.hk-yn'));
+        fail(container || first);
+      }
+    });
+
+    // 3. Step 4: cook_types + meal_1 only required if can_cook = Yes
+    if (n === 4) {
+      const canCookEl = step.querySelector('input[name="can_cook"]:checked');
+      if (canCookEl && canCookEl.value === 'Yes') {
+        if (!step.querySelector('input[name="cook_types"]:checked')) fail(step.querySelector('.cb-grid'));
+        const m1 = step.querySelector('input[name="meal_1"]');
+        if (m1 && !m1.value.trim()) fail(m1);
+      }
+    }
+
+    // 4. Step 6: languages (at least one) + passport file required
+    if (n === 6) {
+      if (!step.querySelector('input[name="languages"]:checked')) fail(step.querySelector('.cb-grid'));
+      const pf = document.getElementById('passportFile');
+      if (!pf.files.length) {
+        const pz = document.getElementById('passportZone');
+        pz.style.borderColor = 'var(--red)';
+        if (!firstErr) firstErr = pz;
+      }
+    }
+
+    if (firstErr) {
+      firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showStepError('⚠️ Please complete all required fields before continuing.');
+      return false;
+    }
+    return true;
+  }
+
   let currentStep = 1;
   const TOTAL = 6;
   const LABELS = ['','Step 1 of 6 — Personal Information','Step 2 of 6 — Position & Experience','Step 3 of 6 — Baby & Childcare','Step 4 of 6 — Housekeeping & Cooking','Step 5 of 6 — Personality & UAE Readiness','Step 6 of 6 — Language, References & Declaration'];
@@ -544,7 +632,7 @@
     window.scrollTo({top: 0, behavior: 'smooth'});
   }
 
-  function nextStep() { if (currentStep < TOTAL) { currentStep++; showStep(currentStep); } }
+  function nextStep() { if (!validateStep(currentStep)) return; if (currentStep < TOTAL) { currentStep++; showStep(currentStep); } }
   function prevStep() { if (currentStep > 1) { currentStep--; showStep(currentStep); } }
 
   function validateAge() {
