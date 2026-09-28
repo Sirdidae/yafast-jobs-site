@@ -524,7 +524,7 @@
     }
     container.innerHTML = data.map((v, i) => {
       const id = 'pos_' + i;
-      return `<div class="pill"><input type="radio" name="position" id="${id}" value="${v.title.replace(/"/g,'&quot;')}"><label for="${id}">${v.title}</label></div>`;
+      return `<div class="pill"><input type="radio" name="position" id="${id}" value="${v.title.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}"><label for="${id}">${v.title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</label></div>`;
     }).join('');
   })();
 
@@ -670,25 +670,32 @@
   });
 
   // ── FILE UPLOAD HELPERS ──
+  const _ALLOWED_MIME = ['application/pdf','image/png','image/jpeg'];
+  function _esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function _checkFile(f){ return _ALLOWED_MIME.includes(f.type); }
+
   function handleSingleFile(input, zoneId, tagsId) {
     const f = input.files[0];
     if (!f) return;
+    if (!_checkFile(f)) { alert('Invalid file type. Only PDF, PNG or JPEG are accepted.'); input.value = ''; return; }
     if (f.size > 5 * 1024 * 1024) { alert('File too large. Maximum size is 5 MB.'); input.value = ''; return; }
     const zone = document.getElementById(zoneId);
     zone.classList.add('has-file');
-    zone.innerHTML = '<div class="file-zone-icon">✅</div><div class="file-zone-text">'+f.name+'</div><div class="file-zone-sub">'+((f.size/1024).toFixed(0))+' KB · tap to change</div>';
+    zone.innerHTML = '<div class="file-zone-icon">✅</div><div class="file-zone-text">'+_esc(f.name)+'</div><div class="file-zone-sub">'+((f.size/1024).toFixed(0))+' KB · tap to change</div>';
     document.getElementById(tagsId).innerHTML = '';
   }
 
   function handleMultiFiles(input, zoneId, tagsId) {
     const files = Array.from(input.files);
     if (!files.length) return;
+    const badType = files.filter(f => !_checkFile(f));
+    if (badType.length) { alert('Invalid file type: '+badType.map(f=>_esc(f.name)).join(', ')+'. Only PDF, PNG or JPEG are accepted.'); input.value=''; return; }
     const oversized = files.filter(f => f.size > 5*1024*1024);
-    if (oversized.length) { alert('These files exceed 5 MB: '+oversized.map(f=>f.name).join(', ')); input.value=''; return; }
+    if (oversized.length) { alert('These files exceed 5 MB: '+oversized.map(f=>_esc(f.name)).join(', ')); input.value=''; return; }
     const zone = document.getElementById(zoneId);
     zone.classList.add('has-file');
     zone.innerHTML = '<div class="file-zone-icon">✅</div><div class="file-zone-text">'+files.length+' file'+(files.length>1?'s':'')+' selected</div><div class="file-zone-sub">Tap to change</div>';
-    document.getElementById(tagsId).innerHTML = files.map(f=>'<span class="file-tag">📄 '+f.name+' <span style="color:var(--muted);font-weight:400;">('+((f.size/1024).toFixed(0))+' KB)</span></span>').join('');
+    document.getElementById(tagsId).innerHTML = files.map(f=>'<span class="file-tag">📄 '+_esc(f.name)+' <span style="color:var(--muted);font-weight:400;">('+((f.size/1024).toFixed(0))+' KB)</span></span>').join('');
   }
 
   async function uploadFiles(name, position) {
