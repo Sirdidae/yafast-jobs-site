@@ -184,8 +184,8 @@
           <div class="form-group"><label class="lbl">Current Location</label><input type="text" name="location" placeholder="e.g. Blantyre, Malawi" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl opt">Passport Number</label><input type="text" name="passport_no" placeholder="e.g. MWP1234567" /></div>
-          <div class="form-group"><label class="lbl opt">Passport Expiry Date</label><input type="date" name="passport_expiry" /></div>
+          <div class="form-group"><label class="lbl">Passport Number</label><input type="text" name="passport_no" placeholder="e.g. MWP1234567" /></div>
+          <div class="form-group"><label class="lbl">Passport Expiry Date</label><input type="date" name="passport_expiry" /></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label class="lbl opt">Emergency Contact Name</label><input type="text" name="emergency_name" placeholder="Full name" /></div>
@@ -214,7 +214,7 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl opt">Country / Countries Worked In</label><input type="text" name="countries_worked" placeholder="e.g. UAE, South Africa" /></div>
+          <div class="form-group"><label class="lbl">Country / Countries Worked In</label><input type="text" name="countries_worked" placeholder="e.g. UAE, South Africa" /></div>
           <div class="form-group">
             <label class="lbl opt">Years of Experience</label>
             <select name="years_experience">
@@ -225,10 +225,10 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl opt">Previous Employer's Nationality</label><input type="text" name="prev_employer_nat" placeholder="e.g. Emirati" /></div>
-          <div class="form-group"><label class="lbl opt">Number of Children Cared For</label><input type="number" name="num_children_cared" placeholder="e.g. 2" min="0" /></div>
+          <div class="form-group"><label class="lbl">Previous Employer's Nationality</label><input type="text" name="prev_employer_nat" placeholder="e.g. Emirati" /></div>
+          <div class="form-group"><label class="lbl">Number of Children Cared For</label><input type="number" name="num_children_cared" placeholder="e.g. 2" min="0" /></div>
         </div>
-        <div class="form-group"><label class="lbl opt">Age(s) of Youngest Child You Cared For</label><input type="text" name="youngest_child_age" placeholder="e.g. 3 months, 2 years" /></div>
+        <div class="form-group"><label class="lbl">Age(s) of Youngest Child You Cared For</label><input type="text" name="youngest_child_age" placeholder="e.g. 3 months, 2 years" /></div>
         <div class="form-group">
           <label class="lbl">Have you cared for a newborn baby (0–3 months)?</label>
           <div class="yn">
@@ -538,12 +538,9 @@
     'meal_1', 'meal_2', 'meal_3', 'meal_4', 'meal_5',
     // Conditional childcare
     'num_newborns', 'sterilize_explain', 'night_care_explain', 'child_meals_explain',
-    // Personal — not blocking for initial screening
+    // Personal — optional demographic fields
     'dob', 'marital_status', 'num_children',
-    'passport_no', 'passport_expiry',
     'emergency_name', 'emergency_phone',
-    // Work history — conditional on previous experience
-    'countries_worked', 'prev_employer_nat', 'num_children_cared', 'youngest_child_age',
     // Reference 1 — conditional on previous employment
     'ref1_employer', 'ref1_country', 'ref1_position', 'ref1_period', 'ref1_phone', 'ref1_reason',
   ]);

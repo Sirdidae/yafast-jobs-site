@@ -183,8 +183,8 @@
           <div class="form-group"><label class="lbl">Current Location / District</label><input type="text" name="location" placeholder="e.g. Blantyre, Malawi" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl opt">Passport Number</label><input type="text" name="passport_no" placeholder="e.g. MWP1234567" /></div>
-          <div class="form-group"><label class="lbl opt">Passport Expiry Date</label><input type="date" name="passport_expiry" /></div>
+          <div class="form-group"><label class="lbl">Passport Number</label><input type="text" name="passport_no" placeholder="e.g. MWP1234567" /></div>
+          <div class="form-group"><label class="lbl">Passport Expiry Date</label><input type="date" name="passport_expiry" /></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label class="lbl opt">Emergency Contact Name</label><input type="text" name="emergency_name" placeholder="Full name" /></div>
@@ -240,12 +240,12 @@
             <label class="cb-item"><input type="checkbox" name="facility_types" value="Construction Sites"><span>Construction Sites</span></label>
           </div>
         </div>
-        <div class="form-group"><label class="lbl opt">Previous Employer's Name / Company</label><input type="text" name="prev_employer" placeholder="e.g. Clean Pro Services" /></div>
+        <div class="form-group"><label class="lbl">Previous Employer's Name / Company</label><input type="text" name="prev_employer" placeholder="e.g. Clean Pro Services" /></div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl opt">Previous Employer's Nationality</label><input type="text" name="prev_employer_nat" placeholder="e.g. South African" /></div>
-          <div class="form-group"><label class="lbl opt">Employment Period</label><input type="text" name="prev_period" placeholder="e.g. 2022 – 2024" /></div>
+          <div class="form-group"><label class="lbl">Previous Employer's Nationality</label><input type="text" name="prev_employer_nat" placeholder="e.g. South African" /></div>
+          <div class="form-group"><label class="lbl">Employment Period</label><input type="text" name="prev_period" placeholder="e.g. 2022 – 2024" /></div>
         </div>
-        <div class="form-group"><label class="lbl opt">Reason for leaving previous job</label><textarea name="reason_leaving" placeholder="Why did you leave or want to leave?" style="min-height:60px;"></textarea></div>
+        <div class="form-group"><label class="lbl">Reason for leaving previous job</label><textarea name="reason_leaving" placeholder="Why did you leave or want to leave?" style="min-height:60px;"></textarea></div>
       </div>
     </div>
 
@@ -505,11 +505,9 @@
     'ref2_name', 'ref2_phone',
     // Conditional health detail
     'medical_details',
-    // Personal — not blocking for initial screening
-    'dob', 'num_children', 'passport_no', 'passport_expiry',
+    // Personal — optional demographic fields
+    'dob', 'num_children',
     'emergency_name', 'emergency_phone',
-    // Work history — conditional on previous experience
-    'countries_worked', 'prev_employer', 'prev_employer_nat', 'prev_period', 'reason_leaving',
     // Reference 1 — conditional on previous employment
     'ref1_employer', 'ref1_country', 'ref1_position', 'ref1_period', 'ref1_phone',
   ]);
