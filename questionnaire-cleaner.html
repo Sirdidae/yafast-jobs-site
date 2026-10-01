@@ -151,8 +151,8 @@
       <div class="section-head"><h2>1. Personal Information</h2><p>Your basic details — must be accurate</p></div>
       <div class="card">
         <div class="form-row">
-          <div class="form-group"><label class="lbl req">Full Name</label><input type="text" name="full_name" placeholder="e.g. Tadala Phiri" /></div>
-          <div class="form-group"><label class="lbl req">Date of Birth</label><input type="date" name="dob" id="dobField" /></div>
+          <div class="form-group"><label class="lbl">Full Name</label><input type="text" name="full_name" placeholder="e.g. Tadala Phiri" /></div>
+          <div class="form-group"><label class="lbl opt">Date of Birth</label><input type="date" name="dob" id="dobField" /></div>
         </div>
         <div class="form-group">
           <label class="lbl req">Age <span style="font-weight:400;color:var(--muted)">(21–38 only)</span></label>
@@ -170,25 +170,25 @@
         <div class="form-row">
           <div class="form-group"><label class="lbl req">Nationality</label><input type="text" name="nationality" placeholder="e.g. Malawian" /></div>
           <div class="form-group">
-            <label class="lbl">Marital Status</label>
+            <label class="lbl opt">Marital Status</label>
             <select name="marital_status">
               <option value="">Select…</option>
               <option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option>
             </select>
           </div>
         </div>
-        <div class="form-group"><label class="lbl">Number of Children</label><input type="number" name="num_children" placeholder="0" min="0" /></div>
+        <div class="form-group"><label class="lbl opt">Number of Children</label><input type="number" name="num_children" placeholder="0" min="0" /></div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl req">Phone / WhatsApp</label><input type="tel" name="phone" placeholder="+265 9XX XXX XXX" /></div>
+          <div class="form-group"><label class="lbl">Phone / WhatsApp</label><input type="tel" name="phone" placeholder="+265 9XX XXX XXX" /></div>
           <div class="form-group"><label class="lbl">Current Location / District</label><input type="text" name="location" placeholder="e.g. Blantyre, Malawi" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl">Passport Number</label><input type="text" name="passport_no" placeholder="e.g. MWP1234567" /></div>
-          <div class="form-group"><label class="lbl">Passport Expiry Date</label><input type="date" name="passport_expiry" /></div>
+          <div class="form-group"><label class="lbl opt">Passport Number</label><input type="text" name="passport_no" placeholder="e.g. MWP1234567" /></div>
+          <div class="form-group"><label class="lbl opt">Passport Expiry Date</label><input type="date" name="passport_expiry" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl">Emergency Contact Name</label><input type="text" name="emergency_name" placeholder="Full name" /></div>
-          <div class="form-group"><label class="lbl">Emergency Contact Phone</label><input type="tel" name="emergency_phone" placeholder="+265 9XX XXX XXX" /></div>
+          <div class="form-group"><label class="lbl opt">Emergency Contact Name</label><input type="text" name="emergency_name" placeholder="Full name" /></div>
+          <div class="form-group"><label class="lbl opt">Emergency Contact Phone</label><input type="tel" name="emergency_phone" placeholder="+265 9XX XXX XXX" /></div>
         </div>
       </div>
       <div class="card">
@@ -240,12 +240,12 @@
             <label class="cb-item"><input type="checkbox" name="facility_types" value="Construction Sites"><span>Construction Sites</span></label>
           </div>
         </div>
-        <div class="form-group"><label class="lbl">Previous Employer's Name / Company</label><input type="text" name="prev_employer" placeholder="e.g. Clean Pro Services" /></div>
+        <div class="form-group"><label class="lbl opt">Previous Employer's Name / Company</label><input type="text" name="prev_employer" placeholder="e.g. Clean Pro Services" /></div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl">Previous Employer's Nationality</label><input type="text" name="prev_employer_nat" placeholder="e.g. South African" /></div>
-          <div class="form-group"><label class="lbl">Employment Period</label><input type="text" name="prev_period" placeholder="e.g. 2022 – 2024" /></div>
+          <div class="form-group"><label class="lbl opt">Previous Employer's Nationality</label><input type="text" name="prev_employer_nat" placeholder="e.g. South African" /></div>
+          <div class="form-group"><label class="lbl opt">Employment Period</label><input type="text" name="prev_period" placeholder="e.g. 2022 – 2024" /></div>
         </div>
-        <div class="form-group"><label class="lbl">Reason for leaving previous job</label><textarea name="reason_leaving" placeholder="Why did you leave or want to leave?" style="min-height:60px;"></textarea></div>
+        <div class="form-group"><label class="lbl opt">Reason for leaving previous job</label><textarea name="reason_leaving" placeholder="Why did you leave or want to leave?" style="min-height:60px;"></textarea></div>
       </div>
     </div>
 
@@ -386,16 +386,16 @@
 
       <div class="section-head"><h2>References</h2></div>
       <div class="card">
-        <p class="sub-label">Reference 1</p>
+        <p class="sub-label">Reference 1 (if applicable)</p>
         <div class="form-row">
-          <div class="form-group"><label class="lbl">Employer / Company Name</label><input type="text" name="ref1_employer" placeholder="Full name or company" /></div>
-          <div class="form-group"><label class="lbl">Country</label><input type="text" name="ref1_country" placeholder="e.g. Malawi" /></div>
+          <div class="form-group"><label class="lbl opt">Employer / Company Name</label><input type="text" name="ref1_employer" placeholder="Full name or company" /></div>
+          <div class="form-group"><label class="lbl opt">Country</label><input type="text" name="ref1_country" placeholder="e.g. Malawi" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="lbl">Position Held</label><input type="text" name="ref1_position" placeholder="e.g. Cleaner / Housekeeper" /></div>
-          <div class="form-group"><label class="lbl">Employment Period</label><input type="text" name="ref1_period" placeholder="e.g. 2022 – 2024" /></div>
+          <div class="form-group"><label class="lbl opt">Position Held</label><input type="text" name="ref1_position" placeholder="e.g. Cleaner / Housekeeper" /></div>
+          <div class="form-group"><label class="lbl opt">Employment Period</label><input type="text" name="ref1_period" placeholder="e.g. 2022 – 2024" /></div>
         </div>
-        <div class="form-group"><label class="lbl">Reference Phone Number</label><input type="tel" name="ref1_phone" placeholder="+265 9XX XXX XXX" /></div>
+        <div class="form-group"><label class="lbl opt">Reference Phone Number</label><input type="tel" name="ref1_phone" placeholder="+265 9XX XXX XXX" /></div>
         <hr class="divider">
         <p class="sub-label">Reference 2 (optional)</p>
         <div class="form-row">
@@ -501,8 +501,17 @@
 
   // Fields excluded from mandatory validation (conditional or explicitly optional)
   const OPTIONAL_FIELDS = new Set([
+    // Reference 2
     'ref2_name', 'ref2_phone',
-    'medical_details'  // conditional on medical_issues = Yes
+    // Conditional health detail
+    'medical_details',
+    // Personal — not blocking for initial screening
+    'dob', 'num_children', 'passport_no', 'passport_expiry',
+    'emergency_name', 'emergency_phone',
+    // Work history — conditional on previous experience
+    'countries_worked', 'prev_employer', 'prev_employer_nat', 'prev_period', 'reason_leaving',
+    // Reference 1 — conditional on previous employment
+    'ref1_employer', 'ref1_country', 'ref1_position', 'ref1_period', 'ref1_phone',
   ]);
 
   function showStepError(msg) {
@@ -731,6 +740,7 @@
   }
 
   async function submitQuestionnaire() {
+    if (!validateStep(5)) return;
     if (!document.getElementById('sponsor_agree').checked) {
       alert('Please confirm that you understand and accept the self-sponsorship terms.');
       return;

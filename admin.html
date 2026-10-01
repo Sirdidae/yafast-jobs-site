@@ -1029,7 +1029,7 @@ function renderQuestionnaires(){
       <div id="qd${i}" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
         <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
           ${commonRows}${isCleaner?cleanerRows:housemaidRows}
-          ${(d.file_passport||d.file_extras||d.file_exp_proof)?`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">📁 Uploaded Documents</td></tr>${d.file_passport?`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Passport Copy</td><td><a href="#" onclick="openSignedFile(event,'${esc(d.file_passport)}')" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`:''}${(d.file_extras&&d.file_extras.length)?d.file_extras.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Extra File ${xi+1}</td><td><a href="#" onclick="openSignedFile(event,'${esc(u)}')" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}${(d.file_exp_proof&&d.file_exp_proof.length)?d.file_exp_proof.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Exp. Proof ${xi+1}</td><td><a href="#" onclick="openSignedFile(event,'${esc(u)}')" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}`:'' }
+          ${(d.file_passport||d.file_extras||d.file_exp_proof)?`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">📁 Uploaded Documents</td></tr>${d.file_passport?`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Passport Copy</td><td><a href="#" data-fp="${esc(d.file_passport)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`:''}${(d.file_extras&&d.file_extras.length)?d.file_extras.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Extra File ${xi+1}</td><td><a href="#" data-fp="${esc(u)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}${(d.file_exp_proof&&d.file_exp_proof.length)?d.file_exp_proof.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Exp. Proof ${xi+1}</td><td><a href="#" data-fp="${esc(u)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}`:'' }
         </table>
       </div>
     </div>`;
@@ -1037,20 +1037,30 @@ function renderQuestionnaires(){
 }
 function toggleQ(id){ const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
 
-// Generate a 1-hour signed URL for a private storage file, or open a legacy public URL directly
-async function openSignedFile(e, path){
-  e.preventDefault();
-  if(path.startsWith('https://')){ window.open(path,'_blank'); return; }
-  const {data,error}=await db.storage.from('questionnaire-files').createSignedUrl(path,3600);
-  if(data?.signedUrl) window.open(data.signedUrl,'_blank');
-  else alert('Could not generate file link. Please try again.');
+// Extract the raw storage path from an old public URL (bucket is now private)
+const _PUBLIC_PFX = 'https://kefsvaettxwuzrusufmi.supabase.co/storage/v1/object/public/questionnaire-files/';
+function _toStoragePath(val){
+  if(!val) return null;
+  if(val.startsWith(_PUBLIC_PFX)) return decodeURIComponent(val.slice(_PUBLIC_PFX.length));
+  return val; // already a raw path
 }
 
-// Resolve a stored file value to a URL (signed for paths, direct for legacy public URLs)
+// Generate a 1-hour signed URL and open it
+async function openSignedFile(e, path){
+  e.preventDefault();
+  const storagePath = _toStoragePath(path);
+  if(!storagePath){ alert('Invalid file path.'); return; }
+  const {data,error}=await db.storage.from('questionnaire-files').createSignedUrl(storagePath,3600);
+  if(data?.signedUrl) window.open(data.signedUrl,'_blank');
+  else { console.error('Signed URL error:',error); alert('Could not open file. Make sure you are logged in and try again.'); }
+}
+
+// Resolve a stored file value to a signed URL
 async function resolveFileUrl(val){
   if(!val) return null;
-  if(val.startsWith('https://')) return val;
-  const {data}=await db.storage.from('questionnaire-files').createSignedUrl(val,3600);
+  const storagePath = _toStoragePath(val);
+  if(!storagePath) return null;
+  const {data}=await db.storage.from('questionnaire-files').createSignedUrl(storagePath,3600);
   return data?.signedUrl||null;
 }
 
