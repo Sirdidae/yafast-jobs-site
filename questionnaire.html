@@ -432,6 +432,16 @@
           <div id="cvTags" style="margin-top:6px;"></div>
         </div>
         <div class="form-group" style="margin-top:4px;">
+          <label class="lbl opt">Proof of Work History <span style="font-weight:400;color:var(--muted)">(optional · employment records, contracts or pay slips)</span></label>
+          <div class="file-zone" id="workHistoryZone" onclick="document.getElementById('workHistoryFiles').click()">
+            <div class="file-zone-icon">💼</div>
+            <div class="file-zone-text">Tap to attach work history proof</div>
+            <div class="file-zone-sub">You can select multiple files · PDF, PNG or JPEG</div>
+          </div>
+          <input type="file" id="workHistoryFiles" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleMultiFiles(this,'workHistoryZone','workHistoryTags')">
+          <div id="workHistoryTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
           <label class="lbl req">Proof of Experience <span style="font-weight:400;color:var(--muted)">(required · PDF, PNG or JPEG · max 5 MB each)</span></label>
           <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px;">Accepted proof: <strong>(1)</strong> An experience / reference letter from a family or employer you worked for previously, <strong>or (2)</strong> Passport pages clearly showing entry and exit stamps for countries where you worked as a domestic helper.</p>
           <div class="file-zone" id="expProofZone" onclick="document.getElementById('expProofFiles').click()">
@@ -727,7 +737,7 @@
   }
 
   async function uploadFiles(name, position) {
-    const urls = { passport: null, medical: null, noc: null, cv: null, expProof: [] };
+    const urls = { passport: null, medical: null, noc: null, cv: null, workHistory: [], expProof: [] };
     const slug = (name||'applicant').replace(/\s+/g,'-').toLowerCase();
     const folder = (position||'general').toLowerCase()+'/'+slug+'-'+Date.now();
     const prog = document.getElementById('uploadProgress');
@@ -756,6 +766,12 @@
         const path = folder+'/cv-'+cf.name;
         const {error} = await _sb.storage.from('questionnaire-files').upload(path, cf, {upsert:true});
         if (!error) urls.cv = path;
+      }
+      const whf = document.getElementById('workHistoryFiles').files;
+      for (let i=0;i<whf.length;i++) {
+        const path = folder+'/work-history-'+i+'-'+whf[i].name;
+        const {error} = await _sb.storage.from('questionnaire-files').upload(path, whf[i], {upsert:true});
+        if (!error) urls.workHistory.push(path);
       }
       const epf = document.getElementById('expProofFiles').files;
       for (let i=0;i<epf.length;i++) {
@@ -836,6 +852,7 @@
     if (fileUrls.medical) data.file_medical = fileUrls.medical;
     if (fileUrls.noc) data.file_noc = fileUrls.noc;
     if (fileUrls.cv) data.file_cv = fileUrls.cv;
+    if (fileUrls.workHistory.length) data.file_work_history = fileUrls.workHistory;
     if (fileUrls.expProof.length) data.file_exp_proof = fileUrls.expProof;
     data.agreed_duty_hours = document.getElementById('agree_duty_hours').checked ? 'Yes' : 'No';
     data.agreed_no_dayoff = document.getElementById('agree_no_dayoff').checked ? 'Yes' : 'No';
@@ -855,6 +872,7 @@
         'Medical certificate: '+(fileUrls.medical||'Not uploaded'),
         'NOC letter: '+(fileUrls.noc||'Not uploaded'),
         'CV/Resume: '+(fileUrls.cv||'Not uploaded'),
+        'Work history proof: '+(fileUrls.workHistory.length?fileUrls.workHistory.join(' | '):'None'),
         'Experience proof: '+(fileUrls.expProof.length?fileUrls.expProof.join(' | '):'Not uploaded'),
         'Agreed — 12h+ duty: Yes | No day off: Yes | Min 24mo contract: Yes',
         '---','View full answers in Yafast admin panel (Questionnaires tab).'

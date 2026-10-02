@@ -448,6 +448,16 @@
           <div id="cvTags" style="margin-top:6px;"></div>
         </div>
         <div class="form-group" style="margin-top:4px;">
+          <label class="lbl opt">Proof of Work History <span style="font-weight:400;color:var(--muted)">(optional · employment records, contracts or pay slips)</span></label>
+          <div class="file-zone" id="workHistoryZone" onclick="document.getElementById('workHistoryFiles').click()">
+            <div class="file-zone-icon">💼</div>
+            <div class="file-zone-text">Tap to attach work history proof</div>
+            <div class="file-zone-sub">You can select multiple files · PDF, PNG or JPEG</div>
+          </div>
+          <input type="file" id="workHistoryFiles" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleMultiFiles(this,'workHistoryZone','workHistoryTags')">
+          <div id="workHistoryTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
           <label class="lbl opt">Reference / Experience Letter <span style="font-weight:400;color:var(--muted)">(optional · from a previous employer)</span></label>
           <div class="file-zone" id="refLetterZone" onclick="document.getElementById('refLetterFiles').click()">
             <div class="file-zone-icon">📋</div>
@@ -727,7 +737,7 @@
   }
 
   async function uploadFiles(name, position) {
-    const urls = { passport: null, medical: null, noc: null, cv: null, refLetters: [] };
+    const urls = { passport: null, medical: null, noc: null, cv: null, workHistory: [], refLetters: [] };
     const slug = (name||'applicant').replace(/\s+/g,'-').toLowerCase();
     const folder = (position||'cleaner').toLowerCase()+'/'+slug+'-'+Date.now();
     const prog = document.getElementById('uploadProgress');
@@ -756,6 +766,12 @@
         const path = folder+'/cv-'+cf.name;
         const {error} = await _sb.storage.from('questionnaire-files').upload(path, cf, {upsert:true});
         if (!error) urls.cv = path;
+      }
+      const whf = document.getElementById('workHistoryFiles').files;
+      for (let i=0;i<whf.length;i++) {
+        const path = folder+'/work-history-'+i+'-'+whf[i].name;
+        const {error} = await _sb.storage.from('questionnaire-files').upload(path, whf[i], {upsert:true});
+        if (!error) urls.workHistory.push(path);
       }
       const rlf = document.getElementById('refLetterFiles').files;
       for (let i=0;i<rlf.length;i++) {
@@ -821,6 +837,7 @@
     if (fileUrls.medical) data.file_medical = fileUrls.medical;
     if (fileUrls.noc) data.file_noc = fileUrls.noc;
     if (fileUrls.cv) data.file_cv = fileUrls.cv;
+    if (fileUrls.workHistory.length) data.file_work_history = fileUrls.workHistory;
     if (fileUrls.refLetters.length) data.file_ref_letters = fileUrls.refLetters;
     btn.textContent = 'Submitting…';
     try {
@@ -844,6 +861,7 @@
         'Medical certificate: ' + (fileUrls.medical || 'Not uploaded'),
         'NOC letter: ' + (fileUrls.noc || 'Not uploaded'),
         'CV/Resume: ' + (fileUrls.cv || 'Not uploaded'),
+        'Work history proof: ' + (fileUrls.workHistory.length ? fileUrls.workHistory.join(' | ') : 'None'),
         'Reference letters: ' + (fileUrls.refLetters.length ? fileUrls.refLetters.join(' | ') : 'None'),
         '---', 'View full answers in Yafast admin panel (Questionnaires tab).'
       ].join('\n');
