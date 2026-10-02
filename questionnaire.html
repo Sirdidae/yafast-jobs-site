@@ -392,7 +392,7 @@
       <div class="section-head"><h2>Supporting Documents</h2><p>Attach your passport copy and any other relevant files</p></div>
       <div class="card">
         <div class="form-group">
-          <label class="lbl">Passport Copy <span style="font-weight:400;color:var(--muted)">(PDF, PNG or JPEG · max 5 MB)</span></label>
+          <label class="lbl req">Passport Copy <span style="font-weight:400;color:var(--muted)">(Required · PDF, PNG or JPEG · max 5 MB)</span></label>
           <div class="file-zone" id="passportZone" onclick="document.getElementById('passportFile').click()">
             <div class="file-zone-icon">🛂</div>
             <div class="file-zone-text">Tap to attach passport copy</div>
@@ -402,14 +402,34 @@
           <div id="passportTags" style="margin-top:6px;"></div>
         </div>
         <div class="form-group" style="margin-top:4px;">
-          <label class="lbl">Additional Documents <span style="font-weight:400;color:var(--muted)">(optional — CV, certificates, ID · PDF, PNG or JPEG)</span></label>
-          <div class="file-zone" id="extraZone" onclick="document.getElementById('extraFiles').click()">
-            <div class="file-zone-icon">📎</div>
-            <div class="file-zone-text">Tap to attach more files</div>
-            <div class="file-zone-sub">You can select multiple files at once</div>
+          <label class="lbl opt">Medical Certificate <span style="font-weight:400;color:var(--muted)">(optional · PDF, PNG or JPEG · max 5 MB)</span></label>
+          <div class="file-zone" id="medicalZone" onclick="document.getElementById('medicalFile').click()">
+            <div class="file-zone-icon">🏥</div>
+            <div class="file-zone-text">Tap to attach medical certificate</div>
+            <div class="file-zone-sub">PDF, PNG or JPEG accepted</div>
           </div>
-          <input type="file" id="extraFiles" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleMultiFiles(this,'extraZone','extraTags')">
-          <div id="extraTags" style="margin-top:6px;"></div>
+          <input type="file" id="medicalFile" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleSingleFile(this,'medicalZone','medicalTags')">
+          <div id="medicalTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label class="lbl opt">NOC Letter <span style="font-weight:400;color:var(--muted)">(optional · No Objection Certificate from previous employer)</span></label>
+          <div class="file-zone" id="nocZone" onclick="document.getElementById('nocFile').click()">
+            <div class="file-zone-icon">📄</div>
+            <div class="file-zone-text">Tap to attach NOC letter</div>
+            <div class="file-zone-sub">PDF, PNG or JPEG accepted</div>
+          </div>
+          <input type="file" id="nocFile" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleSingleFile(this,'nocZone','nocTags')">
+          <div id="nocTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label class="lbl opt">CV / Resume <span style="font-weight:400;color:var(--muted)">(optional · PDF, PNG or JPEG · max 5 MB)</span></label>
+          <div class="file-zone" id="cvZone" onclick="document.getElementById('cvFile').click()">
+            <div class="file-zone-icon">📝</div>
+            <div class="file-zone-text">Tap to attach CV or resume</div>
+            <div class="file-zone-sub">PDF, PNG or JPEG accepted</div>
+          </div>
+          <input type="file" id="cvFile" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleSingleFile(this,'cvZone','cvTags')">
+          <div id="cvTags" style="margin-top:6px;"></div>
         </div>
         <div class="form-group" style="margin-top:4px;">
           <label class="lbl req">Proof of Experience <span style="font-weight:400;color:var(--muted)">(required · PDF, PNG or JPEG · max 5 MB each)</span></label>
@@ -707,7 +727,7 @@
   }
 
   async function uploadFiles(name, position) {
-    const urls = { passport: null, extras: [], expProof: [] };
+    const urls = { passport: null, medical: null, noc: null, cv: null, expProof: [] };
     const slug = (name||'applicant').replace(/\s+/g,'-').toLowerCase();
     const folder = (position||'general').toLowerCase()+'/'+slug+'-'+Date.now();
     const prog = document.getElementById('uploadProgress');
@@ -719,11 +739,23 @@
         const {error} = await _sb.storage.from('questionnaire-files').upload(path, pf, {upsert:true});
         if (!error) urls.passport = path;
       }
-      const ef = document.getElementById('extraFiles').files;
-      for (let i=0;i<ef.length;i++) {
-        const path = folder+'/extra-'+i+'-'+ef[i].name;
-        const {error} = await _sb.storage.from('questionnaire-files').upload(path, ef[i], {upsert:true});
-        if (!error) urls.extras.push(path);
+      const mf = document.getElementById('medicalFile').files[0];
+      if (mf) {
+        const path = folder+'/medical-'+mf.name;
+        const {error} = await _sb.storage.from('questionnaire-files').upload(path, mf, {upsert:true});
+        if (!error) urls.medical = path;
+      }
+      const nf = document.getElementById('nocFile').files[0];
+      if (nf) {
+        const path = folder+'/noc-'+nf.name;
+        const {error} = await _sb.storage.from('questionnaire-files').upload(path, nf, {upsert:true});
+        if (!error) urls.noc = path;
+      }
+      const cf = document.getElementById('cvFile').files[0];
+      if (cf) {
+        const path = folder+'/cv-'+cf.name;
+        const {error} = await _sb.storage.from('questionnaire-files').upload(path, cf, {upsert:true});
+        if (!error) urls.cv = path;
       }
       const epf = document.getElementById('expProofFiles').files;
       for (let i=0;i<epf.length;i++) {
@@ -801,7 +833,9 @@
     btn.disabled = true; btn.textContent = 'Uploading files…';
     const fileUrls = await uploadFiles(name, position||'Housemaid');
     if (fileUrls.passport) data.file_passport = fileUrls.passport;
-    if (fileUrls.extras.length) data.file_extras = fileUrls.extras;
+    if (fileUrls.medical) data.file_medical = fileUrls.medical;
+    if (fileUrls.noc) data.file_noc = fileUrls.noc;
+    if (fileUrls.cv) data.file_cv = fileUrls.cv;
     if (fileUrls.expProof.length) data.file_exp_proof = fileUrls.expProof;
     data.agreed_duty_hours = document.getElementById('agree_duty_hours').checked ? 'Yes' : 'No';
     data.agreed_no_dayoff = document.getElementById('agree_no_dayoff').checked ? 'Yes' : 'No';
@@ -818,8 +852,10 @@
         'English level: '+(data.english_level||'N/A'), 'Passport: '+(data.passport_no||'N/A')+' (Exp: '+(data.passport_expiry||'N/A')+')',
         'Can cook: '+(data.can_cook||'N/A')+(meals?' — '+meals:''),
         'Passport copy: '+(fileUrls.passport||'Not uploaded'),
+        'Medical certificate: '+(fileUrls.medical||'Not uploaded'),
+        'NOC letter: '+(fileUrls.noc||'Not uploaded'),
+        'CV/Resume: '+(fileUrls.cv||'Not uploaded'),
         'Experience proof: '+(fileUrls.expProof.length?fileUrls.expProof.join(' | '):'Not uploaded'),
-        'Extra files: '+(fileUrls.extras.length?fileUrls.extras.join(' | '):'None'),
         'Agreed — 12h+ duty: Yes | No day off: Yes | Min 24mo contract: Yes',
         '---','View full answers in Yafast admin panel (Questionnaires tab).'
       ].join('\n');
