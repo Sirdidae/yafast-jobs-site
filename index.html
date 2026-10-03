@@ -2473,6 +2473,7 @@ const _sb = supabase.createClient(
   'https://kefsvaettxwuzrusufmi.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZnN2YWV0dHh3dXpydXN1Zm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTE3MzQsImV4cCI6MjEwNTI2NzczNH0.u7yPSyKzets54SQmrJ72d7MqRK2XuZnfanp3ZIALxK8'
 );
+_sb.from('page_views').insert({ page: 'Home' }).then(() => {});
 const _ICONS={Domestic:'🏠',Construction:'🏗️',Hospitality:'🏨',Healthcare:'⚕️',Cleaning:'🧹',Sales:'🎫',Driving:'🚗',Security:'🛡️'};
 function _esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 

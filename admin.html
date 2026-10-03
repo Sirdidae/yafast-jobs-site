@@ -354,6 +354,10 @@ tr:hover td{background:var(--ground);}
             <span class="icon">📝</span><span>Questionnaires</span>
           </div>
         </div>
+          <div class="nav-item" onclick="showPanel('traffic',this)">
+            <span class="icon">📈</span><span>Traffic</span>
+          </div>
+        </div>
         <div class="nav-group">
           <div class="nav-label">Settings</div>
           <div class="nav-item" onclick="showPanel('settings',this)">
@@ -462,6 +466,56 @@ tr:hover td{background:var(--ground);}
           </div>
         </div>
 
+        <!-- TRAFFIC -->
+        <div class="panel" id="panel-traffic">
+          <div class="sec-head"><h2>Website Traffic</h2></div>
+          <div id="traffic-setup-notice" style="display:none;background:#FFF8E4;border:1px solid #F0A500;border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:22px;font-size:.87rem;line-height:1.7;">
+            <strong>One-time setup required.</strong> Run this SQL in your <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--sky)">Supabase SQL Editor</a> to enable tracking:
+            <pre style="background:#0D2B4E;color:#5EC5F5;border-radius:8px;padding:14px;margin-top:10px;font-size:.78rem;overflow-x:auto;white-space:pre-wrap;">create table if not exists page_views (
+  id bigserial primary key,
+  page text not null default '/',
+  created_at timestamptz not null default now()
+);
+alter table page_views enable row level security;
+create policy "pv_insert" on page_views for insert with check (true);
+create policy "pv_select" on page_views for select using (true);</pre>
+          </div>
+          <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+            <div class="stat-tile">
+              <div class="label">Today</div>
+              <div class="value" id="tv-today">—</div>
+              <div class="sub">Page views</div>
+            </div>
+            <div class="stat-tile">
+              <div class="label">This Week</div>
+              <div class="value" id="tv-week">—</div>
+              <div class="sub">Last 7 days</div>
+            </div>
+            <div class="stat-tile">
+              <div class="label">This Month</div>
+              <div class="value" id="tv-month">—</div>
+              <div class="sub">Last 30 days</div>
+            </div>
+            <div class="stat-tile">
+              <div class="label">All Time</div>
+              <div class="value" id="tv-total">—</div>
+              <div class="sub">Since launch</div>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:22px;">
+            <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:.82rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;">Daily Views — Last 7 Days</div>
+            <div id="traffic-chart" style="width:100%;height:120px;"></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Page</th><th>All-Time Views</th><th>This Week</th></tr></thead>
+              <tbody id="traffic-pages-tbody">
+                <tr><td colspan="3"><div class="empty"><div class="icon">📈</div><p>Loading…</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- SETTINGS -->
         <div class="panel" id="panel-settings">
           <div class="sec-head"><h2>Admin Settings</h2></div>
@@ -504,6 +558,9 @@ tr:hover td{background:var(--ground);}
     </div>
     <div class="bottom-nav-item" id="bn-questionnaires" onclick="showPanel('questionnaires',this,'bn-questionnaires')">
       <span class="bn-icon">📝</span><span>HR Forms</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-traffic" onclick="showPanel('traffic',this,'bn-traffic')">
+      <span class="bn-icon">📈</span><span>Traffic</span>
     </div>
     <div class="bottom-nav-item" id="bn-settings" onclick="showPanel('settings',this,'bn-settings')">
       <span class="bn-icon">⚙️</span><span>Settings</span>
@@ -737,7 +794,8 @@ function showPanel(name, el, bnId){
   // Highlight bottom nav item (mobile)
   const bnEl=document.getElementById(bnId||'bn-'+name);
   if(bnEl) bnEl.classList.add('active');
-  const titles={dashboard:'Dashboard',vacancies:'Job Vacancies',applications:'Applications',enquiries:'Enquiries',questionnaires:'HR Questionnaires',settings:'Settings'};
+  const titles={dashboard:'Dashboard',vacancies:'Job Vacancies',applications:'Applications',enquiries:'Enquiries',questionnaires:'HR Questionnaires',traffic:'Website Traffic',settings:'Settings'};
+  if(name==='traffic') loadTrafficData();
   document.getElementById('panelTitle').textContent=titles[name]||name;
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -770,6 +828,81 @@ function renderDashboard(){
       <td>${esc(v.location||'')}</td>
       <td><span class="tag tag-${(v.status||'active').toLowerCase()}">${esc(v.status||'')}</span></td>
     </tr>`).join('');
+}
+
+// ── TRAFFIC ──
+let _pvData = null;
+async function loadTrafficData() {
+  if (_pvData) { renderTraffic(_pvData); return; }
+  const { data, error } = await db.from('page_views')
+    .select('page,created_at')
+    .order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('traffic-setup-notice').style.display = 'block';
+    document.getElementById('traffic-pages-tbody').innerHTML =
+      '<tr><td colspan="3"><div class="empty"><div class="icon">⚙️</div><p>Table not set up yet — follow the instructions above.</p></div></td></tr>';
+    return;
+  }
+  _pvData = data || [];
+  renderTraffic(_pvData);
+}
+
+function renderTraffic(rows) {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const ms7 = 7 * 86400000, ms30 = 30 * 86400000;
+
+  let today = 0, week = 0, month = 0;
+  const byDay = {}, byPage = {}, byPageWeek = {};
+  rows.forEach(r => {
+    const d = new Date(r.created_at);
+    const age = now - d;
+    if (d >= startOfToday) today++;
+    if (age <= ms7) week++;
+    if (age <= ms30) month++;
+    const day = d.toISOString().slice(0, 10);
+    byDay[day] = (byDay[day] || 0) + 1;
+    byPage[r.page] = (byPage[r.page] || 0) + 1;
+    if (age <= ms7) byPageWeek[r.page] = (byPageWeek[r.page] || 0) + 1;
+  });
+
+  document.getElementById('tv-today').textContent = today;
+  document.getElementById('tv-week').textContent = week;
+  document.getElementById('tv-month').textContent = month;
+  document.getElementById('tv-total').textContent = rows.length;
+
+  // 7-day bar chart
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(startOfToday - i * 86400000);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const counts = days.map(d => byDay[d] || 0);
+  const maxC = Math.max(...counts, 1);
+  const labels = days.map(d => { const dt = new Date(d+'T00:00:00'); return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()]; });
+  const barW = 100 / 7;
+  const svgBars = counts.map((c, i) => {
+    const h = Math.max((c / maxC) * 80, c > 0 ? 4 : 0);
+    const x = i * barW + barW * 0.15;
+    const w = barW * 0.7;
+    const y = 100 - h;
+    return `<rect x="${x}%" y="${y}%" width="${w}%" height="${h}%" rx="3" fill="var(--sky)" opacity=".85"/>
+      <text x="${x + w / 2 * 0.01 * 100 * 0.5}%" y="97%" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="Montserrat,sans-serif">${labels[i]}</text>
+      ${c > 0 ? `<text x="${x + w * 0.5}%" y="${Math.max(y - 2, 4)}%" text-anchor="middle" font-size="9" fill="var(--sky)" font-family="Montserrat,sans-serif" font-weight="700">${c}</text>` : ''}`;
+  }).join('');
+  document.getElementById('traffic-chart').innerHTML =
+    `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:100%;overflow:visible;">${svgBars}</svg>`;
+
+  // Page table
+  const pages = Object.entries(byPage).sort((a, b) => b[1] - a[1]);
+  if (!pages.length) {
+    document.getElementById('traffic-pages-tbody').innerHTML =
+      '<tr><td colspan="3"><div class="empty"><div class="icon">📈</div><p>No page views recorded yet.</p></div></td></tr>';
+    return;
+  }
+  document.getElementById('traffic-pages-tbody').innerHTML = pages.map(([pg, total]) =>
+    `<tr><td><strong>${esc(pg)}</strong></td><td>${total}</td><td>${byPageWeek[pg] || 0}</td></tr>`
+  ).join('');
 }
 
 // ── VACANCIES ──
