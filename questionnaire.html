@@ -129,7 +129,7 @@
   <h1>UAE Domestic Worker / Nanny<br>HR Interview Questionnaire</h1>
   <p>Complete all sections honestly. This form is confidential.</p>
 </div>
-<div class="age-banner">⚠️ Female applicants only · Age requirement: 26–40 years</div>
+<div class="age-banner">⚠️ Female applicants only · Age requirement: 25–40 years</div>
 
 <div style="background:#f0fdf4;border-bottom:2px solid #16a34a;padding:14px 20px;">
   <div style="max-width:700px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;">
@@ -156,9 +156,9 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="lbl req">Age <span style="font-weight:400;color:var(--muted)">(26–40 only)</span></label>
-            <input type="number" name="age" id="ageField" placeholder="Must be 26–40" min="26" max="40" />
-            <div class="age-error-msg" id="ageErrorMsg">❌ Sorry, applicants must be between 26 and 40 years old.</div>
+            <label class="lbl req">Age <span style="font-weight:400;color:var(--muted)">(25–40 only)</span></label>
+            <input type="number" name="age" id="ageField" placeholder="Must be 25–40" min="25" max="40" />
+            <div class="age-error-msg" id="ageErrorMsg">❌ Sorry, applicants must be between 25 and 40 years old.</div>
           </div>
           <div class="form-group"><label class="lbl">Nationality</label><input type="text" name="nationality" placeholder="e.g. Malawian" /></div>
         </div>
@@ -678,7 +678,7 @@
     const v = parseInt(document.getElementById('ageField').value, 10);
     const err = document.getElementById('ageErrorMsg');
     const field = document.getElementById('ageField');
-    if (v && (v < 26 || v > 40)) {
+    if (v && (v < 25 || v > 40)) {
       field.classList.add('age-error'); err.classList.add('show'); return false;
     }
     field.classList.remove('age-error'); err.classList.remove('show'); return true;
@@ -834,8 +834,8 @@
       currentStep = 1; showStep(1); return;
     }
     const ageNum = parseInt(data.age, 10);
-    if (ageNum && (ageNum < 26 || ageNum > 40)) {
-      alert('Sorry, only applicants aged 26–40 can apply for this position.');
+    if (ageNum && (ageNum < 25 || ageNum > 40)) {
+      alert('Sorry, only applicants aged 25–40 can apply for this position.');
       currentStep = 1; showStep(1); return;
     }
     if (data.gender === 'Male') {
