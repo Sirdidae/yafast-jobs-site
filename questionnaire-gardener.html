@@ -124,7 +124,7 @@
   <h1>🌿 Gardener — Dubai, UAE<br>Job Application Questionnaire</h1>
   <p>Complete all sections honestly. This form is confidential.</p>
 </div>
-<div class="age-banner">⚠️ Male candidates only · Age requirement: 22–42 years · AED 900 / month</div>
+<div class="age-banner">⚠️ Male candidates only · Age requirement: 21–42 years · AED 900 / month</div>
 <div class="employer-banner">
   <div class="employer-inner">
     <div class="employer-icon">✈️</div>
@@ -158,9 +158,9 @@
           <div class="form-group"><label class="lbl opt">Date of Birth</label><input type="date" name="dob" id="dobField" /></div>
         </div>
         <div class="form-group">
-          <label class="lbl">Age <span style="font-weight:400;color:var(--muted)">(22–42 only)</span></label>
-          <input type="number" name="age" id="ageField" placeholder="Must be 22–42" min="22" max="42" />
-          <div class="age-error-msg" id="ageErrorMsg">❌ Sorry, applicants must be between 22 and 42 years old to apply for this position.</div>
+          <label class="lbl">Age <span style="font-weight:400;color:var(--muted)">(21–42 only)</span></label>
+          <input type="number" name="age" id="ageField" placeholder="Must be 21–42" min="21" max="42" />
+          <div class="age-error-msg" id="ageErrorMsg">❌ Sorry, applicants must be between 21 and 42 years old to apply for this position.</div>
         </div>
         <div class="form-group">
           <label class="lbl">Gender <span style="font-weight:400;color:var(--muted)">(male candidates only)</span></label>
@@ -596,7 +596,7 @@
     const ageVal = parseInt(document.getElementById('ageField').value, 10);
     const ageErr = document.getElementById('ageErrorMsg');
     const ageField = document.getElementById('ageField');
-    if (ageVal && (ageVal < 22 || ageVal > 42)) {
+    if (ageVal && (ageVal < 21 || ageVal > 42)) {
       ageField.classList.add('age-error');
       ageErr.classList.add('show');
       return false;
@@ -733,8 +733,8 @@
       currentStep = 1; showStep(1); return;
     }
     const ageNum = parseInt(age, 10);
-    if (ageNum && (ageNum < 22 || ageNum > 42)) {
-      alert('Sorry, only applicants aged 22–42 can apply for this position.');
+    if (ageNum && (ageNum < 21 || ageNum > 42)) {
+      alert('Sorry, only applicants aged 21–42 can apply for this position.');
       currentStep = 1; showStep(1); return;
     }
     if (data.gender === 'Female') {
