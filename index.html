@@ -546,8 +546,9 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
   .placement-grid{grid-template-columns:1fr!important;}
 }
 @media(max-width:600px){
-  /* Nav-top — hide entirely on phone */
-  .nav-top{display:none;}
+  /* Nav-top — keep visible on phone, stack items */
+  .nav-top{display:block;padding-block:8px;}
+  .nav-top .container{flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:.75rem;}
 
   /* ── HERO: show full group photo on mobile ── */
   /* Pull image out of absolute positioning so it displays at natural size */
