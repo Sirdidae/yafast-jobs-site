@@ -542,14 +542,10 @@
 
   // Fields excluded from mandatory validation (conditional or explicitly optional)
   const OPTIONAL_FIELDS = new Set([
-    // Reference 2
     'ref2_name', 'ref2_phone',
-    // Conditional health detail
     'medical_details',
-    // Personal — optional demographic fields
-    'dob', 'num_children',
+    'dob', 'num_children', 'marital_status',
     'emergency_name', 'emergency_phone',
-    // Reference 1 — conditional on previous employment
     'ref1_employer', 'ref1_country', 'ref1_position', 'ref1_period', 'ref1_phone',
   ]);
 
