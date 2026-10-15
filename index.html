@@ -299,11 +299,14 @@ h3{font-size:1.2rem;font-weight:700;}
 .partner-type{font-size:.72rem;color:var(--text-muted);}
 /* ── REAL STORIES ── */
 .voices-section{background:var(--ground);padding-block:80px;}
+.voices-layout{display:grid;grid-template-columns:280px 1fr;gap:48px;align-items:start;}
+.voices-banner img{width:100%;display:block;border-radius:var(--radius-lg);box-shadow:var(--shadow-md);}
 .voices-header{text-align:center;margin-bottom:52px;}
 .voices-header .eyebrow{display:inline-block;margin-bottom:10px;}
 .voices-header h2{margin-top:0;max-width:22ch;margin-inline:auto;}
 .voices-header p{color:var(--text-muted);max-width:48ch;margin-inline:auto;margin-top:12px;font-size:.97rem;}
 .voices-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media(max-width:900px){.voices-layout{grid-template-columns:1fr;}.voices-banner{display:none;}}
 @media(max-width:580px){.voices-grid{grid-template-columns:1fr;}}
 .voice-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:18px 16px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .2s,border-color .2s;}
 .voice-card:hover{border-color:var(--sky);box-shadow:var(--shadow-md);}
@@ -976,6 +979,11 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 <!-- EMPLOYEE VOICES -->
 <section class="section voices-section reveal">
   <div class="container">
+    <div class="voices-layout">
+    <div class="voices-banner">
+      <img src="visa-rollup-banner.webp" alt="Yafast UAE Visa Services — Visit, Job Seeking, Work Permit & Direct Recruitment" />
+    </div>
+    <div>
     <div class="voices-header">
       <p class="eyebrow">Team &amp; Candidate Stories</p>
       <h2>Real Stories</h2>
@@ -1075,6 +1083,8 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
       </div>
 
     </div>
+  </div><!-- /voices-right -->
+  </div><!-- /voices-layout -->
   </div>
 </section>
 
