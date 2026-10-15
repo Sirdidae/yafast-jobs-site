@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gardener Application — Yafast</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0F3568; --blue: #1565A0; --sky: #2196F3;
+      --bg: #f4f6f9; --white: #fff; --text: #1a1a2e;
+      --muted: #64748b; --border: #dde1e7; --green: #16a34a; --red: #dc2626;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    .page-header { background: linear-gradient(135deg, #0a4a1a, #15803d); color: white; padding: 24px 20px 28px; text-align: center; }
+    .brand { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: .75; margin-bottom: 8px; }
+    .page-header h1 { font-size: clamp(18px, 5vw, 24px); font-weight: 800; line-height: 1.25; }
+    .page-header p { font-size: 13px; opacity: .8; margin-top: 6px; }
+
+    .age-banner { background: #fffbeb; border-bottom: 2px solid #f59e0b; padding: 10px 20px; text-align: center; font-size: 13px; font-weight: 600; color: #92400e; }
+
+    .progress-wrap { background: #c8d8f0; height: 5px; }
+    .progress-bar { background: var(--green); height: 5px; transition: width .4s ease; }
+    .step-label { text-align: center; font-size: 12px; color: var(--muted); padding: 7px; background: #e8f5e9; font-weight: 500; }
+
+    .employer-banner { background: #f0fdf4; border-bottom: 2px solid #4ade80; padding: 14px 20px; }
+    .employer-inner { max-width: 700px; margin: 0 auto; display: flex; gap: 12px; align-items: flex-start; }
+    .employer-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+    .employer-banner strong { font-size: 14px; color: #14532d; display: block; margin-bottom: 4px; }
+    .employer-banner p { font-size: 12px; color: #166534; line-height: 1.6; margin: 0; }
+
+    .container { max-width: 700px; margin: 0 auto; padding: 0 16px 110px; }
+
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+
+    .section-head { background: var(--white); border-left: 4px solid var(--green); padding: 14px 18px; margin: 22px 0 14px; border-radius: 0 8px 8px 0; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .section-head h2 { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .section-head p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .card { background: white; border-radius: 10px; padding: 18px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+
+    .form-group { margin-bottom: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    label.lbl { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
+    label.lbl::after { content: ' *'; color: #e53e3e; }
+    label.lbl.opt::after { content: ''; }
+
+    input[type=text], input[type=tel], input[type=email], input[type=date],
+    input[type=number], select, textarea {
+      width: 100%; padding: 9px 11px; border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: 14px; font-family: inherit; color: var(--text);
+      background: white; transition: border-color .2s;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(22,163,74,.1); }
+    input.age-error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(220,38,38,.1); }
+    textarea { min-height: 75px; resize: vertical; }
+
+    .age-error-msg { font-size: 12px; color: var(--red); font-weight: 600; margin-top: 4px; display: none; }
+    .age-error-msg.show { display: block; }
+
+    .yn { display: flex; gap: 8px; }
+    .yn input[type=radio] { display: none; }
+    .yn label { flex: 1; display: block; text-align: center; padding: 8px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .2s; }
+    .yn input:checked + label { border-color: var(--green); background: #f0fdf4; color: var(--green); }
+
+    .pills { display: flex; flex-wrap: wrap; gap: 7px; }
+    .pill input[type=radio] { display: none; }
+    .pill label { display: block; padding: 6px 13px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); transition: all .2s; }
+    .pill input:checked + label { border-color: var(--green); background: var(--green); color: white; }
+
+    .cb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    @media (max-width: 380px) { .cb-grid { grid-template-columns: 1fr; } }
+    .cb-item { display: flex; align-items: center; gap: 8px; padding: 8px 11px; border: 1.5px solid var(--border); border-radius: 7px; cursor: pointer; transition: border-color .2s; }
+    .cb-item:hover { border-color: var(--green); }
+    .cb-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+    .cb-item span { font-size: 13px; font-weight: 500; }
+
+    .sk-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 9px 13px; background: #f8fafc; border-radius: 7px; border: 1.5px solid var(--border); margin-bottom: 6px; }
+    .sk-label { font-size: 13px; font-weight: 500; }
+    .sk-yn { display: flex; gap: 6px; }
+    .sk-yn input[type=radio] { display: none; }
+    .sk-yn label { padding: 3px 12px; border: 1.5px solid var(--border); border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .2s; }
+    .sk-yn input:checked + label { border-color: var(--green); background: var(--green); color: white; }
+
+    .form-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; z-index: 100; }
+    .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .btn-back { background: #f1f5f9; color: var(--navy); }
+    .btn-next { background: var(--navy); color: white; }
+    .btn-submit { background: var(--green); color: white; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    #successScreen { display: none; text-align: center; padding: 60px 20px; max-width: 480px; margin: 0 auto; }
+    .success-icon { font-size: 56px; margin-bottom: 16px; }
+    #successScreen h2 { color: var(--navy); font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    #successScreen p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    .divider { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .sub-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+    .info-box { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #14532d; margin-bottom: 14px; }
+
+    .file-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 16px 14px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; background: #fafbfc; }
+    .file-zone:hover { border-color: var(--green); background: #f0fdf4; }
+    .file-zone.has-file { border-color: var(--green); background: #f0fdf4; }
+    .file-zone-icon { font-size: 22px; margin-bottom: 4px; }
+    .file-zone-text { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .file-zone-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .file-tag { display: inline-flex; align-items: center; gap: 6px; background: #dcfce7; border: 1px solid #86efac; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: #14532d; margin: 4px 2px; word-break: break-all; }
+    .upload-progress { font-size: 12px; color: var(--muted); margin-top: 6px; display: none; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="brand">Ya Fast Job Links &amp; Travel Services — Malawi</div>
+  <h1>🌿 Gardener — Dubai, UAE<br>Job Application Questionnaire</h1>
+  <p>Complete all sections honestly. This form is confidential.</p>
+</div>
+<div class="age-banner">⚠️ Male candidates only · Age requirement: 22–42 years · AED 900 / month</div>
+<div class="employer-banner">
+  <div class="employer-inner">
+    <div class="employer-icon">✈️</div>
+    <div>
+      <strong>Employer-Arranged Position — Key Terms You Must Understand</strong>
+      <p>
+        <strong>Air Ticket:</strong> Company covers the air ticket as a loan — deducted from your salary in equal splits over 5 months. &nbsp;|&nbsp;
+        <strong>Visa:</strong> Free — company provides at no cost. &nbsp;|&nbsp;
+        <strong>Probation:</strong> 6 months. &nbsp;|&nbsp;
+        <strong>Accommodation &amp; Transport in UAE:</strong> Provided by the company. &nbsp;|&nbsp;
+        <strong>Meals:</strong> Kitchen facilities are provided — you cook your own meals. &nbsp;|&nbsp;
+        <strong>Work Schedule:</strong> 10 hours/day · 26 working days/month · 4 rest days. &nbsp;|&nbsp;
+        Agency consultation and processing T&amp;Cs apply.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:20%"></div></div>
+<div class="step-label" id="stepLabel">Step 1 of 5 — Personal Information</div>
+
+<div class="container">
+  <form id="qForm">
+
+    <!-- ══ STEP 1: PERSONAL INFO ══ -->
+    <div class="form-step active" id="step1">
+      <div class="section-head"><h2>1. Personal Information</h2><p>Your basic details — must be accurate</p></div>
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Full Name</label><input type="text" name="full_name" placeholder="e.g. Kondwani Banda" /></div>
+          <div class="form-group"><label class="lbl opt">Date of Birth</label><input type="date" name="dob" id="dobField" /></div>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Age <span style="font-weight:400;color:var(--muted)">(22–42 only)</span></label>
+          <input type="number" name="age" id="ageField" placeholder="Must be 22–42" min="22" max="42" />
+          <div class="age-error-msg" id="ageErrorMsg">❌ Sorry, applicants must be between 22 and 42 years old to apply for this position.</div>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Gender <span style="font-weight:400;color:var(--muted)">(male candidates only)</span></label>
+          <div class="pills">
+            <div class="pill"><input type="radio" name="gender" id="gen_m" value="Male"><label for="gen_m">Male</label></div>
+            <div class="pill"><input type="radio" name="gender" id="gen_f" value="Female"><label for="gen_f">Female</label></div>
+          </div>
+          <div class="age-error-msg" id="genderErrorMsg">❌ Sorry, this position is for male candidates only.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Nationality</label><input type="text" name="nationality" placeholder="e.g. Malawian" /></div>
+          <div class="form-group">
+            <label class="lbl opt">Marital Status</label>
+            <select name="marital_status">
+              <option value="">Select…</option>
+              <option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="lbl opt">Number of Children</label><input type="number" name="num_children" placeholder="0" min="0" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Phone / WhatsApp</label><input type="tel" name="phone" placeholder="+265 9XX XXX XXX" /></div>
+          <div class="form-group"><label class="lbl">Current Location / District</label><input type="text" name="location" placeholder="e.g. Lilongwe, Malawi" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Passport Number</label><input type="text" name="passport_no" placeholder="e.g. MWP1234567" /></div>
+          <div class="form-group"><label class="lbl">Passport Expiry Date</label><input type="date" name="passport_expiry" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl opt">Emergency Contact Name</label><input type="text" name="emergency_name" placeholder="Full name" /></div>
+          <div class="form-group"><label class="lbl opt">Emergency Contact Phone</label><input type="tel" name="emergency_phone" placeholder="+265 9XX XXX XXX" /></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl">Position Applied For</label>
+          <div class="pills">
+            <div class="pill"><input type="radio" name="position" id="pos_gard" value="Gardener" checked><label for="pos_gard">Gardener — Dubai, UAE</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2: WORK EXPERIENCE ══ -->
+    <div class="form-step" id="step2">
+      <div class="section-head"><h2>2. Gardening Work Experience</h2><p>Tell us about your background in gardening or grounds maintenance</p></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl">Have you worked as a gardener or grounds worker before?</label>
+          <div class="yn">
+            <input type="radio" name="prev_gardening" id="pg_y" value="Yes"><label for="pg_y">Yes</label>
+            <input type="radio" name="prev_gardening" id="pg_n" value="No"><label for="pg_n">No</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="lbl">Years of Gardening Experience</label>
+            <select name="years_experience">
+              <option value="">Select…</option>
+              <option>No experience</option>
+              <option>Less than 1 year</option>
+              <option>1–2 years</option>
+              <option>3–5 years</option>
+              <option>5+ years</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="lbl">Country / Countries Worked In</label><input type="text" name="countries_worked" placeholder="e.g. Malawi, South Africa" /></div>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Types of environments you have worked in (select all that apply):</label>
+          <div class="cb-grid">
+            <label class="cb-item"><input type="checkbox" name="garden_types" value="Private Residential Gardens"><span>Private Residential Gardens</span></label>
+            <label class="cb-item"><input type="checkbox" name="garden_types" value="Hotel / Resort Grounds"><span>Hotel / Resort Grounds</span></label>
+            <label class="cb-item"><input type="checkbox" name="garden_types" value="Commercial / Office Landscaping"><span>Commercial / Office Landscaping</span></label>
+            <label class="cb-item"><input type="checkbox" name="garden_types" value="Public Parks or Roads"><span>Public Parks or Roads</span></label>
+            <label class="cb-item"><input type="checkbox" name="garden_types" value="Nursery / Plant Farms"><span>Nursery / Plant Farms</span></label>
+            <label class="cb-item"><input type="checkbox" name="garden_types" value="Agricultural Land"><span>Agricultural Land</span></label>
+          </div>
+        </div>
+        <div class="form-group"><label class="lbl">Previous Employer's Name / Company</label><input type="text" name="prev_employer" placeholder="e.g. Green Spaces Ltd" /></div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl">Previous Employer's Nationality</label><input type="text" name="prev_employer_nat" placeholder="e.g. South African" /></div>
+          <div class="form-group"><label class="lbl">Employment Period</label><input type="text" name="prev_period" placeholder="e.g. 2021 – 2024" /></div>
+        </div>
+        <div class="form-group"><label class="lbl">Reason for leaving previous job</label><textarea name="reason_leaving" placeholder="Why did you leave or want to leave?" style="min-height:60px;"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3: GARDENING SKILLS ══ -->
+    <div class="form-step" id="step3">
+      <div class="section-head"><h2>3. Gardening Skills &amp; Knowledge</h2><p>Indicate Yes or No for each — be honest</p></div>
+      <div class="card">
+        <p class="sub-label" style="margin-bottom:10px;">Gardening Tasks</p>
+        <div class="sk-row"><span class="sk-label">Mowing and trimming lawns</span><div class="sk-yn"><input type="radio" name="sk_mowing" id="mo_y" value="Yes"><label for="mo_y">Yes</label><input type="radio" name="sk_mowing" id="mo_n" value="No"><label for="mo_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Pruning and shaping trees and shrubs</span><div class="sk-yn"><input type="radio" name="sk_pruning" id="pr_y" value="Yes"><label for="pr_y">Yes</label><input type="radio" name="sk_pruning" id="pr_n" value="No"><label for="pr_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Planting flowers, trees and shrubs</span><div class="sk-yn"><input type="radio" name="sk_planting" id="pl_y" value="Yes"><label for="pl_y">Yes</label><input type="radio" name="sk_planting" id="pl_n" value="No"><label for="pl_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Watering plants and managing irrigation systems</span><div class="sk-yn"><input type="radio" name="sk_irrigation" id="ir_y" value="Yes"><label for="ir_y">Yes</label><input type="radio" name="sk_irrigation" id="ir_n" value="No"><label for="ir_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Applying fertilisers and compost</span><div class="sk-yn"><input type="radio" name="sk_fertiliser" id="fe_y" value="Yes"><label for="fe_y">Yes</label><input type="radio" name="sk_fertiliser" id="fe_n" value="No"><label for="fe_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Applying pesticides and weed killers safely</span><div class="sk-yn"><input type="radio" name="sk_pesticides" id="pe_y" value="Yes"><label for="pe_y">Yes</label><input type="radio" name="sk_pesticides" id="pe_n" value="No"><label for="pe_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Weeding garden beds and borders</span><div class="sk-yn"><input type="radio" name="sk_weeding" id="wd_y" value="Yes"><label for="wd_y">Yes</label><input type="radio" name="sk_weeding" id="wd_n" value="No"><label for="wd_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Clearing leaves and general grounds tidying</span><div class="sk-yn"><input type="radio" name="sk_clearing" id="cl_y" value="Yes"><label for="cl_y">Yes</label><input type="radio" name="sk_clearing" id="cl_n" value="No"><label for="cl_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Laying or patching turf / grass</span><div class="sk-yn"><input type="radio" name="sk_turf" id="tu_y" value="Yes"><label for="tu_y">Yes</label><input type="radio" name="sk_turf" id="tu_n" value="No"><label for="tu_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Identifying common plant diseases or pests</span><div class="sk-yn"><input type="radio" name="sk_disease" id="ds_y" value="Yes"><label for="ds_y">Yes</label><input type="radio" name="sk_disease" id="ds_n" value="No"><label for="ds_n">No</label></div></div>
+      </div>
+
+      <div class="section-head"><h2>Tools &amp; Equipment</h2><p>Indicate which tools you can operate</p></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl">Gardening tools and equipment you can use (select all that apply):</label>
+          <div class="cb-grid">
+            <label class="cb-item"><input type="checkbox" name="equipment" value="Lawn Mower (Push)"><span>Lawn Mower (Push)</span></label>
+            <label class="cb-item"><input type="checkbox" name="equipment" value="Ride-On Mower"><span>Ride-On Mower</span></label>
+            <label class="cb-item"><input type="checkbox" name="equipment" value="Hedge Trimmer"><span>Hedge Trimmer</span></label>
+            <label class="cb-item"><input type="checkbox" name="equipment" value="Leaf Blower"><span>Leaf Blower</span></label>
+            <label class="cb-item"><input type="checkbox" name="equipment" value="Chainsaw"><span>Chainsaw</span></label>
+            <label class="cb-item"><input type="checkbox" name="equipment" value="Irrigation System Controls"><span>Irrigation System Controls</span></label>
+            <label class="cb-item"><input type="checkbox" name="equipment" value="Pressure Washer"><span>Pressure Washer</span></label>
+            <label class="cb-item"><input type="checkbox" name="equipment" value="Hand Tools (spade, rake, hoe)"><span>Hand Tools (spade, rake, hoe)</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="lbl">Can you handle and apply pesticides or fertilisers safely using PPE?</label>
+          <div class="yn">
+            <input type="radio" name="chemicals_safe" id="cs_y" value="Yes"><label for="cs_y">Yes</label>
+            <input type="radio" name="chemicals_safe" id="cs_n" value="No"><label for="cs_n">No</label>
+          </div>
+        </div>
+        <div class="form-group"><label class="lbl">What steps do you take before applying a chemical product to plants?</label><textarea name="chemicals_explain" placeholder="Describe your safety approach…"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 4: PHYSICAL FITNESS & WORK ATTITUDE ══ -->
+    <div class="form-step" id="step4">
+      <div class="section-head"><h2>4. Physical Fitness &amp; Health</h2><p>Gardening in UAE requires excellent physical fitness</p></div>
+      <div class="card">
+        <div class="info-box">🌡️ This role involves working outdoors for <strong>10 hours per day</strong> in Dubai's heat (temperatures can reach 45°C in summer). You must be physically fit and able to perform manual outdoor labour continuously for long shifts.</div>
+        <div class="sk-row"><span class="sk-label">Can you work outdoors in hot weather (up to 45°C) for 10 hours a day?</span><div class="sk-yn"><input type="radio" name="work_heat" id="wh_y" value="Yes"><label for="wh_y">Yes</label><input type="radio" name="work_heat" id="wh_n" value="No"><label for="wh_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Can you lift and carry equipment and materials up to 25 kg?</span><div class="sk-yn"><input type="radio" name="lift_heavy" id="lh_y" value="Yes"><label for="lh_y">Yes</label><input type="radio" name="lift_heavy" id="lh_n" value="No"><label for="lh_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Can you stand, bend and kneel for extended periods?</span><div class="sk-yn"><input type="radio" name="stand_long" id="sl_y" value="Yes"><label for="sl_y">Yes</label><input type="radio" name="stand_long" id="sl_n" value="No"><label for="sl_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Do you have any medical conditions that may affect physical outdoor work?</span><div class="sk-yn"><input type="radio" name="medical_issues" id="mi_y" value="Yes"><label for="mi_y">Yes</label><input type="radio" name="medical_issues" id="mi_n" value="No"><label for="mi_n">No</label></div></div>
+        <div class="form-group" style="margin-top:10px;"><label class="lbl opt">If yes, please describe the condition:</label><textarea name="medical_details" placeholder="Only if applicable…" style="min-height:55px;"></textarea></div>
+      </div>
+
+      <div class="section-head"><h2>Work Attitude &amp; Personality</h2></div>
+      <div class="card">
+        <div class="form-group"><label class="lbl">Why do you want to work as a gardener in Dubai, UAE?</label><textarea name="why_dubai" placeholder="Share your reason honestly…" style="min-height:85px;"></textarea></div>
+        <div class="form-group"><label class="lbl">How do you prioritise tasks when you have multiple areas to maintain in one day?</label><textarea name="work_approach" placeholder="Describe how you organise your work…"></textarea></div>
+        <div class="form-group"><label class="lbl">How do you handle working alone outdoors for long hours without supervision?</label><textarea name="self_motivated" placeholder="How do you stay focused and motivated?"></textarea></div>
+        <div class="sk-row"><span class="sk-label">Can you work independently without constant supervision?</span><div class="sk-yn"><input type="radio" name="work_independent" id="wi_y" value="Yes"><label for="wi_y">Yes</label><input type="radio" name="work_independent" id="wi_n" value="No"><label for="wi_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Are you comfortable working as part of a grounds team?</span><div class="sk-yn"><input type="radio" name="team_player" id="tp_y" value="Yes"><label for="tp_y">Yes</label><input type="radio" name="team_player" id="tp_n" value="No"><label for="tp_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Can you work early morning start times (e.g. 6:00 AM)?</span><div class="sk-yn"><input type="radio" name="early_start" id="es_y" value="Yes"><label for="es_y">Yes</label><input type="radio" name="early_start" id="es_n" value="No"><label for="es_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Can you prepare your own meals using kitchen facilities provided?</span><div class="sk-yn"><input type="radio" name="self_cook" id="sc2_y" value="Yes"><label for="sc2_y">Yes</label><input type="radio" name="self_cook" id="sc2_n" value="No"><label for="sc2_n">No</label></div></div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 5: UAE READINESS, REFERENCES & DECLARATION ══ -->
+    <div class="form-step" id="step5">
+      <div class="section-head"><h2>5. UAE Employment Readiness</h2></div>
+      <div class="card">
+        <div class="info-box" style="margin-bottom:16px;">
+          📋 <strong>Employment Terms for This Position:</strong><br>
+          Salary: <strong>AED 900 / month</strong> &nbsp;|&nbsp; Schedule: <strong>10 hrs/day · 26 days/month · 4 rest days</strong><br>
+          Air ticket: Company-funded as a loan — deducted from salary over <strong>5 equal monthly instalments</strong><br>
+          Visa: <strong>Free</strong> (provided by the company) &nbsp;|&nbsp; Probation: <strong>6 months</strong><br>
+          Accommodation &amp; Transport in UAE: <strong>Provided</strong> &nbsp;|&nbsp; Meals: Kitchen provided — you cook your own
+        </div>
+        <div class="sk-row"><span class="sk-label">Are you willing to work in Dubai, UAE?</span><div class="sk-yn"><input type="radio" name="willing_dubai" id="wd_y" value="Yes"><label for="wd_y">Yes</label><input type="radio" name="willing_dubai" id="wd_n" value="No"><label for="wd_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Do you accept the salary of AED 900 per month?</span><div class="sk-yn"><input type="radio" name="accept_salary" id="as_y" value="Yes"><label for="as_y">Yes</label><input type="radio" name="accept_salary" id="as_n" value="No"><label for="as_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Do you accept the work schedule of 10 hrs/day · 26 days/month?</span><div class="sk-yn"><input type="radio" name="accept_schedule" id="asc_y" value="Yes"><label for="asc_y">Yes</label><input type="radio" name="accept_schedule" id="asc_n" value="No"><label for="asc_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Do you understand the air ticket is a loan deducted over 5 months?</span><div class="sk-yn"><input type="radio" name="accept_ticket_loan" id="atl_y" value="Yes"><label for="atl_y">Yes</label><input type="radio" name="accept_ticket_loan" id="atl_n" value="No"><label for="atl_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Are you willing to serve a 6-month probation period?</span><div class="sk-yn"><input type="radio" name="accept_probation" id="ap_y" value="Yes"><label for="ap_y">Yes</label><input type="radio" name="accept_probation" id="ap_n" value="No"><label for="ap_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Are you willing to sign a two-year employment contract?</span><div class="sk-yn"><input type="radio" name="sign_contract" id="sc_y" value="Yes"><label for="sc_y">Yes</label><input type="radio" name="sign_contract" id="sc_n" value="No"><label for="sc_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Are you ready to travel once the visa process is complete?</span><div class="sk-yn"><input type="radio" name="ready_travel" id="rt_y" value="Yes"><label for="rt_y">Yes</label><input type="radio" name="ready_travel" id="rt_n" value="No"><label for="rt_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Are you willing to undergo a medical / health screening?</span><div class="sk-yn"><input type="radio" name="medical_ok" id="mo_y" value="Yes"><label for="mo_y">Yes</label><input type="radio" name="medical_ok" id="mo_n" value="No"><label for="mo_n">No</label></div></div>
+        <div class="sk-row"><span class="sk-label">Do you accept that employment is subject to UAE labour laws and your contract?</span><div class="sk-yn"><input type="radio" name="accept_uae_law" id="ul_y" value="Yes"><label for="ul_y">Yes</label><input type="radio" name="accept_uae_law" id="ul_n" value="No"><label for="ul_n">No</label></div></div>
+        <div class="form-group" style="margin-top:12px;">
+          <label class="lbl">How soon can you be available to travel?</label>
+          <select name="availability">
+            <option value="">Select…</option>
+            <option>Immediately (1–4 weeks)</option>
+            <option>Within 1–2 months</option>
+            <option>Within 3 months</option>
+            <option>More than 3 months</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-head"><h2>Language &amp; Communication</h2></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl">Languages spoken:</label>
+          <div class="cb-grid">
+            <label class="cb-item"><input type="checkbox" name="languages" value="English"><span>English</span></label>
+            <label class="cb-item"><input type="checkbox" name="languages" value="Chichewa"><span>Chichewa</span></label>
+            <label class="cb-item"><input type="checkbox" name="languages" value="Tumbuka"><span>Tumbuka</span></label>
+            <label class="cb-item"><input type="checkbox" name="languages" value="Other"><span>Other</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="lbl">English communication level:</label>
+          <div class="pills">
+            <div class="pill"><input type="radio" name="english_level" id="el_e" value="Excellent"><label for="el_e">Excellent</label></div>
+            <div class="pill"><input type="radio" name="english_level" id="el_g" value="Good"><label for="el_g">Good</label></div>
+            <div class="pill"><input type="radio" name="english_level" id="el_f" value="Fair"><label for="el_f">Fair</label></div>
+            <div class="pill"><input type="radio" name="english_level" id="el_b" value="Basic"><label for="el_b">Basic</label></div>
+          </div>
+        </div>
+        <div class="form-group"><label class="lbl">Can you understand basic English instructions from a supervisor?</label><div class="yn"><input type="radio" name="basic_english" id="be_y" value="Yes"><label for="be_y">Yes</label><input type="radio" name="basic_english" id="be_n" value="No"><label for="be_n">No</label></div></div>
+      </div>
+
+      <div class="section-head"><h2>References</h2></div>
+      <div class="card">
+        <p class="sub-label">Reference 1 (if applicable)</p>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl opt">Employer / Company Name</label><input type="text" name="ref1_employer" placeholder="Full name or company" /></div>
+          <div class="form-group"><label class="lbl opt">Country</label><input type="text" name="ref1_country" placeholder="e.g. Malawi" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl opt">Position Held</label><input type="text" name="ref1_position" placeholder="e.g. Gardener / Groundsman" /></div>
+          <div class="form-group"><label class="lbl opt">Employment Period</label><input type="text" name="ref1_period" placeholder="e.g. 2021 – 2024" /></div>
+        </div>
+        <div class="form-group"><label class="lbl opt">Reference Phone Number</label><input type="tel" name="ref1_phone" placeholder="+265 9XX XXX XXX" /></div>
+        <hr class="divider">
+        <p class="sub-label">Reference 2 (optional)</p>
+        <div class="form-row">
+          <div class="form-group"><label class="lbl opt">Reference Name</label><input type="text" name="ref2_name" placeholder="Full name" /></div>
+          <div class="form-group"><label class="lbl opt">Phone Number</label><input type="tel" name="ref2_phone" placeholder="+XXX XX XXX XXXX" /></div>
+        </div>
+      </div>
+
+      <!-- ── SUPPORTING DOCUMENTS ── -->
+      <div class="section-head"><h2>Supporting Documents</h2><p>Attach your passport copy and any relevant files</p></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="lbl">Passport Copy <span style="font-weight:400;color:var(--muted)">(Required · PDF, PNG or JPEG · max 5 MB)</span></label>
+          <div class="file-zone" id="passportZone" onclick="document.getElementById('passportFile').click()">
+            <div class="file-zone-icon">🛂</div>
+            <div class="file-zone-text">Tap to attach passport copy</div>
+            <div class="file-zone-sub">PDF, PNG or JPEG accepted</div>
+          </div>
+          <input type="file" id="passportFile" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleSingleFile(this,'passportZone','passportTags')">
+          <div id="passportTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label class="lbl opt">Medical Certificate <span style="font-weight:400;color:var(--muted)">(optional · PDF, PNG or JPEG · max 5 MB)</span></label>
+          <div class="file-zone" id="medicalZone" onclick="document.getElementById('medicalFile').click()">
+            <div class="file-zone-icon">🏥</div>
+            <div class="file-zone-text">Tap to attach medical certificate</div>
+            <div class="file-zone-sub">PDF, PNG or JPEG accepted</div>
+          </div>
+          <input type="file" id="medicalFile" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleSingleFile(this,'medicalZone','medicalTags')">
+          <div id="medicalTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label class="lbl opt">CV / Resume <span style="font-weight:400;color:var(--muted)">(optional · PDF, PNG or JPEG · max 5 MB)</span></label>
+          <div class="file-zone" id="cvZone" onclick="document.getElementById('cvFile').click()">
+            <div class="file-zone-icon">📝</div>
+            <div class="file-zone-text">Tap to attach CV or resume</div>
+            <div class="file-zone-sub">PDF, PNG or JPEG accepted</div>
+          </div>
+          <input type="file" id="cvFile" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleSingleFile(this,'cvZone','cvTags')">
+          <div id="cvTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label class="lbl opt">Proof of Work History <span style="font-weight:400;color:var(--muted)">(optional · employment records, contracts or pay slips)</span></label>
+          <div class="file-zone" id="workHistoryZone" onclick="document.getElementById('workHistoryFiles').click()">
+            <div class="file-zone-icon">💼</div>
+            <div class="file-zone-text">Tap to attach work history proof</div>
+            <div class="file-zone-sub">You can select multiple files · PDF, PNG or JPEG</div>
+          </div>
+          <input type="file" id="workHistoryFiles" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleMultiFiles(this,'workHistoryZone','workHistoryTags')">
+          <div id="workHistoryTags" style="margin-top:6px;"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label class="lbl opt">Reference / Experience Letter <span style="font-weight:400;color:var(--muted)">(optional · from a previous employer)</span></label>
+          <div class="file-zone" id="refLetterZone" onclick="document.getElementById('refLetterFiles').click()">
+            <div class="file-zone-icon">📋</div>
+            <div class="file-zone-text">Tap to attach reference letter</div>
+            <div class="file-zone-sub">You can select multiple files · PDF, PNG or JPEG</div>
+          </div>
+          <input type="file" id="refLetterFiles" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleMultiFiles(this,'refLetterZone','refLetterTags')">
+          <div id="refLetterTags" style="margin-top:6px;"></div>
+        </div>
+        <p class="hint" style="margin-top:4px;">📁 Files are uploaded securely to Yafast. Only HR staff can access them.</p>
+        <div class="upload-progress" id="uploadProgress">⏳ Uploading files, please wait…</div>
+      </div>
+
+      <div class="section-head" style="border-left-color:#16a34a;"><h2>Candidate Declaration</h2></div>
+      <div class="card">
+        <div style="background:#f0fdf4;border:1.5px solid #4ade80;border-radius:8px;padding:13px 15px;margin-bottom:14px;">
+          <p style="font-size:13px;font-weight:700;color:#14532d;margin-bottom:6px;">✈️ Employment Terms Acknowledgement</p>
+          <p style="font-size:12px;color:#166534;line-height:1.65;">
+            I fully understand and agree to the following terms for the Gardener position:<br>
+            <strong>Salary:</strong> AED 900/month · <strong>Schedule:</strong> 10 hrs/day, 26 days/month, 4 rest days ·
+            <strong>Air ticket:</strong> Company-funded as a loan, deducted over 5 equal monthly instalments ·
+            <strong>Visa:</strong> Free, provided by the company ·
+            <strong>Probation:</strong> 6 months ·
+            <strong>Accommodation &amp; Transport:</strong> Provided by company ·
+            <strong>Meals:</strong> Kitchen facilities provided — I will prepare my own meals ·
+            Agency consultation and processing terms &amp; conditions apply.
+          </p>
+        </div>
+        <label class="cb-item" style="border-color:#4ade80;cursor:pointer;margin-bottom:10px;">
+          <input type="checkbox" name="terms_agree" id="terms_agree" value="agreed">
+          <span style="font-size:13px;font-weight:600;color:#14532d;">I have read and fully understand all the employment terms above ✓</span>
+        </label>
+        <hr style="border:none;border-top:1px dashed var(--border);margin:14px 0;">
+        <p style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px;">
+          I also confirm that the information provided in this questionnaire is <strong>true and accurate</strong> to the best of my knowledge. I understand that providing false information may affect my employment application and could lead to rejection or contract termination.
+        </p>
+        <label class="cb-item" style="border-color:#16a34a;cursor:pointer;margin-bottom:10px;">
+          <input type="checkbox" name="decl_agree" id="decl_agree" value="agreed">
+          <span style="font-size:13px;font-weight:600;color:#15803d;">I agree to the above declaration ✓</span>
+        </label>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;"><em>Note: This is an HR recruitment questionnaire by Yafast Job Links &amp; Travel Services. Candidates must complete all required visa, medical, and contract procedures applicable to the UAE.</em></p>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="successScreen">
+    <div class="success-icon">🌿</div>
+    <h2>Application Submitted!</h2>
+    <p>Thank you, <strong id="successName"></strong>. Your Gardener job application has been received by the Yafast team. We will review your answers and contact you on your WhatsApp number within <strong>48 hours</strong>.</p>
+    <p style="margin-top:12px;font-size:13px;color:var(--muted);">Keep your phone on and check your WhatsApp regularly.</p>
+  </div>
+</div>
+
+<!-- FIXED NAVIGATION -->
+<div class="form-nav" id="formNav">
+  <button class="btn btn-back" id="prevBtn" onclick="prevStep()" style="display:none">← Back</button>
+  <button class="btn btn-next" id="nextBtn" onclick="nextStep()">Next →</button>
+  <button class="btn btn-submit" id="submitBtn" type="button" onclick="submitQuestionnaire()" style="display:none">Submit Application →</button>
+</div>
+
+<script>
+  const _sb = supabase.createClient(
+    'https://kefsvaettxwuzrusufmi.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZnN2YWV0dHh3dXpydXN1Zm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTE3MzQsImV4cCI6MjEwNTI2NzczNH0.u7yPSyKzets54SQmrJ72d7MqRK2XuZnfanp3ZIALxK8'
+  );
+  _sb.from('page_views').insert({ page: 'Gardener Form' }).then(() => {});
+
+  const NOTIFY_KEY = 'face650a-59f4-42d9-9618-dd67a24e77de';
+
+  const OPTIONAL_FIELDS = new Set([
+    'ref2_name', 'ref2_phone', 'medical_details', 'dob', 'num_children',
+    'emergency_name', 'emergency_phone',
+    'ref1_employer', 'ref1_country', 'ref1_position', 'ref1_period', 'ref1_phone',
+  ]);
+
+  function showStepError(msg) {
+    let b = document.getElementById('stepErrBanner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'stepErrBanner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#dc2626;color:white;padding:12px 16px;font-size:13px;font-weight:700;z-index:300;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.3);display:none;';
+      document.body.prepend(b);
+    }
+    b.textContent = msg;
+    b.style.display = 'block';
+    clearTimeout(b._t);
+    b._t = setTimeout(() => { b.style.display = 'none'; }, 5000);
+  }
+
+  function clearStepHighlights(step) {
+    step.querySelectorAll('input, select, textarea').forEach(el => { el.style.borderColor = ''; el.style.boxShadow = ''; });
+    step.querySelectorAll('.yn, .pills, .sk-yn, .cb-grid').forEach(c => { c.style.outline = ''; c.style.borderRadius = ''; });
+    step.querySelectorAll('.file-zone').forEach(z => { z.style.borderColor = ''; });
+  }
+
+  function validateStep(n) {
+    const step = document.getElementById('step' + n);
+    clearStepHighlights(step);
+    let firstErr = null;
+    function fail(el) {
+      if (!el) return;
+      const isField = el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA';
+      if (isField) { el.style.borderColor = 'var(--red)'; el.style.boxShadow = '0 0 0 3px rgba(220,38,38,.15)'; }
+      else { el.style.outline = '2px solid var(--red)'; el.style.borderRadius = '8px'; }
+      if (!firstErr) firstErr = el;
+    }
+    step.querySelectorAll('input:not([type=radio]):not([type=checkbox]):not([type=file]), select, textarea').forEach(el => {
+      if (!el.name || OPTIONAL_FIELDS.has(el.name)) return;
+      if (!el.value.trim()) fail(el);
+    });
+    const radioNames = new Set();
+    step.querySelectorAll('input[type=radio]').forEach(r => radioNames.add(r.name));
+    radioNames.forEach(name => {
+      if (OPTIONAL_FIELDS.has(name)) return;
+      if (!step.querySelector('input[name="' + name + '"]:checked')) {
+        const first = step.querySelector('input[name="' + name + '"]');
+        const container = first && (first.closest('.yn') || first.closest('.pills') || first.closest('.sk-yn'));
+        fail(container || first);
+      }
+    });
+    if (n === 3) {
+      if (!step.querySelector('input[name="equipment"]:checked')) {
+        fail(step.querySelector('.cb-grid'));
+      }
+    }
+    if (n === 5) {
+      if (!step.querySelector('input[name="languages"]:checked')) {
+        fail(step.querySelector('.cb-grid'));
+      }
+      const pf = document.getElementById('passportFile');
+      if (!pf.files.length) {
+        const pz = document.getElementById('passportZone');
+        pz.style.borderColor = 'var(--red)';
+        if (!firstErr) firstErr = pz;
+      }
+    }
+    if (firstErr) {
+      firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showStepError('⚠️ Please complete all required fields before continuing.');
+      return false;
+    }
+    return true;
+  }
+
+  let currentStep = 1;
+  const TOTAL = 5;
+  const LABELS = [
+    '',
+    'Step 1 of 5 — Personal Information',
+    'Step 2 of 5 — Work Experience',
+    'Step 3 of 5 — Gardening Skills & Equipment',
+    'Step 4 of 5 — Physical Fitness & Work Attitude',
+    'Step 5 of 5 — UAE Readiness, References & Declaration'
+  ];
+
+  function validateAge() {
+    const ageVal = parseInt(document.getElementById('ageField').value, 10);
+    const ageErr = document.getElementById('ageErrorMsg');
+    const ageField = document.getElementById('ageField');
+    if (ageVal && (ageVal < 22 || ageVal > 42)) {
+      ageField.classList.add('age-error');
+      ageErr.classList.add('show');
+      return false;
+    }
+    ageField.classList.remove('age-error');
+    ageErr.classList.remove('show');
+    return true;
+  }
+
+  function validateGender() {
+    const selected = document.querySelector('input[name="gender"]:checked');
+    const err = document.getElementById('genderErrorMsg');
+    if (selected && selected.value === 'Female') {
+      err.classList.add('show'); return false;
+    }
+    err.classList.remove('show'); return true;
+  }
+  document.querySelectorAll('input[name="gender"]').forEach(r => r.addEventListener('change', validateGender));
+  document.getElementById('ageField').addEventListener('input', validateAge);
+  document.getElementById('dobField').addEventListener('change', function() {
+    const dob = new Date(this.value);
+    if (!isNaN(dob)) {
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      document.getElementById('ageField').value = age;
+      validateAge();
+    }
+  });
+
+  function showStep(n) {
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    document.getElementById('progressBar').style.width = (n / TOTAL * 100) + '%';
+    document.getElementById('stepLabel').textContent = LABELS[n];
+    document.getElementById('prevBtn').style.display = n > 1 ? 'block' : 'none';
+    document.getElementById('nextBtn').style.display = n < TOTAL ? 'block' : 'none';
+    document.getElementById('submitBtn').style.display = n === TOTAL ? 'block' : 'none';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  function nextStep() {
+    if (!validateStep(currentStep)) return;
+    if (currentStep < TOTAL) { currentStep++; showStep(currentStep); }
+  }
+  function prevStep() { if (currentStep > 1) { currentStep--; showStep(currentStep); } }
+
+  const _ALLOWED_MIME = ['application/pdf','image/png','image/jpeg'];
+  function _esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function _checkFile(f){ return _ALLOWED_MIME.includes(f.type); }
+
+  function handleSingleFile(input, zoneId, tagsId) {
+    const f = input.files[0];
+    if (!f) return;
+    if (!_checkFile(f)) { alert('Invalid file type. Only PDF, PNG or JPEG are accepted.'); input.value = ''; return; }
+    if (f.size > 5 * 1024 * 1024) { alert('File too large. Maximum size is 5 MB.'); input.value = ''; return; }
+    const zone = document.getElementById(zoneId);
+    zone.classList.add('has-file');
+    zone.innerHTML = '<div class="file-zone-icon">✅</div><div class="file-zone-text">'+_esc(f.name)+'</div><div class="file-zone-sub">'+((f.size/1024).toFixed(0))+' KB · tap to change</div>';
+    document.getElementById(tagsId).innerHTML = '';
+  }
+
+  function handleMultiFiles(input, zoneId, tagsId) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const badType = files.filter(f => !_checkFile(f));
+    if (badType.length) { alert('Invalid file type: '+badType.map(f=>_esc(f.name)).join(', ')+'. Only PDF, PNG or JPEG are accepted.'); input.value=''; return; }
+    const oversized = files.filter(f => f.size > 5*1024*1024);
+    if (oversized.length) { alert('These files exceed 5 MB: '+oversized.map(f=>_esc(f.name)).join(', ')); input.value=''; return; }
+    const zone = document.getElementById(zoneId);
+    zone.classList.add('has-file');
+    zone.innerHTML = '<div class="file-zone-icon">✅</div><div class="file-zone-text">'+files.length+' file'+(files.length>1?'s':'')+' selected</div><div class="file-zone-sub">Tap to change</div>';
+    document.getElementById(tagsId).innerHTML = files.map(f=>'<span class="file-tag">📄 '+_esc(f.name)+' <span style="color:var(--muted);font-weight:400;">('+((f.size/1024).toFixed(0))+' KB)</span></span>').join('');
+  }
+
+  async function uploadFiles(name, position) {
+    const urls = { passport: null, medical: null, cv: null, workHistory: [], refLetters: [] };
+    const slug = (name||'applicant').replace(/\s+/g,'-').toLowerCase();
+    const folder = (position||'gardener').toLowerCase()+'/'+slug+'-'+Date.now();
+    const prog = document.getElementById('uploadProgress');
+    if (prog) prog.style.display = 'block';
+    try {
+      const pf = document.getElementById('passportFile').files[0];
+      if (pf) { const path = folder+'/passport-'+pf.name; const {error} = await _sb.storage.from('questionnaire-files').upload(path, pf, {upsert:true}); if (!error) urls.passport = path; }
+      const mf = document.getElementById('medicalFile').files[0];
+      if (mf) { const path = folder+'/medical-'+mf.name; const {error} = await _sb.storage.from('questionnaire-files').upload(path, mf, {upsert:true}); if (!error) urls.medical = path; }
+      const cf = document.getElementById('cvFile').files[0];
+      if (cf) { const path = folder+'/cv-'+cf.name; const {error} = await _sb.storage.from('questionnaire-files').upload(path, cf, {upsert:true}); if (!error) urls.cv = path; }
+      const whf = document.getElementById('workHistoryFiles').files;
+      for (let i=0;i<whf.length;i++) { const path = folder+'/work-history-'+i+'-'+whf[i].name; const {error} = await _sb.storage.from('questionnaire-files').upload(path, whf[i], {upsert:true}); if (!error) urls.workHistory.push(path); }
+      const rlf = document.getElementById('refLetterFiles').files;
+      for (let i=0;i<rlf.length;i++) { const path = folder+'/ref-letter-'+i+'-'+rlf[i].name; const {error} = await _sb.storage.from('questionnaire-files').upload(path, rlf[i], {upsert:true}); if (!error) urls.refLetters.push(path); }
+    } catch(e) { console.warn('File upload error:', e); }
+    if (prog) prog.style.display = 'none';
+    return urls;
+  }
+
+  function collectData() {
+    const f = document.getElementById('qForm');
+    const d = {};
+    f.querySelectorAll('input:not([type=radio]):not([type=checkbox]):not([type=file]), select, textarea').forEach(el => {
+      if (el.name) d[el.name] = el.value.trim();
+    });
+    f.querySelectorAll('input[type=radio]:checked').forEach(el => { d[el.name] = el.value; });
+    const cbGroups = {};
+    f.querySelectorAll('input[type=checkbox]').forEach(el => {
+      if (!el.name || el.name === 'decl_agree' || el.name === 'terms_agree') return;
+      if (!cbGroups[el.name]) cbGroups[el.name] = [];
+      if (el.checked) cbGroups[el.name].push(el.value);
+    });
+    Object.assign(d, cbGroups);
+    return d;
+  }
+
+  async function submitQuestionnaire() {
+    if (!validateStep(5)) return;
+    if (!document.getElementById('terms_agree').checked) {
+      alert('Please confirm that you understand and accept all the employment terms.');
+      return;
+    }
+    if (!document.getElementById('decl_agree').checked) {
+      alert('Please tick the declaration checkbox before submitting.');
+      return;
+    }
+    const data = collectData();
+    const name = data.full_name || '';
+    const phone = data.phone || '';
+    const nationality = data.nationality || '';
+    const age = data.age || '';
+    const position = 'Gardener';
+    if (!name || !phone) {
+      alert('Please fill in your Full Name and Phone number on Step 1.');
+      currentStep = 1; showStep(1); return;
+    }
+    const ageNum = parseInt(age, 10);
+    if (ageNum && (ageNum < 22 || ageNum > 42)) {
+      alert('Sorry, only applicants aged 22–42 can apply for this position.');
+      currentStep = 1; showStep(1); return;
+    }
+    if (data.gender === 'Female') {
+      alert('Sorry, this Gardener position is for male candidates only.');
+      currentStep = 1; showStep(1); return;
+    }
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = 'Uploading files…';
+    const fileUrls = await uploadFiles(name, position);
+    if (fileUrls.passport) data.file_passport = fileUrls.passport;
+    if (fileUrls.medical) data.file_medical = fileUrls.medical;
+    if (fileUrls.cv) data.file_cv = fileUrls.cv;
+    if (fileUrls.workHistory.length) data.file_work_history = fileUrls.workHistory;
+    if (fileUrls.refLetters.length) data.file_ref_letters = fileUrls.refLetters;
+    btn.textContent = 'Submitting…';
+    try {
+      await _sb.from('questionnaires').insert([{ name, phone, position, nationality, data }]);
+    } catch(e) { console.error(e); }
+    if (NOTIFY_KEY) {
+      const gardenTypes = (data.garden_types || []).join(', ');
+      const equipment = (data.equipment || []).join(', ');
+      const body = [
+        'Name: ' + name, 'Age: ' + age, 'Phone: ' + phone,
+        'Position: Gardener — Dubai, UAE', 'Nationality: ' + nationality,
+        'Experience: ' + (data.years_experience || 'N/A'),
+        'Countries worked: ' + (data.countries_worked || 'N/A'),
+        'Garden types: ' + (gardenTypes || 'N/A'),
+        'Equipment: ' + (equipment || 'N/A'),
+        'English level: ' + (data.english_level || 'N/A'),
+        'Passport: ' + (data.passport_no || 'N/A') + ' (Exp: ' + (data.passport_expiry || 'N/A') + ')',
+        'Accepts salary AED 900: ' + (data.accept_salary || 'N/A'),
+        'Accepts ticket loan (5 months): ' + (data.accept_ticket_loan || 'N/A'),
+        'Accepts 6-month probation: ' + (data.accept_probation || 'N/A'),
+        'Availability: ' + (data.availability || 'N/A'),
+        'Passport copy: ' + (fileUrls.passport || 'Not uploaded'),
+        'Medical certificate: ' + (fileUrls.medical || 'Not uploaded'),
+        'CV/Resume: ' + (fileUrls.cv || 'Not uploaded'),
+        'Work history proof: ' + (fileUrls.workHistory.length ? fileUrls.workHistory.join(' | ') : 'None'),
+        'Reference letters: ' + (fileUrls.refLetters.length ? fileUrls.refLetters.join(' | ') : 'None'),
+        '---', 'View full answers in Yafast admin panel (Questionnaires tab).'
+      ].join('\n');
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ access_key: NOTIFY_KEY, subject: '[Yafast] New Gardener Application — ' + name, message: body, from_name: 'Yafast Questionnaire Form' })
+      }).catch(() => {});
+    }
+    document.getElementById('qForm').style.display = 'none';
+    document.getElementById('formNav').style.display = 'none';
+    document.getElementById('successName').textContent = name.split(' ')[0];
+    document.getElementById('successScreen').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  showStep(1);
+</script>
+</body>
+</html>

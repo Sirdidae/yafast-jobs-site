@@ -2711,7 +2711,7 @@ async function loadVacancies(){
         :v.title.toLowerCase().includes('cleaner')
         ?'<a href="questionnaire-cleaner.html" class="apply-btn" style="background:var(--navy);text-decoration:none;display:inline-flex;align-items:center;gap:6px;" target="_blank">📋 Apply by filling the HR Questionnaire</a>'
         :v.title.toLowerCase().includes('gardener')
-        ?'<button class="apply-btn" style="background:var(--navy);" onclick="openApply(\''+_esc(v.title)+'\',\''+_esc(v.location||'UAE')+'\')">📋 Apply Now</button>'
+        ?'<a href="questionnaire-gardener.html" class="apply-btn" style="background:var(--navy);text-decoration:none;display:inline-flex;align-items:center;gap:6px;" target="_blank">📋 Apply by filling the HR Questionnaire</a>'
         :'<button class="apply-btn" onclick="openApply(\''+_esc(v.title)+'\',\''+_esc(v.location||'UAE')+'\')">Apply Now</button>')
       +'</div>'
       +'</div>'
