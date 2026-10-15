@@ -1143,22 +1143,22 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
     <h2 style="margin-top:8px;max-width:20ch;">Everything You Need to Travel, Sorted.</h2>
     <p style="margin-top:12px;color:rgba(255,255,255,.7);">From Kamuzu International Airport to any corner of the world — Yafast Travel handles your flights, hotels, visas, and more.</p>
     <div class="travel-grid">
-      <div class="travel-card" onclick="openTravelEnquiry('Flight Booking')">
+      <div class="travel-card" onclick="navigate('flight-booking')" style="cursor:pointer;">
         <div class="travel-icon">✈️</div>
         <h3>Flight Booking</h3>
         <p>Best-price tickets from Lilongwe &amp; Blantyre airports. Economy, business, and group fares.</p>
       </div>
-      <div class="travel-card" onclick="openTravelEnquiry('Visa Application')">
+      <div class="travel-card" onclick="navigate('visa-application')" style="cursor:pointer;">
         <div class="travel-icon">🛂</div>
         <h3>Visa Application</h3>
         <p>End-to-end visa support for UAE, SA, UK, Qatar, and 20+ countries. We know the paperwork.</p>
       </div>
-      <div class="travel-card" onclick="openTravelEnquiry('Hotel & Transfers')">
+      <div class="travel-card" onclick="navigate('hotel-transfers')" style="cursor:pointer;">
         <div class="travel-icon">🏨</div>
         <h3>Hotel &amp; Transfers</h3>
         <p>Hotel reservations and airport transfer packages. Arrive to a room, not a search engine.</p>
       </div>
-      <div class="travel-card" onclick="openTravelEnquiry('Travel Insurance')">
+      <div class="travel-card" onclick="navigate('travel-insurance')" style="cursor:pointer;">
         <div class="travel-icon">🛡️</div>
         <h3>Travel Insurance</h3>
         <p>Medical, trip cancellation, and work-travel coverage. Travel with a safety net.</p>
@@ -1168,6 +1168,166 @@ footer{background:var(--navy-deep);color:rgba(255,255,255,.7);padding-block:64px
 </section>
 
 </div><!-- /page:travel -->
+
+<!-- ═══ FLIGHT BOOKING PAGE ═══ -->
+<div class="page" data-page="flight-booking">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb" onclick="navigate('travel')">Travel</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Flight Booking</span>
+    </div>
+  </div>
+  <section class="section reveal" style="background:var(--ground);padding-block:72px;">
+    <div class="container" style="max-width:800px;">
+      <span class="eyebrow">Travel Division</span>
+      <h2 style="margin-top:8px;">✈️ Flight Booking</h2>
+      <p style="color:var(--text-muted);margin-top:12px;">Best-price tickets from Lilongwe &amp; Blantyre airports. Economy, business, and group fares.</p>
+      <div style="margin-top:40px;display:flex;flex-direction:column;gap:20px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+          <h3>What We Offer</h3>
+          <ul style="margin-top:12px;color:var(--text-muted);line-height:2;padding-left:20px;">
+            <li>Domestic and international flight tickets</li>
+            <li>Economy, business, and first class bookings</li>
+            <li>Group travel fares for 10+ passengers</li>
+            <li>One-way, return, and multi-city routes</li>
+            <li>Departures from Kamuzu International (LLW) &amp; Chileka (BLZ)</li>
+          </ul>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+          <h3>Airlines &amp; Routes</h3>
+          <p style="color:var(--text-muted);margin-top:8px;">We work with major carriers flying out of Malawi including Emirates, Ethiopian Airlines, Kenya Airways, Qatar Airways, and South African Airways to destinations across the UAE, UK, South Africa, and beyond.</p>
+        </div>
+      </div>
+      <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="openTravelEnquiry('Flight Booking')">📋 Enquire About Flights</button>
+        <button class="btn-secondary" onclick="navigate('travel')">← Back to Travel</button>
+      </div>
+    </div>
+  </section>
+</div><!-- /page:flight-booking -->
+
+<!-- ═══ VISA APPLICATION PAGE ═══ -->
+<div class="page" data-page="visa-application">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb" onclick="navigate('travel')">Travel</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Visa Application</span>
+    </div>
+  </div>
+  <section class="section reveal" style="background:var(--ground);padding-block:72px;">
+    <div class="container" style="max-width:800px;">
+      <span class="eyebrow">Travel Division</span>
+      <h2 style="margin-top:8px;">🛂 Visa Application</h2>
+      <p style="color:var(--text-muted);margin-top:12px;">End-to-end visa support for UAE, SA, UK, Qatar, and 20+ countries. We know the paperwork.</p>
+      <div style="margin-top:40px;display:flex;flex-direction:column;gap:20px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+          <h3>Countries We Cover</h3>
+          <ul style="margin-top:12px;color:var(--text-muted);line-height:2;padding-left:20px;">
+            <li>United Arab Emirates (UAE) — Employment &amp; Visit visas</li>
+            <li>United Kingdom (UK)</li>
+            <li>South Africa (SA)</li>
+            <li>Qatar</li>
+            <li>Saudi Arabia</li>
+            <li>And 20+ more destinations</li>
+          </ul>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+          <h3>Our Process</h3>
+          <p style="color:var(--text-muted);margin-top:8px;">We handle document preparation, application submission, medical requirements, and follow-up with embassies on your behalf. We guide you from start to stamp.</p>
+        </div>
+      </div>
+      <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="openTravelEnquiry('Visa Application')">📋 Enquire About Visas</button>
+        <button class="btn-secondary" onclick="navigate('travel')">← Back to Travel</button>
+      </div>
+    </div>
+  </section>
+</div><!-- /page:visa-application -->
+
+<!-- ═══ HOTEL & TRANSFERS PAGE ═══ -->
+<div class="page" data-page="hotel-transfers">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb" onclick="navigate('travel')">Travel</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Hotel &amp; Transfers</span>
+    </div>
+  </div>
+  <section class="section reveal" style="background:var(--ground);padding-block:72px;">
+    <div class="container" style="max-width:800px;">
+      <span class="eyebrow">Travel Division</span>
+      <h2 style="margin-top:8px;">🏨 Hotel &amp; Transfers</h2>
+      <p style="color:var(--text-muted);margin-top:12px;">Hotel reservations and airport transfer packages. Arrive to a room, not a search engine.</p>
+      <div style="margin-top:40px;display:flex;flex-direction:column;gap:20px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+          <h3>Hotel Reservations</h3>
+          <ul style="margin-top:12px;color:var(--text-muted);line-height:2;padding-left:20px;">
+            <li>Budget, mid-range, and 5-star hotels worldwide</li>
+            <li>Business travel and leisure packages</li>
+            <li>Extended stay arrangements for workers</li>
+            <li>UAE, UK, South Africa, and beyond</li>
+          </ul>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+          <h3>Airport Transfers</h3>
+          <p style="color:var(--text-muted);margin-top:8px;">We arrange airport pickup and drop-off so you are not stranded on arrival. Especially useful for first-time travellers heading to UAE or South Africa.</p>
+        </div>
+      </div>
+      <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="openTravelEnquiry('Hotel &amp; Transfers')">📋 Enquire About Hotels</button>
+        <button class="btn-secondary" onclick="navigate('travel')">← Back to Travel</button>
+      </div>
+    </div>
+  </section>
+</div><!-- /page:hotel-transfers -->
+
+<!-- ═══ TRAVEL INSURANCE PAGE ═══ -->
+<div class="page" data-page="travel-insurance">
+  <div class="page-hdr">
+    <div class="container">
+      <span class="page-crumb" onclick="navigate('home')">Home</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb" onclick="navigate('travel')">Travel</span>
+      <span class="page-crumb-sep">›</span>
+      <span class="page-crumb-cur">Travel Insurance</span>
+    </div>
+  </div>
+  <section class="section reveal" style="background:var(--ground);padding-block:72px;">
+    <div class="container" style="max-width:800px;">
+      <span class="eyebrow">Travel Division</span>
+      <h2 style="margin-top:8px;">🛡️ Travel Insurance</h2>
+      <p style="color:var(--text-muted);margin-top:12px;">Medical, trip cancellation, and work-travel coverage. Travel with a safety net.</p>
+      <div style="margin-top:40px;display:flex;flex-direction:column;gap:20px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+          <h3>Coverage Options</h3>
+          <ul style="margin-top:12px;color:var(--text-muted);line-height:2;padding-left:20px;">
+            <li>Medical emergencies abroad</li>
+            <li>Trip cancellation and delays</li>
+            <li>Lost or delayed baggage</li>
+            <li>Work-travel and employment coverage</li>
+            <li>Short-term and annual plans available</li>
+          </ul>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+          <h3>Why It Matters</h3>
+          <p style="color:var(--text-muted);margin-top:8px;">Many UAE and UK employers require valid travel insurance before you depart. We help you get the right cover at the right price before your travel date.</p>
+        </div>
+      </div>
+      <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="openTravelEnquiry('Travel Insurance')">📋 Enquire About Insurance</button>
+        <button class="btn-secondary" onclick="navigate('travel')">← Back to Travel</button>
+      </div>
+    </div>
+  </section>
+</div><!-- /page:travel-insurance -->
 
 <!-- ═══ DESTINATIONS PAGE ═══ -->
 <div class="page" data-page="destinations">
