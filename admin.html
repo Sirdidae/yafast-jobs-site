@@ -353,7 +353,6 @@ tr:hover td{background:var(--ground);}
           <div class="nav-item" onclick="showPanel('questionnaires',this)">
             <span class="icon">📝</span><span>Questionnaires</span>
           </div>
-        </div>
           <div class="nav-item" onclick="showPanel('traffic',this)">
             <span class="icon">📈</span><span>Traffic</span>
           </div>
@@ -586,6 +585,7 @@ create policy "pv_select" on page_views for select using (true);</pre>
           <option value="Hospitality">Hospitality</option>
           <option value="Healthcare">Healthcare</option>
           <option value="Cleaning">Cleaning / Facility</option>
+          <option value="Garden">Garden / Landscaping</option>
           <option value="Sales">Sales / Ticketing</option>
           <option value="Driving">Driving</option>
           <option value="Other">Other</option>
@@ -1043,6 +1043,7 @@ function renderQuestionnaires(){
     const d=q.data||{};
     const langs=arr(d.languages);
     const isCleaner=(q.position||'').toLowerCase()==='cleaner';
+    const isGardener=(q.position||'').toLowerCase()==='gardener';
 
     // ── COMMON HEADER ROWS ──
     const commonRows=[
@@ -1109,6 +1110,61 @@ function renderQuestionnaires(){
       td('Ref 2', esc(d.ref2_name||'—')+' · '+esc(d.ref2_phone||'—')),
     ].join('') : '';
 
+    // ── GARDENER-SPECIFIC ROWS ──
+    const gardenerRows=isGardener?[
+      th('Gardening Experience'),
+      td('Prev. Gardening Work', yn(d.prev_gardening)),
+      td('Years Experience', esc(d.years_experience||'—')),
+      td('Countries Worked', esc(d.countries_worked||'—')),
+      td('Garden Types', arr(d.garden_types)),
+      td('Prev. Employer', esc(d.prev_employer||'—')+' ('+esc(d.prev_employer_nat||'—')+')'),
+      td('Employment Period', esc(d.prev_period||'—')),
+      td('Reason for Leaving', esc(d.reason_leaving||'—')),
+      th('Gardening Skills'),
+      td('Mowing &amp; Trimming', yn(d.sk_mowing)),
+      td('Pruning &amp; Shaping', yn(d.sk_pruning)),
+      td('Planting', yn(d.sk_planting)),
+      td('Watering / Irrigation', yn(d.sk_irrigation)),
+      td('Fertilisers', yn(d.sk_fertiliser)),
+      td('Pesticides Safely', yn(d.sk_pesticides)),
+      td('Weeding', yn(d.sk_weeding)),
+      td('Clearing / Tidying', yn(d.sk_clearing)),
+      td('Turf / Grass Laying', yn(d.sk_turf)),
+      td('Plant Disease ID', yn(d.sk_disease)),
+      th('Equipment &amp; Chemicals'),
+      td('Equipment Used', arr(d.equipment)),
+      td('Handles Chemicals Safely', yn(d.chemicals_safe)),
+      td('Chemical Safety Approach', esc(d.chemicals_explain||'—')),
+      th('Physical Fitness'),
+      td('Works in Heat (45°C)', yn(d.work_heat)),
+      td('Can Lift 25 kg', yn(d.lift_heavy)),
+      td('Stand/Bend/Kneel Long', yn(d.stand_long)),
+      td('Medical Issues', yn(d.medical_issues)),
+      td('Medical Details', esc(d.medical_details||'—')),
+      th('Work Attitude'),
+      td('Why Dubai', esc(d.why_dubai||'—')),
+      td('Work Approach', esc(d.work_approach||'—')),
+      td('Self-Motivated Approach', esc(d.self_motivated||'—')),
+      td('Works Independently', yn(d.work_independent)),
+      td('Team Player', yn(d.team_player)),
+      td('Early Start (6am) OK', yn(d.early_start)),
+      td('Self Cook', yn(d.self_cook)),
+      th('UAE Readiness'),
+      td('Willing to Work in Dubai', yn(d.willing_dubai)),
+      td('Accept AED 900 Salary', yn(d.accept_salary)),
+      td('Accept 10hr/26day Schedule', yn(d.accept_schedule)),
+      td('Accept Ticket Loan (5mo)', yn(d.accept_ticket_loan)),
+      td('Accept 6-mo Probation', yn(d.accept_probation)),
+      td('Sign 2-yr Contract', yn(d.sign_contract)),
+      td('Ready to Travel', yn(d.ready_travel)),
+      td('Medical Screening OK', yn(d.medical_ok)),
+      td('Accept UAE Labour Law', yn(d.accept_uae_law)),
+      td('Availability', esc(d.availability||'—')),
+      th('Language &amp; References'),
+      td('Languages', esc(langs)),
+      td('English Level', esc(d.english_level||'—')),
+    ].join('') : '';
+
     // ── HOUSEMAID/NANNY-SPECIFIC ROWS ──
     const hk=['hk_bedrooms','hk_bathrooms','hk_sweep','hk_dusting','hk_laundry','hk_ironing','hk_dishes','hk_kitchen','hk_beds','hk_organize'];
     const hkLabels=['Bedrooms','Bathrooms','Sweeping/Mopping','Dusting','Laundry','Ironing','Dishes','Kitchen','Beds','Organizing'];
@@ -1151,7 +1207,7 @@ function renderQuestionnaires(){
       <div class="enq-top" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
         <span class="enq-name">${esc(q.name||'—')}</span>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span class="${isCleaner?'':'tag-new'}" style="white-space:nowrap;${isCleaner?'background:#fff7ed;color:#9a3412;border:1px solid #f97316;border-radius:12px;padding:2px 10px;font-size:.75rem;font-weight:700;':''}">${esc(q.position||'—')}</span>
+          <span style="white-space:nowrap;background:${isCleaner?'#fff7ed':isGardener?'#f0fdf4':'#eff6ff'};color:${isCleaner?'#9a3412':isGardener?'#14532d':'#1e40af'};border:1px solid ${isCleaner?'#f97316':isGardener?'#4ade80':'#93c5fd'};border-radius:12px;padding:2px 10px;font-size:.75rem;font-weight:700;">${esc(q.position||'—')}</span>
           <button class="btn-danger" style="padding:4px 10px;font-size:.72rem;" onclick="deleteQuestionnaire('${q.id}')">Delete</button>
         </div>
       </div>
@@ -1162,7 +1218,7 @@ function renderQuestionnaires(){
       </div>
       <div id="qd${i}" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
         <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
-          ${commonRows}${isCleaner?cleanerRows:housemaidRows}
+          ${commonRows}${isCleaner?cleanerRows:isGardener?gardenerRows:housemaidRows}
           ${(d.file_passport||d.file_extras||d.file_exp_proof)?`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">📁 Uploaded Documents</td></tr>${d.file_passport?`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Passport Copy</td><td><a href="#" data-fp="${esc(d.file_passport)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`:''}${(d.file_extras&&d.file_extras.length)?d.file_extras.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Extra File ${xi+1}</td><td><a href="#" data-fp="${esc(u)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}${(d.file_exp_proof&&d.file_exp_proof.length)?d.file_exp_proof.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Exp. Proof ${xi+1}</td><td><a href="#" data-fp="${esc(u)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}`:'' }
         </table>
       </div>
@@ -1202,6 +1258,7 @@ async function printQuestionnaire(idx){
   const q=_qs[idx]; if(!q) return;
   const d=q.data||{};
   const isCleaner=(q.position||'').toLowerCase()==='cleaner';
+  const isGardener=(q.position||'').toLowerCase()==='gardener';
   const arr=(v)=>(Array.isArray(v)?v:typeof v==='string'?[v]:[]).join(', ')||'—';
   const yn=(v)=>v==='Yes'?'✓ Yes':'✗ No';
   const row=(label,val)=>`<tr><td class="lbl">${label}</td><td>${val}</td></tr>`;
@@ -1278,7 +1335,61 @@ async function printQuestionnaire(idx){
     row('Ref 2', esc(d.ref2_name||'—')+' · '+esc(d.ref2_phone||'—')),
   ].join('') : '';
 
-  const housemaidRows=!isCleaner?[
+  const gardenerRows=isGardener?[
+    hd('Gardening Experience'),
+    row('Prev. Gardening Work', yn(d.prev_gardening)),
+    row('Years Experience', esc(d.years_experience||'—')),
+    row('Countries Worked', esc(d.countries_worked||'—')),
+    row('Garden Types', arr(d.garden_types)),
+    row('Prev. Employer', esc(d.prev_employer||'—')+' ('+esc(d.prev_employer_nat||'—')+')'),
+    row('Employment Period', esc(d.prev_period||'—')),
+    row('Reason for Leaving', esc(d.reason_leaving||'—')),
+    hd('Gardening Skills'),
+    row('Mowing & Trimming', yn(d.sk_mowing)),
+    row('Pruning & Shaping', yn(d.sk_pruning)),
+    row('Planting', yn(d.sk_planting)),
+    row('Watering / Irrigation', yn(d.sk_irrigation)),
+    row('Fertilisers', yn(d.sk_fertiliser)),
+    row('Pesticides Safely', yn(d.sk_pesticides)),
+    row('Weeding', yn(d.sk_weeding)),
+    row('Clearing / Tidying', yn(d.sk_clearing)),
+    row('Turf / Grass Laying', yn(d.sk_turf)),
+    row('Plant Disease ID', yn(d.sk_disease)),
+    hd('Equipment & Chemicals'),
+    row('Equipment Used', arr(d.equipment)),
+    row('Handles Chemicals Safely', yn(d.chemicals_safe)),
+    row('Chemical Safety Approach', esc(d.chemicals_explain||'—')),
+    hd('Physical Fitness'),
+    row('Works in Heat (45°C)', yn(d.work_heat)),
+    row('Can Lift 25 kg', yn(d.lift_heavy)),
+    row('Stand/Bend/Kneel Long', yn(d.stand_long)),
+    row('Medical Issues', yn(d.medical_issues)),
+    row('Medical Details', esc(d.medical_details||'—')),
+    hd('Work Attitude'),
+    row('Why Dubai', esc(d.why_dubai||'—')),
+    row('Work Approach', esc(d.work_approach||'—')),
+    row('Self-Motivated Approach', esc(d.self_motivated||'—')),
+    row('Works Independently', yn(d.work_independent)),
+    row('Team Player', yn(d.team_player)),
+    row('Early Start (6am) OK', yn(d.early_start)),
+    row('Self Cook', yn(d.self_cook)),
+    hd('UAE Readiness'),
+    row('Willing to Work in Dubai', yn(d.willing_dubai)),
+    row('Accept AED 900 Salary', yn(d.accept_salary)),
+    row('Accept 10hr/26day Schedule', yn(d.accept_schedule)),
+    row('Accept Ticket Loan (5mo)', yn(d.accept_ticket_loan)),
+    row('Accept 6-mo Probation', yn(d.accept_probation)),
+    row('Sign 2-yr Contract', yn(d.sign_contract)),
+    row('Ready to Travel', yn(d.ready_travel)),
+    row('Medical Screening OK', yn(d.medical_ok)),
+    row('Accept UAE Labour Law', yn(d.accept_uae_law)),
+    row('Availability', esc(d.availability||'—')),
+    hd('Language & References'),
+    row('Languages', esc(langs)),
+    row('English Level', esc(d.english_level||'—')),
+  ].join('') : '';
+
+  const housemaidRows=!isCleaner&&!isGardener?[
     hd('Experience'),
     row('Prev. Domestic Work', esc(d.prev_work||'—')),
     row('Countries Worked', esc(d.countries_worked||'—')),
@@ -1335,7 +1446,7 @@ async function printQuestionnaire(idx){
   .logo span{color:#2196F3;}
   .meta{text-align:right;font-size:11px;color:#555;}
   .meta strong{display:block;font-size:14px;color:#111;}
-  .badge-pos{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;background:${isCleaner?'#fff7ed':'#eff6ff'};color:${isCleaner?'#9a3412':'#1e40af'};border:1px solid ${isCleaner?'#f97316':'#93c5fd'};}
+  .badge-pos{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;background:${isCleaner?'#fff7ed':isGardener?'#f0fdf4':'#eff6ff'};color:${isCleaner?'#9a3412':isGardener?'#14532d':'#1e40af'};border:1px solid ${isCleaner?'#f97316':isGardener?'#4ade80':'#93c5fd'};}
   table{width:100%;border-collapse:collapse;margin-bottom:4px;}
   td,th{padding:4px 6px;vertical-align:top;}
   .lbl{color:#555;width:42%;font-weight:600;white-space:nowrap;}
@@ -1352,7 +1463,7 @@ async function printQuestionnaire(idx){
   <div><div class="logo">YA<span>FAST</span> Services</div><div style="font-size:11px;color:#555;margin-top:2px;">yafastservices.com</div></div>
   <div class="meta"><strong>${esc(q.name||'—')}</strong>${esc(q.phone||'—')} · ${esc(q.nationality||'—')}<br><span class="badge-pos">${esc(q.position||'—')}</span><br>Submitted: ${submitted}</div>
 </div>
-<table>${commonRows}${isCleaner?cleanerRows:housemaidRows}${filesRows}</table>
+<table>${commonRows}${isCleaner?cleanerRows:isGardener?gardenerRows:housemaidRows}${filesRows}</table>
 <div class="footer"><span>Yafast Job Links &amp; Travel Services — Confidential HR Document</span><span>Printed: ${new Date().toLocaleString('en-GB')}</span></div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
