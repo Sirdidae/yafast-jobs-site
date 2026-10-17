@@ -407,10 +407,10 @@ tr:hover td{background:var(--ground);}
           <div class="table-wrap">
             <table>
               <thead>
-                <tr><th>Recent Vacancies</th><th>Sector</th><th>Location</th><th>Status</th></tr>
+                <tr><th>Recent Vacancies</th><th>Sector</th><th>Location</th><th>Status</th><th>Actions</th></tr>
               </thead>
               <tbody id="dash-vacancies-tbody">
-                <tr><td colspan="4"><div class="empty"><div class="icon">💼</div><p>No vacancies posted yet. Go to Vacancies to add one.</p></div></td></tr>
+                <tr><td colspan="5"><div class="empty"><div class="icon">💼</div><p>No vacancies posted yet. Go to Vacancies to add one.</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -820,13 +820,17 @@ function renderDashboard(){
   document.getElementById('stat-enquiries').textContent=_enqs.length;
   document.getElementById('stat-questionnaires').textContent=_qs.length;
   const tbody=document.getElementById('dash-vacancies-tbody');
-  if(!_vacs.length){ tbody.innerHTML='<tr><td colspan="4"><div class="empty"><div class="icon">💼</div><p>No vacancies posted yet.</p></div></td></tr>'; return; }
+  if(!_vacs.length){ tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="icon">💼</div><p>No vacancies posted yet.</p></div></td></tr>'; return; }
   tbody.innerHTML=_vacs.slice(0,5).map(v=>`
     <tr>
-      <td><strong>${esc(v.title)}</strong></td>
+      <td><strong>${esc(v.title)}</strong><br><span style="font-size:.75rem;color:var(--text-muted);">${fmt(v.created_at)}</span></td>
       <td>${esc(v.sector||'')}</td>
       <td>${esc(v.location||'')}</td>
       <td><span class="tag tag-${(v.status||'active').toLowerCase()}">${esc(v.status||'')}</span></td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn-edit" onclick="showPanel('vacancies',document.querySelector('[onclick*=vacancies]'));openVacancyModal('${v.id}')">Edit</button>
+        <button class="btn-danger" onclick="deleteVacancy('${v.id}')">Delete</button>
+      </td>
     </tr>`).join('');
 }
 
