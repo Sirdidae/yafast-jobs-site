@@ -211,8 +211,12 @@
 
     <!-- Submit -->
     <div class="submit-wrap">
+      <div id="doc-counter" style="text-align:center;font-size:.8rem;font-weight:700;color:#a0aec0;margin-bottom:12px;transition:color .2s;">
+        0 of 4 documents uploaded
+      </div>
       <div id="err-msg" style="display:none;background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:10px 14px;font-size:.8rem;color:#c53030;margin-bottom:14px;"></div>
-      <button class="btn-submit" id="submitBtn" onclick="submitApplication()">Submit Application →</button>
+      <button class="btn-submit" id="submitBtn" onclick="submitApplication()" disabled style="opacity:.45;cursor:not-allowed;">Submit Application →</button>
+      <p style="text-align:center;font-size:.72rem;color:#a0aec0;margin-top:10px;">All 4 documents must be uploaded before submitting</p>
     </div>
 
     <!-- Success -->
@@ -241,6 +245,19 @@
     document.getElementById('zone_' + key).classList.add('filled');
     document.getElementById('zone_' + key).classList.remove('err');
     document.getElementById('fname_' + key).textContent = f.name;
+    updateDocCounter();
+  }
+
+  function updateDocCounter() {
+    const count = Object.values(_files).filter(Boolean).length;
+    const counter = document.getElementById('doc-counter');
+    const btn = document.getElementById('submitBtn');
+    const all = count === 4;
+    counter.textContent = count + ' of 4 documents uploaded';
+    counter.style.color = all ? '#38a169' : count > 0 ? '#d97706' : '#a0aec0';
+    btn.disabled = !all;
+    btn.style.opacity = all ? '1' : '0.45';
+    btn.style.cursor = all ? 'pointer' : 'not-allowed';
   }
 
   function showErr(msg) {
