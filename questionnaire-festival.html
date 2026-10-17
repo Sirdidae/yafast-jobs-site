@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liwa Festival — Cleaning Staff Application</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Montserrat',sans-serif;background:#f0f4f8;min-height:100vh;padding:0;}
+
+    /* ── TOP BANNER ── */
+    .top-banner{background:#0F3568;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .top-banner a{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .top-banner img{width:44px;height:44px;border-radius:50%;object-fit:cover;}
+    .top-banner .brand{color:#fff;font-weight:800;font-size:1rem;letter-spacing:.04em;}
+    .top-banner .brand span{color:#1BA3E8;}
+    .festival-badge{background:#1BA3E8;color:#fff;font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:100px;white-space:nowrap;}
+
+    /* ── HERO ── */
+    .hero{background:linear-gradient(135deg,#0F3568 0%,#1e5fa8 100%);padding:32px 20px 28px;text-align:center;}
+    .hero h1{color:#fff;font-size:clamp(1.2rem,4vw,1.6rem);font-weight:800;margin-bottom:8px;}
+    .hero p{color:rgba(255,255,255,.75);font-size:.85rem;line-height:1.6;max-width:480px;margin:0 auto 16px;}
+    .perks{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px;}
+    .perk{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:100px;color:#fff;font-size:.72rem;font-weight:700;padding:5px 12px;}
+
+    /* ── FORM CARD ── */
+    .form-wrap{max-width:600px;margin:28px auto;padding:0 16px 48px;}
+    .form-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.09);overflow:hidden;}
+    .form-section{padding:24px 28px;border-bottom:1px solid #e8edf3;}
+    .form-section:last-child{border-bottom:none;}
+    .section-title{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1BA3E8;margin-bottom:18px;}
+
+    .form-group{margin-bottom:16px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    label.lbl{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4a5568;margin-bottom:6px;}
+    label.lbl .req{color:#e53e3e;margin-left:2px;}
+    input[type=text],input[type=tel],input[type=date],input[type=email]{
+      width:100%;padding:11px 14px;border:1.5px solid #d1dbe8;border-radius:8px;
+      font-family:'Montserrat',sans-serif;font-size:.88rem;color:#1a202c;
+      transition:border-color .2s,box-shadow .2s;background:#f7fafc;
+    }
+    input:focus{outline:none;border-color:#1BA3E8;box-shadow:0 0 0 3px rgba(27,163,232,.12);background:#fff;}
+    input.err{border-color:#e53e3e;}
+
+    /* ── FILE UPLOAD ZONES ── */
+    .upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .upload-zone{border:2px dashed #cbd5e0;border-radius:10px;padding:16px 12px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+    .upload-zone:hover,.upload-zone.drag{border-color:#1BA3E8;background:#f0f8ff;}
+    .upload-zone.filled{border-color:#38a169;background:#f0fff4;border-style:solid;}
+    .upload-zone.err{border-color:#e53e3e;}
+    .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+    .upload-icon{font-size:1.4rem;}
+    .upload-label{font-size:.72rem;font-weight:700;color:#4a5568;line-height:1.3;}
+    .upload-sub{font-size:.65rem;color:#a0aec0;}
+    .upload-name{font-size:.68rem;color:#38a169;font-weight:700;margin-top:2px;word-break:break-all;}
+    .req-star{color:#e53e3e;font-size:.65rem;font-weight:700;}
+
+    /* ── SUBMIT ── */
+    .submit-wrap{padding:24px 28px;}
+    .btn-submit{width:100%;padding:15px;background:#0F3568;color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.04em;cursor:pointer;transition:background .2s,transform .1s;}
+    .btn-submit:hover{background:#1BA3E8;}
+    .btn-submit:active{transform:scale(.98);}
+    .btn-submit:disabled{background:#a0aec0;cursor:not-allowed;}
+
+    /* ── SUCCESS ── */
+    .success-card{display:none;padding:40px 28px;text-align:center;}
+    .success-card .icon{font-size:3rem;margin-bottom:12px;}
+    .success-card h2{color:#0F3568;font-size:1.25rem;margin-bottom:8px;}
+    .success-card p{color:#4a5568;font-size:.88rem;line-height:1.7;}
+
+    /* ── NOTE BOX ── */
+    .note-box{background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px 16px;font-size:.78rem;color:#1e40af;line-height:1.6;margin-bottom:20px;}
+    .note-box strong{display:block;margin-bottom:4px;}
+
+    @media(max-width:480px){
+      .form-row{grid-template-columns:1fr;}
+      .upload-grid{grid-template-columns:1fr;}
+      .form-section{padding:20px 16px;}
+      .submit-wrap{padding:20px 16px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BANNER -->
+<div class="top-banner">
+  <a href="index.html">
+    <img src="logo.png" alt="Yafast" onerror="this.style.display='none'">
+    <span class="brand">YA<span>FAST</span> Services</span>
+  </a>
+  <span class="festival-badge">🎪 Liwa Festival — Abu Dhabi</span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Festival Cleaning Staff Application</h1>
+  <p>3-month contract · Abu Dhabi, UAE · Work starts 1 November 2026</p>
+  <div class="perks">
+    <span class="perk">AED 1,450 / mo</span>
+    <span class="perk">🏠 Free Accommodation</span>
+    <span class="perk">🚌 Free Transport</span>
+    <span class="perk">🍽️ 3 Meals/Day</span>
+    <span class="perk">✅ No Agency Fee</span>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="form-wrap">
+  <div class="form-card">
+
+    <!-- Personal Info -->
+    <div class="form-section">
+      <div class="section-title">Personal Information</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="lbl">First &amp; Middle Name <span class="req">*</span></label>
+          <input type="text" id="first_name" placeholder="e.g. Kondwani James" />
+        </div>
+        <div class="form-group">
+          <label class="lbl">Last Name <span class="req">*</span></label>
+          <input type="text" id="last_name" placeholder="e.g. Banda" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="lbl">Date of Birth <span class="req">*</span></label>
+          <input type="date" id="dob" />
+        </div>
+        <div class="form-group">
+          <label class="lbl">WhatsApp Number <span class="req">*</span></label>
+          <input type="tel" id="phone" placeholder="+971 5X XXX XXXX" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="lbl">Current Location in UAE <span class="req">*</span></label>
+        <input type="text" id="location" placeholder="e.g. Dubai — Deira, Sharjah, Abu Dhabi" />
+      </div>
+    </div>
+
+    <!-- Document Info -->
+    <div class="form-section">
+      <div class="section-title">Passport &amp; Emirates ID</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="lbl">Passport Number <span class="req">*</span></label>
+          <input type="text" id="passport_no" placeholder="e.g. MWP1234567" />
+        </div>
+        <div class="form-group">
+          <label class="lbl">Emirates ID Number <span class="req">*</span></label>
+          <input type="text" id="eid_number" placeholder="784-XXXX-XXXXXXX-X" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="lbl">Emirates ID Expiry Date <span class="req">*</span></label>
+        <input type="date" id="eid_expiry" />
+      </div>
+    </div>
+
+    <!-- Document Uploads -->
+    <div class="form-section">
+      <div class="section-title">Upload Documents</div>
+
+      <div class="note-box">
+        <strong>📋 Required for all applicants</strong>
+        All 4 documents are mandatory. Accepted formats: JPG, PNG, PDF. Max 5 MB each.
+      </div>
+
+      <div class="upload-grid">
+
+        <div class="upload-zone" id="zone_visa">
+          <input type="file" id="file_visa" accept=".jpg,.jpeg,.png,.pdf" onchange="onFile('visa',this)" />
+          <div class="upload-icon">🛂</div>
+          <div class="upload-label">Residence Visa <span class="req-star">*</span></div>
+          <div class="upload-sub">Copy of your UAE visa</div>
+          <div class="upload-name" id="fname_visa"></div>
+        </div>
+
+        <div class="upload-zone" id="zone_eid">
+          <input type="file" id="file_eid" accept=".jpg,.jpeg,.png,.pdf" onchange="onFile('eid',this)" />
+          <div class="upload-icon">🪪</div>
+          <div class="upload-label">Emirates ID <span class="req-star">*</span></div>
+          <div class="upload-sub">Front &amp; back (one file)</div>
+          <div class="upload-name" id="fname_eid"></div>
+        </div>
+
+        <div class="upload-zone" id="zone_passport">
+          <input type="file" id="file_passport" accept=".jpg,.jpeg,.png,.pdf" onchange="onFile('passport',this)" />
+          <div class="upload-icon">📘</div>
+          <div class="upload-label">Passport Copy <span class="req-star">*</span></div>
+          <div class="upload-sub">Bio-data page</div>
+          <div class="upload-name" id="fname_passport"></div>
+        </div>
+
+        <div class="upload-zone" id="zone_photo">
+          <input type="file" id="file_photo" accept=".jpg,.jpeg,.png" onchange="onFile('photo',this)" />
+          <div class="upload-icon">🤳</div>
+          <div class="upload-label">ID Photo <span class="req-star">*</span></div>
+          <div class="upload-sub">White background</div>
+          <div class="upload-name" id="fname_photo"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-wrap">
+      <div id="err-msg" style="display:none;background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:10px 14px;font-size:.8rem;color:#c53030;margin-bottom:14px;"></div>
+      <button class="btn-submit" id="submitBtn" onclick="submitApplication()">Submit Application →</button>
+    </div>
+
+    <!-- Success -->
+    <div class="success-card" id="successCard">
+      <div class="icon">🎉</div>
+      <h2>Application Received!</h2>
+      <p>Thank you for applying for the <strong>Festival Cleaning Staff</strong> position at Liwa Festival, Abu Dhabi.<br><br>Our team will review your documents and contact you on WhatsApp within <strong>1–2 business days</strong>.<br><br>Work starts <strong>1 November 2026</strong>. Dubai candidates are collected from <strong>Ibn Battuta Mall</strong>.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const _sb = supabase.createClient(
+    'https://kefsvaettxwuzrusufmi.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZnN2YWV0dHh3dXpydXN1Zm1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2OTE3MzQsImV4cCI6MjEwNTI2NzczNH0.u7yPSyKzets54SQmrJ72d7MqRK2XuZnfanp3ZIALxK8'
+  );
+  _sb.from('page_views').insert({ page: 'Festival Form' }).then(() => {});
+
+  const _files = { visa: null, eid: null, passport: null, photo: null };
+
+  function onFile(key, input) {
+    const f = input.files[0];
+    if (!f) return;
+    _files[key] = f;
+    document.getElementById('zone_' + key).classList.add('filled');
+    document.getElementById('zone_' + key).classList.remove('err');
+    document.getElementById('fname_' + key).textContent = f.name;
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById('err-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function clearErr() {
+    document.getElementById('err-msg').style.display = 'none';
+  }
+
+  function v(id) { return document.getElementById(id).value.trim(); }
+
+  function markErr(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('err'); el.focus(); }
+  }
+
+  async function uploadFile(key, prefix) {
+    const f = _files[key];
+    if (!f) return null;
+    const ts = Date.now();
+    const ext = f.name.split('.').pop();
+    const path = `festival/${ts}_${prefix}.${ext}`;
+    const { error } = await _sb.storage.from('questionnaire-files').upload(path, f, { upsert: true });
+    if (error) { console.error('Upload error', key, error); return null; }
+    return path;
+  }
+
+  async function submitApplication() {
+    clearErr();
+
+    // Validate text fields
+    const firstName = v('first_name');
+    const lastName  = v('last_name');
+    const dob       = v('dob');
+    const phone     = v('phone');
+    const location  = v('location');
+    const passportNo = v('passport_no');
+    const eidNumber  = v('eid_number');
+    const eidExpiry  = v('eid_expiry');
+
+    if (!firstName) { markErr('first_name'); showErr('Please enter your first and middle name.'); return; }
+    if (!lastName)  { markErr('last_name');  showErr('Please enter your last name.'); return; }
+    if (!dob)       { markErr('dob');        showErr('Please enter your date of birth.'); return; }
+    if (!phone)     { markErr('phone');      showErr('Please enter your WhatsApp number.'); return; }
+    if (!location)  { markErr('location');   showErr('Please enter your current location in UAE.'); return; }
+    if (!passportNo){ markErr('passport_no');showErr('Please enter your passport number.'); return; }
+    if (!eidNumber) { markErr('eid_number'); showErr('Please enter your Emirates ID number.'); return; }
+    if (!eidExpiry) { markErr('eid_expiry'); showErr('Please enter your Emirates ID expiry date.'); return; }
+
+    // Validate file uploads
+    const fileKeys = ['visa','eid','passport','photo'];
+    const fileLabels = ['Residence Visa','Emirates ID','Passport Copy','ID Photo'];
+    for (let i = 0; i < fileKeys.length; i++) {
+      if (!_files[fileKeys[i]]) {
+        document.getElementById('zone_' + fileKeys[i]).classList.add('err');
+        showErr('Please upload your ' + fileLabels[i] + '.');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Uploading documents…';
+
+    // Upload all files
+    const visaPath     = await uploadFile('visa',     'residence_visa');
+    const eidPath      = await uploadFile('eid',      'emirates_id');
+    const passportPath = await uploadFile('passport', 'passport_copy');
+    const photoPath    = await uploadFile('photo',    'id_photo');
+
+    btn.textContent = 'Saving application…';
+
+    const fullName = firstName + ' ' + lastName;
+
+    const data = {
+      first_name: firstName,
+      last_name: lastName,
+      dob,
+      location,
+      passport_no: passportNo,
+      eid_number: eidNumber,
+      eid_expiry: eidExpiry,
+      file_visa:     visaPath,
+      file_eid:      eidPath,
+      file_passport: passportPath,
+      file_photo:    photoPath
+    };
+
+    const { error } = await _sb.from('questionnaires').insert([{
+      name:      fullName,
+      phone,
+      position:  'Festival Cleaning Staff',
+      nationality: '(UAE Resident)',
+      data
+    }]);
+
+    if (error) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Application →';
+      showErr('Submission failed: ' + error.message + '. Please try again or contact us on WhatsApp.');
+      return;
+    }
+
+    // Email notification via Web3Forms
+    try {
+      await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'face650a-59f4-42d9-9618-dd67a24e77de',
+          subject: '🎪 New Festival Application — ' + fullName,
+          from_name: 'Yafast Festival Form',
+          name: fullName,
+          phone,
+          position: 'Festival Cleaning Staff — Liwa Festival',
+          location,
+          passport: passportNo,
+          emirates_id: eidNumber,
+          eid_expiry: eidExpiry,
+          dob,
+          message: 'New application received. Check admin panel for uploaded documents.'
+        })
+      });
+    } catch(e) { console.warn('Email notify failed', e); }
+
+    // Show success
+    document.querySelector('.form-card').querySelectorAll('.form-section, .submit-wrap').forEach(el => el.style.display = 'none');
+    document.getElementById('successCard').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
