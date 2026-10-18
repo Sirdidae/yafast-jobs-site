@@ -1048,9 +1048,26 @@ function renderQuestionnaires(){
     const langs=arr(d.languages);
     const isCleaner=(q.position||'').toLowerCase()==='cleaner';
     const isGardener=(q.position||'').toLowerCase()==='gardener';
+    const isFestival=(q.position||'').toLowerCase().includes('festival');
 
-    // ── COMMON HEADER ROWS ──
-    const commonRows=[
+    // ── FESTIVAL-SPECIFIC ROWS (replaces commonRows + extra rows) ──
+    const festivalRows=isFestival?[
+      th('Personal Details'),
+      td('Date of Birth', esc(d.dob||'—')),
+      td('Current Location (UAE)', esc(d.location||'—')),
+      th('Documents'),
+      td('Passport No.', esc(d.passport_no||'—')),
+      td('Emirates ID No.', esc(d.eid_number||'—')),
+      td('Emirates ID Expiry', esc(d.eid_expiry||'—')),
+      th('Uploaded Files'),
+      d.file_visa?td('Residence Visa','<a href="#" data-fp="'+esc(d.file_visa)+'" onclick="openSignedFile(event,this.getAttribute(\'data-fp\'))" style="color:var(--sky);font-weight:600;">View ↗</a>'):td('Residence Visa','—'),
+      d.file_eid?td('Emirates ID','<a href="#" data-fp="'+esc(d.file_eid)+'" onclick="openSignedFile(event,this.getAttribute(\'data-fp\'))" style="color:var(--sky);font-weight:600;">View ↗</a>'):td('Emirates ID','—'),
+      d.file_passport?td('Passport Copy','<a href="#" data-fp="'+esc(d.file_passport)+'" onclick="openSignedFile(event,this.getAttribute(\'data-fp\'))" style="color:var(--sky);font-weight:600;">View ↗</a>'):td('Passport Copy','—'),
+      d.file_photo?td('ID Photo','<a href="#" data-fp="'+esc(d.file_photo)+'" onclick="openSignedFile(event,this.getAttribute(\'data-fp\'))" style="color:var(--sky);font-weight:600;">View ↗</a>'):td('ID Photo','—'),
+    ].join('') : '';
+
+    // ── COMMON HEADER ROWS (for non-festival forms) ──
+    const commonRows=!isFestival?[
       th('Personal Details'),
       td('Date of Birth', esc(d.dob||'—')),
       td('Age', esc(d.age||'—')),
@@ -1059,7 +1076,7 @@ function renderQuestionnaires(){
       td('Location', esc(d.location||'—')),
       td('Passport No.', esc(d.passport_no||'—')+' (Exp: '+esc(d.passport_expiry||'—')+')'),
       td('Emergency Contact', esc(d.emergency_name||'—')+' · '+esc(d.emergency_phone||'—')),
-    ].join('');
+    ].join(''):'';
 
     // ── CLEANER-SPECIFIC ROWS ──
     const cleanerRows=isCleaner?[
@@ -1211,7 +1228,7 @@ function renderQuestionnaires(){
       <div class="enq-top" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
         <span class="enq-name">${esc(q.name||'—')}</span>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span style="white-space:nowrap;background:${isCleaner?'#fff7ed':isGardener?'#f0fdf4':'#eff6ff'};color:${isCleaner?'#9a3412':isGardener?'#14532d':'#1e40af'};border:1px solid ${isCleaner?'#f97316':isGardener?'#4ade80':'#93c5fd'};border-radius:12px;padding:2px 10px;font-size:.75rem;font-weight:700;">${esc(q.position||'—')}</span>
+          <span style="white-space:nowrap;background:${isCleaner?'#fff7ed':isGardener?'#f0fdf4':isFestival?'#fdf4ff':'#eff6ff'};color:${isCleaner?'#9a3412':isGardener?'#14532d':isFestival?'#7e22ce':'#1e40af'};border:1px solid ${isCleaner?'#f97316':isGardener?'#4ade80':isFestival?'#d8b4fe':'#93c5fd'};border-radius:12px;padding:2px 10px;font-size:.75rem;font-weight:700;">${esc(q.position||'—')}</span>
           <button class="btn-danger" style="padding:4px 10px;font-size:.72rem;" onclick="deleteQuestionnaire('${q.id}')">Delete</button>
         </div>
       </div>
@@ -1222,8 +1239,8 @@ function renderQuestionnaires(){
       </div>
       <div id="qd${i}" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
         <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
-          ${commonRows}${isCleaner?cleanerRows:isGardener?gardenerRows:housemaidRows}
-          ${(d.file_passport||d.file_extras||d.file_exp_proof)?`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">📁 Uploaded Documents</td></tr>${d.file_passport?`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Passport Copy</td><td><a href="#" data-fp="${esc(d.file_passport)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`:''}${(d.file_extras&&d.file_extras.length)?d.file_extras.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Extra File ${xi+1}</td><td><a href="#" data-fp="${esc(u)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}${(d.file_exp_proof&&d.file_exp_proof.length)?d.file_exp_proof.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Exp. Proof ${xi+1}</td><td><a href="#" data-fp="${esc(u)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}`:'' }
+          ${isFestival?festivalRows:commonRows+(isCleaner?cleanerRows:isGardener?gardenerRows:housemaidRows)}
+          ${!isFestival&&(d.file_passport||d.file_extras||d.file_exp_proof)?`<tr><td colspan="2" style="padding:10px 0 2px;font-weight:700;color:var(--navy);font-size:.82rem;">📁 Uploaded Documents</td></tr>${d.file_passport?`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Passport Copy</td><td><a href="#" data-fp="${esc(d.file_passport)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`:''}${(d.file_extras&&d.file_extras.length)?d.file_extras.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Extra File ${xi+1}</td><td><a href="#" data-fp="${esc(u)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}${(d.file_exp_proof&&d.file_exp_proof.length)?d.file_exp_proof.map((u,xi)=>`<tr><td style="padding:4px 8px 4px 0;color:var(--text-muted);width:42%;font-weight:600;">Exp. Proof ${xi+1}</td><td><a href="#" data-fp="${esc(u)}" onclick="openSignedFile(event,this.getAttribute('data-fp'))" style="color:var(--sky);font-weight:600;">View / Download ↗</a></td></tr>`).join(''):''}`:'' }
         </table>
       </div>
     </div>`;
@@ -1263,6 +1280,7 @@ async function printQuestionnaire(idx){
   const d=q.data||{};
   const isCleaner=(q.position||'').toLowerCase()==='cleaner';
   const isGardener=(q.position||'').toLowerCase()==='gardener';
+  const isFestival=(q.position||'').toLowerCase().includes('festival');
   const arr=(v)=>(Array.isArray(v)?v:typeof v==='string'?[v]:[]).join(', ')||'—';
   const yn=(v)=>v==='Yes'?'✓ Yes':'✗ No';
   const row=(label,val)=>`<tr><td class="lbl">${label}</td><td>${val}</td></tr>`;
@@ -1273,7 +1291,7 @@ async function printQuestionnaire(idx){
   const hkLabels=['Bedrooms','Bathrooms','Sweeping/Mopping','Dusting','Laundry','Ironing','Dishes','Kitchen','Beds','Organizing'];
   const hkRow=hk.map((k,j)=>`<span class="badge ${d[k]==='Yes'?'yes':'no'}">${hkLabels[j]}: ${d[k]||'—'}</span>`).join('');
 
-  const commonRows=[
+  const commonRows=!isFestival?[
     hd('Personal Details'),
     row('Full Name', esc(q.name||'—')),
     row('Phone / WhatsApp', esc(q.phone||'—')),
@@ -1285,7 +1303,7 @@ async function printQuestionnaire(idx){
     row('Location', esc(d.location||'—')),
     row('Passport No.', esc(d.passport_no||'—')+' (Exp: '+esc(d.passport_expiry||'—')+')'),
     row('Emergency Contact', esc(d.emergency_name||'—')+' · '+esc(d.emergency_phone||'—')),
-  ].join('');
+  ].join('') : '';
 
   const cleanerRows=isCleaner?[
     hd('Cleaning Experience'),
@@ -1393,7 +1411,19 @@ async function printQuestionnaire(idx){
     row('English Level', esc(d.english_level||'—')),
   ].join('') : '';
 
-  const housemaidRows=!isCleaner&&!isGardener?[
+  const festivalRows=isFestival?[
+    hd('Personal Details'),
+    row('Full Name', esc(q.name||'—')),
+    row('Phone / WhatsApp', esc(q.phone||'—')),
+    row('Date of Birth', esc(d.dob||'—')),
+    row('Current Location (UAE)', esc(d.location||'—')),
+    hd('Identity Documents'),
+    row('Passport No.', esc(d.passport_no||'—')),
+    row('Emirates ID No.', esc(d.eid_number||'—')),
+    row('Emirates ID Expiry', esc(d.eid_expiry||'—')),
+  ].join('') : '';
+
+  const housemaidRows=!isCleaner&&!isGardener&&!isFestival?[
     hd('Experience'),
     row('Prev. Domestic Work', esc(d.prev_work||'—')),
     row('Countries Worked', esc(d.countries_worked||'—')),
@@ -1427,15 +1457,27 @@ async function printQuestionnaire(idx){
   ].join('') : '';
 
   // Pre-resolve all file URLs (signed or legacy public) before building print HTML
-  const passportUrl = await resolveFileUrl(d.file_passport);
-  const extraUrls   = await Promise.all((d.file_extras||[]).map(resolveFileUrl));
-  const expUrls     = await Promise.all((d.file_exp_proof||[]).map(resolveFileUrl));
+  const passportUrl = isFestival ? null : await resolveFileUrl(d.file_passport);
+  const extraUrls   = isFestival ? [] : await Promise.all((d.file_extras||[]).map(resolveFileUrl));
+  const expUrls     = isFestival ? [] : await Promise.all((d.file_exp_proof||[]).map(resolveFileUrl));
+  // Festival files resolved separately
+  const festVisaUrl    = isFestival ? await resolveFileUrl(d.file_visa) : null;
+  const festEidUrl     = isFestival ? await resolveFileUrl(d.file_eid) : null;
+  const festPassUrl    = isFestival ? await resolveFileUrl(d.file_passport) : null;
+  const festPhotoUrl   = isFestival ? await resolveFileUrl(d.file_photo) : null;
   function printFileLink(url,label){ return url?`<a href="${esc(url)}" style="color:#1565A0;">${label} ↗</a>`:'—'; }
-  const filesRows=(passportUrl||extraUrls.some(Boolean)||expUrls.some(Boolean))?[
+  const filesRows=!isFestival&&(passportUrl||extraUrls.some(Boolean)||expUrls.some(Boolean))?[
     hd('Uploaded Documents'),
     passportUrl?row('Passport Copy',printFileLink(passportUrl,'View Passport')):'',
     ...extraUrls.map((u,xi)=>u?row('Extra File '+(xi+1),printFileLink(u,'View File '+(xi+1))):''),
     ...expUrls.map((u,xi)=>u?row('Experience Proof '+(xi+1),printFileLink(u,'View Proof '+(xi+1))):''),
+  ].join('') : '';
+  const festFilesRows=isFestival?[
+    hd('Uploaded Documents'),
+    row('Residence Visa', printFileLink(festVisaUrl,'View Visa')),
+    row('Emirates ID', printFileLink(festEidUrl,'View Emirates ID')),
+    row('Passport Copy', printFileLink(festPassUrl,'View Passport')),
+    row('ID Photo', printFileLink(festPhotoUrl,'View Photo')),
   ].join('') : '';
 
   const submitted=q.created_at?new Date(q.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
@@ -1450,7 +1492,7 @@ async function printQuestionnaire(idx){
   .logo span{color:#2196F3;}
   .meta{text-align:right;font-size:11px;color:#555;}
   .meta strong{display:block;font-size:14px;color:#111;}
-  .badge-pos{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;background:${isCleaner?'#fff7ed':isGardener?'#f0fdf4':'#eff6ff'};color:${isCleaner?'#9a3412':isGardener?'#14532d':'#1e40af'};border:1px solid ${isCleaner?'#f97316':isGardener?'#4ade80':'#93c5fd'};}
+  .badge-pos{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;background:${isCleaner?'#fff7ed':isGardener?'#f0fdf4':isFestival?'#fdf4ff':'#eff6ff'};color:${isCleaner?'#9a3412':isGardener?'#14532d':isFestival?'#7e22ce':'#1e40af'};border:1px solid ${isCleaner?'#f97316':isGardener?'#4ade80':isFestival?'#d8b4fe':'#93c5fd'};}
   table{width:100%;border-collapse:collapse;margin-bottom:4px;}
   td,th{padding:4px 6px;vertical-align:top;}
   .lbl{color:#555;width:42%;font-weight:600;white-space:nowrap;}
@@ -1467,7 +1509,7 @@ async function printQuestionnaire(idx){
   <div><div class="logo">YA<span>FAST</span> Services</div><div style="font-size:11px;color:#555;margin-top:2px;">yafastservices.com</div></div>
   <div class="meta"><strong>${esc(q.name||'—')}</strong>${esc(q.phone||'—')} · ${esc(q.nationality||'—')}<br><span class="badge-pos">${esc(q.position||'—')}</span><br>Submitted: ${submitted}</div>
 </div>
-<table>${commonRows}${isCleaner?cleanerRows:isGardener?gardenerRows:housemaidRows}${filesRows}</table>
+<table>${isFestival?festivalRows+festFilesRows:commonRows+(isCleaner?cleanerRows:isGardener?gardenerRows:housemaidRows)+filesRows}</table>
 <div class="footer"><span>Yafast Job Links &amp; Travel Services — Confidential HR Document</span><span>Printed: ${new Date().toLocaleString('en-GB')}</span></div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
